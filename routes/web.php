@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,9 +15,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+Route::get('/', function () {
+    return view('welcome');
+});
+Route::post('//sessions', [SessionController::class, 'store'])->name('<sections.store');
 
 Route::get('/services', [ServiceController::class, 'index']) -> name(name: 'services.index');
 Route::get('/services/creat', [ServiceController::class, 'creat']) -> name(name:'services.creat');
