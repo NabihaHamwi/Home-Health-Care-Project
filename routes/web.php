@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+Route::get('/services', [ServiceController::class, 'index']) -> name(name: 'services.index');
+Route::get('/services/creat', [ServiceController::class, 'creat']) -> name(name:'services.creat');
+Route::post('/services', [ServiceController::class, 'store']) -> name(name:'services.store');
+Route::get('/services/{service}', [ServiceController::class, 'show']) -> name(name:'services.show');
+Route::get('/services/{service}/edit', [ServiceController::class, 'edit']) -> name(name:'services.edit');
+Route::put('/services/{service}', [ServiceController::class, 'update']) -> name(name:'services.update');
+Route::delete('/services/{service}', [ServiceController::class, 'destroy']) -> name(name:'services.destroy');
