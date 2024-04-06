@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('session_id');
             //مدة الجلسة 3.5
             $table->float('duration', 8, 2);
+          //text:
             $table->string('observation');
         });
     }

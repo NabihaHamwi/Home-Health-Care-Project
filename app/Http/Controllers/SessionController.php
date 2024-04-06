@@ -19,7 +19,7 @@ public function show()
     return "session show ";
 }
 public function create(){
-
+return view('sessions.create');
 }
 
     public function store()
@@ -35,7 +35,7 @@ public function create(){
     }
     public function edit(){
         //select of db
-        return view('edit');
+        return view('sessions.edit');
     }
      //edit on session
     public function update()
