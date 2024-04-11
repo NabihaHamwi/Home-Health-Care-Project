@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Session extends Model
+class Activity extends Model
 {
     use HasFactory;
     public function getRouteKeyName()
     {
-        return 'session_id';
+        return 'actvity_id';
     }
 }
