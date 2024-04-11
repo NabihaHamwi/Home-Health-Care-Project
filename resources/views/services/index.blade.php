@@ -1,1 +1,9 @@
-this is the first view of index of service
+@extends('layouts.app')
+
+@section('title')
+Services
+@endsection
+
+@section('content')
+    
+@endsection

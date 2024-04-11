@@ -1,1 +1,9 @@
-this is the first view of show of service
+@extends('layouts.app')
+
+@section('title')
+Service name
+@endsection
+
+@section('content')
+    
+@endsection
