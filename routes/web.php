@@ -23,22 +23,14 @@ use Illuminate\Support\Facades\Route;
 
 //create route to "index sessions":
 Route::get('/sessions', [SessionController::class, 'index'])->name('sessions.index');
-
 //create route to "create session":
-
-
+Route::get('/sessions/create', [SessionController::class, 'create'])->name('sessions.create');
 //create route to "store session":
 Route::post('/sessions', [SessionController::class, 'store'])->name('sessions.store');
-//Route::post('/sessions' , function() {return 'hello world';})  -> name('sessions.store');
-
 //create route to "show session"
-Route::get('/sessions/create', [SessionController::class, 'create'])->name('sessions.create');
-
 Route::get('/sessions/{session}', [SessionController::class, 'show'])->name('sessions.show');
-
 //create route to "edit(show) session":
 Route::get('sessions/{session}/edit', [SessionController::class, 'edit'])->name('sessions.edit');
-
 //update route to "update session":
 Route::put('sessions/{session}', function () {
     return 'hello';

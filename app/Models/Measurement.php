@@ -5,11 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Session extends Model
+class Measurement extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['value', 'time'];
+
     public function getRouteKeyName()
     {
-        return 'session_id';
+        return 'measurements_id';
     }
 }
