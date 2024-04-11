@@ -18,7 +18,6 @@ return new class extends Migration
             $table->integer('age');
             $table->string('specialization');
             $table->integer('experience');
-            $table->text('skills');
             $table->binary('personal_image')->nullable();
             $table->string('physical_strength');
             $table->timestamps();
