@@ -10,86 +10,115 @@ use App\Models\User;
 use App\Models\Session;
 use App\Models\Measurement;
 use App\Models\Activity;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Support\Facades\DB;
 
 class ApiSessionController extends Controller
 {
     use ApiResponseTrait;
-
     public function index()
     {
+        //if :  يكون معرف المريض موجود لحتى يتم عرض جميع الجلسات لهذا المريض
+
+        $sessions_view = Session::all();
+        if (!$sessions_view) {
+            return $this->apiResponse(' ', null, 'not found', 401);
+        }
+        $sessions_dates_collection = SessionResource::collection($sessions_view);
+        return $this->apiResponse('index', ['sessions_dates_collection' => $sessions_dates_collection], 'ok', 201);
     }
+
+
+
+
+
+    //_________________________________________________________________
+
+
 
     public function show($session_id)
     {
         $session = Session::where('session_id', $session_id)->first();
-    
+
         if (!$session) {
-            return $this->apiResponse('show', null, 'bad request', 401);
+            return $this->apiResponse(' ', null, 'Session not found', 404);
         }
-    
-        $sessionactivity = DB::table('measurements')
+        $session_activity = DB::table('measurements')
             ->join('activities', 'measurements.activity_id', '=', 'activities.activity_id')
             ->where('measurements.session_id', $session->session_id)
-            ->select('activities.*', 'measurements.*')->get();
-    
-        if ($sessionactivity) {
-            return $this->apiResponse('show', ['activitymeasurements' => $sessionactivity, 'sessions' => $session], 'ok', 201);
+            ->select('activities.*', 'measurements.*')
+            ->get();
+        if (!$session_activity) {
+            return $this->apiResponse(' ', null, 'Session not found', 404);
         }
-        return $this->apiResponse('show', null, 'not found', 401);
+        return $this->apiResponse('show',['session_activity' => $session_activity, 'session' => $session], 'ok', 404);
     }
-    
+
+
+
 
     public function create()
     {
-        $sessionactivity = Activity::all();
-        if ($sessionactivity) {
+        // استرجاع لانشطة الجلسة
+        $sessionactivities = Activity::all();
+        // :التحقق من عدم وجود اخطاء, في حال وجود خطأ 
+        if (!$sessionactivities) {
+
+            return $this->apiResponse(' ', null, 'Bad request', 401);
+        } else {
             // الفكرة انو كان بدي عالج قصة انو اعرض الجلسة حسب اختصاص مقدم الرعاية
-            $activity_by_careprovider = new SessionResource($sessionactivity);
-            return $this->apiResponse($activity_by_careprovider, 'ok', 201);
-        } else
-            return $this->apiResponse(null, null, 'Bad request', 401);
-    }
-    // public function create()
-    // {
-    //     $activities = Activity::all();
-    
-    //     return $this->apiResponse('create', ['activities' => $activities], 'ok', 201);
-    // }
-    
-
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'value' => 'required|max:255',
-            'time' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return $this->apiResponse(null,  $validator->errors(), 400);
-        }
-        $measurements = Measurement::create($request->all());
-        if ($measurements) {
-            return $this->apiResponse(new SessionResource($measurements), 'ok', 201);
+            //  لارسال عدة سطور من قاعدة البيانات(collection)استرجاع مجموعة من البيانات , استخدمنا  
+            $activity_by_careprovider = SessionResource::collection($sessionactivities);
+            return $this->apiResponse('create', ['activity_by_careprovider' => $activity_by_careprovider], 'ok', 201);
         }
     }
 
-    public function edit(Session $session)
+    public function session_summary($session_id)
     {
-        $activity = Activity::all();
-        $measurements = Measurement::where('session_id', $session->session_id)->get();
-        return view('sessions.edit', ['sessionid' => $session], ['act' => $activity]);
+        //بحال الجلسة ليست غير موجودى بقاعدة البيانات
+        $sessionrow = Session::where('session_id', $session_id)->first();
+
+        if (!$sessionrow) {
+            return $this->apiResponse(' ', null, 'not found', 401);
+        }
+        //استرجاع قياسات الانشطة التي قام مقدم الرعاية بالادخال اليها
+        $sessionactivities = DB::table('measurements')
+            ->join('activities', 'measurements.activity_id', '=', 'activities.activity_id')
+            ->where('measurements.session_id', $sessionrow->session_id)
+            ->select('activities.*', 'measurements.*')->get();
+
+        if (!$sessionactivities) {
+            return $this->apiResponse(' ', null, 'not found', 401);
+        }
+        $sessionactivities = SessionResource::collection($sessionactivities);
+        return $this->apiResponse('session_summary', ['activitymeasurements' => $sessionactivities, 'sessions' => $sessionrow], 'ok', 201);
     }
-    //edit on session
-    public function update(Request $request, $postId)
-    {
+   public function store(Request $request)
+{
+    //التحقق من ادخال البيانات 
+    $validator = Validator::make($request->all(), [
+        'value' => 'required|max:255',
+        'time' => 'required',
+        'observation' => 'required'
+    ]);
+
+    // في حال عدم وجودها ارسال رسالة الخطأ
+    if ($validator->fails()) {
+        return $this->apiResponse(' ', null,  $validator->errors(), 400);
     }
 
-    public function session_summary(Session $session)
-    {
-        $sessionvalue = Measurement::where('session_id', $session->session_id)->get();
-        $sessionactivity = Activity::all();
-        return $this->apiResponse($sessionvalue, $sessionactivity, $session);
+    $sessionmeasurements = $request->all();
 
-        //return 'hello';  
+    $measurement = Measurement::create($sessionmeasurements);
+    $sessionobservations = Session::create($sessionmeasurements); 
+
+    if (!($measurement &&  $sessionobservations)) {
+        return $this->apiResponse(' ', null, 'the operation was not completed', 400);
     }
+
+    $session_observations =  new SessionResource($sessionobservations);
+    $session_measurements = new SessionResource($measurement);
+    return $this->apiResponse('store', ['sessionmeasurements' => $sessionmeasurements, 'session_observations' => $session_observations], 'ok', 201);
+}
+
 }

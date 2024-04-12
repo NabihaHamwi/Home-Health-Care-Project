@@ -34,6 +34,8 @@ Route::get('sessions/{session}/edit', [SessionController::class, 'edit'])->name(
 Route::put('sessions/{session}', function () {
     return 'hello';
 })->name('sessions.update');
+Route::get('/sessions/summary/{session}', [SessionController::class, 'session_summary'])->name('sessions.summary');
+Route::post('/sessions/li',[SessionController::class, 'li'])->name('sessions.li');
 
 
 

@@ -12,12 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('measurements', function (Blueprint $table) {
-            $table->id('measurments_id');
-            $table->unsignedBigInteger('session_id');
-            $table->foreign('session_id')->references('session_id')->on('sessions');
-
-            $table->unsignedBigInteger('activity_id');
-            $table->foreign('activity_id')->references('activity_id')->on('activities');
+                $table->id('measurements_id');
+                $table->unsignedBigInteger('session_id');
+                $table->foreign('session_id')->references('session_id')->on('sessions');
+                $table->unsignedBigInteger('activity_id');
+                $table->foreign('activity_id')->references('activity_id')->on('activities');
+                $table->time('time', precision: 0);
+                $table->text('value');
+                $table->timestamps();
+    
         });
     }
 
