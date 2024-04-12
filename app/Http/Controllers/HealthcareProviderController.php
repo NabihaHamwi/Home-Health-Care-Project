@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HealthcareProvider;
+use App\Models\Skill;
 use Illuminate\Http\Request;
 
 class HealthcareProviderController extends Controller
@@ -9,11 +11,28 @@ class HealthcareProviderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        return view('providers.index');
-    }
+    public function index(Request $request)
+{
+    // تطبيق الفلاتر بناءً على سنوات الخبرة والعمر والقوة البدنية والمهارات
+    $providers = HealthcareProvider::when($request->experience, function ($query, $experience) {
+        return $query->where('experience', '>=', $experience);
+    })->when($request->age, function ($query, $age) {
+        return $query->where('age', '<=', $age);
+    })->when($request->input('strength'), function ($query, $strength) {
+        if (!in_array('لايهم', $strength)) {
+            return $query->whereIn('physical_strength', $strength);
+        }
+    })->when($request->input('skills'), function ($query, $skills) {
+        return $query->whereHas('skills', function ($q) use ($skills) {
+            $q->whereIn('id', $skills);
+        });
+    })->get();
 
+    return view('providers.index', compact('providers'));
+}
+
+
+    // ->where('age', '>=', $age)
     /**
      * Show the form for creating a new resource.
      */
