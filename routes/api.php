@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ApiSessionController as ApiSessionController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\SessionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,3 +31,6 @@ Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name(
 Route::get('sessions/summary/{session}', [ApiSessionController::class, 'session_summary'])->name('sessions.summary');
 //"store session"
 Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
+
+// Route to search page
+Route::get('/search', [SearchController::class, 'index']) -> name(name: 'search.index');

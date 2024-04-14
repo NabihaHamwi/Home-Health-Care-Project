@@ -22,6 +22,8 @@ class HealthcareProviderController extends Controller
         if (!in_array('لايهم', $strength)) {
             return $query->whereIn('physical_strength', $strength);
         }
+    })->when($request->input('specialization'), function ($query, $specialization) {
+        return $query->whereIn('specialization', $specialization);
     })->when($request->input('skills'), function ($query, $skills) {
         return $query->whereHas('skills', function ($q) use ($skills) {
             $q->whereIn('id', $skills);
