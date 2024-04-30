@@ -12,13 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('sessions', function (Blueprint $table) {
-            $table->id('session_id');
-            //مدة الجلسة 3.5
-            $table->float('duration', 8, 2);
-            $table->text('observation');
+            $table->id();
+            $table->foreignId('appointment_id')->constrained()->onDelete('cascade');
+            $table->float('duration');
+            $table->text('observation', 1000);
             $table->time('start_time');
-            $table->time('end_time');
-            $table->date('session_date');
             $table->timestamps();
         });
     }
