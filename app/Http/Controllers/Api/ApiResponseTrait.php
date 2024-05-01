@@ -4,43 +4,44 @@ namespace App\http\Controllers\Api;
 
 trait ApiResponseTrait
 {
-    public function apiResponse($type, $data = null, $msg = null, $status = null)
+    const HTTP_BAD_REQUEST = 400;
+    const HTTP_UNAUTHORIZED = 401;
+    const HTTP_FORBIDDEN = 403;
+    const HTTP_NOT_FOUND = 404;
+    const HTTP_METHOD_NOT_ALLOWED = 405;
+    const HTTP_METHOD_ERROR_QUERY = 500;
 
+
+    public function errorResponse($message, $code)
     {
-        // دالة نخزن فيها جميع القيم (رسالة الخطأ, الحالة , البيانات )
+        $errorDetails = [
+            self::HTTP_BAD_REQUEST => ['error_type' => 'Bad Request', 'solution' => 'تحقق من صيغة الطلب.'],
+            self::HTTP_UNAUTHORIZED => ['error_type' => 'Unauthorized', 'solution' => 'التحقق من بيانات المصادقة.'],
+            self::HTTP_FORBIDDEN => ['error_type' => 'Forbidden', 'solution' => 'تحقق من الصلاحيات.'],
+            self::HTTP_NOT_FOUND => ['error_type' => 'Not Found', 'solution' => 'تحقق من العنوان المطلوب.'],
+            self::HTTP_METHOD_NOT_ALLOWED => ['error_type' => 'Method Not Allowed', 'solution' => 'استخدم الطريقة الصحيحة للطلب.'],
+            self::HTTP_METHOD_ERROR_QUERY => [
+                'error_type' => 'wrong query',
+                'solution' => 'استعلام خاطىء يرجى إعادة المحاولة مرة أخرى.'
+            ],
+        ];
+        // التعامل مع الأخطاء غير المعروفة: إذا لم يتم العثور على رمز الحالة داخل مصفوفة $errorDetails، يتم استخدام قيمة افتراضية تمثل خطأ غير معروف وحل مقترح للاتصال بالدعم الفني
         $response = [
-            'msg' => $msg,
-            'status' => $status
+            'status' => 'error',
+            'message' => $message,
+            'error_details' => $errorDetails[$code] ?? ['error_type' => 'Unknown Error', 'solution' => 'اتصل بالدعم الفني.']
         ];
 
-        switch ($type) {
-            case 'index':
-                $response['sessions_dates_collection'] = $data['sessions_dates_collection'];
-
-
-                break;
-            case 'show': // بحال كان الطلب
-                $response['session_activity'] = $data['session_activity'];
-                $response['session'] = $data['session'];
-
-                break;
-
-
-            case 'create':
-                $response['activity_by_careprovider'] = $data['activity_by_careprovider'];
-
-                break;
-            case 'session_summary': // بحال كان الطلب
-                // مصفوفة لح ترجع قياسات جميع الانشطة
-                $response['activitymeasurements'] = $data['activitymeasurements'];
-                //لح ترجع بيانات الجلسة (الملاحظات و معرف الجلسة ووقت الجلسة)
-                $response['sessions'] = $data['sessions'];
-                break;
-            case 'store':
-                $response['sessionmeasurements'] = $data['sessionmeasurements'];
-                //  $response['sessionobservations'] = $data['sessionobservations'];
-                break;
-        }
-        return response($response);
+        return response()->json($response, $code);
     }
+
+    public function successResponse($data = null, $message = null, $code = 200)
+    {
+        return response()->json([
+            'status' => 'success',
+            'message' => $message,
+            'data' => $data
+        ], $code);
+    }
+    
 }
