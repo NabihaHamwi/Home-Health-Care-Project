@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\ApiSessionController as ApiSessionController;
-use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\SessionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -32,5 +33,6 @@ Route::get('sessions/summary/{session}', [ApiSessionController::class, 'session_
 //"store session"
 Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
 
-// Route to search page
-Route::get('/search', [SearchController::class, 'index']) -> name(name: 'search.index');
+// Api's for search page
+Route::get('/skill', [SkillController::class, 'index'])->name(name: 'skill.index');
+Route::get('/service', [ServiceController::class, 'index'])->name(name: 'service.index');
