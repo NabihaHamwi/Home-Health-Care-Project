@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ApiSessionController as ApiSessionController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\SessionController;
@@ -34,5 +35,7 @@ Route::get('sessions/summary/{session}', [ApiSessionController::class, 'session_
 Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
 
 // Api's for search page
-Route::get('/skill', [SkillController::class, 'index'])->name(name: 'skill.index');
-Route::get('/service', [ServiceController::class, 'index'])->name(name: 'service.index');
+Route::get('/search', [SearchController::class, 'index'])->name(name: 'search.index');
+
+//Api for the result of search (care providers)
+//Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');
