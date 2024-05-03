@@ -17,20 +17,30 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// لوحة المتابعة
+Route::group([] ,
+    function ($router) {
+        //عرض جميع جلسات المرضى للادمن
+        Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
+        //عرض جميع جلسات المريض
+        Route::get('/sessions/patientsessoins/{patient}', [ApiSessionController::class, 'patientSessions'])->name('sessions.patientsession');
+        //عرض جلسة للمريض
+        Route::get('/sessions/{session}', [ApiSessionController::class, 'show'])->name('sessions.show');
+        //عرض ملخص الجلسة
+        Route::get('sessions/summary/{patient_id}', [ApiSessionController::class, 'session_summary'])->name('sessions.summary');
+        // انشاء جلسة
+        Route::get('/sessions/create/{service}', [ApiSessionController::class, 'create'])->name('sessions.create');
+        Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
+        //عرض واجهة التعديل على الجلسة
+        Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->name('sessions.edit');
+        //تحديث بيانات الجلسة
+        Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name('sessions.update');
+        //حذف بيانات الجلسة 
+        Route::delete('/sessions/{session}', [ApiSessionController::class, 'destroy'])->name('sessions.destroy');
+    }
+);
 
-Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
-Route::get('/sessions/patientsessoins/{patient}', [ApiSessionController::class, 'patientSessions'])->name('sessions.patientsession');
-Route::get('/sessions/create/{service}', [ApiSessionController::class, 'create'])->name('sessions.create');
-//create route to "show session"
-Route::get('/sessions/{session}', [ApiSessionController::class, 'show'])->name('sessions.show');
-//create route to "edit(show) session":
-Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->name('sessions.edit');
-//update route to "update session":
-Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name('sessions.update');
-//مسار ملخص لوحة المتابعة
-Route::get('sessions/summary/{patient_id}', [ApiSessionController::class, 'session_summary'])->name('sessions.summary');
-//"store session"
-Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
+
 
 // Route to search page
-Route::get('/search', [SearchController::class, 'index']) -> name(name: 'search.index');
+Route::get('/search', [SearchController::class, 'index'])->name(name: 'search.index');

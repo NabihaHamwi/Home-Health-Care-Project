@@ -20,13 +20,19 @@ public function sessions()
     return $this->hasManyThrough(Session::class, Appointment::class);
 }
 
-    public function activities()
-    {
-        // يجب تعريف العلاقة many-to-many هنا
-        return $this->hasManyThrough(Activity::class, Appointment::class, 'service_id', 'id', 'id', 'appointment_id');
-    }
-
-
+    // public function activities()
+    // {
+    //     return $this->hasManyThrough(
+    //         Activity::class, // النموذج الهدف
+    //         Session::class, // النموذج الوسيط الثاني
+    //         Appointment::class, // النموذج الوسيط الأول
+    //         'service_id', // اسم العمود في النموذج الوسيط الأول الذي يربطه بالنموذج الحالي
+    //         'id', // اسم العمود في النموذج الحالي الذي يربطه بالنموذج الوسيط الأول
+    //         'appointment_id', // اسم العمود في النموذج الوسيط الثاني الذي يربطه بالنموذج الوسيط الأول
+    //         'id' // اسم العمود في النموذج الوسيط الأول الذي يربطه بالنموذج الوسيط الثاني
+    //     );
+    // }
+    
 
 // public function activities()
 // {

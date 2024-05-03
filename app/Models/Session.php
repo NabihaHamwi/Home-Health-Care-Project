@@ -14,6 +14,10 @@ class Session extends Model
         return $this->belongsTo(Appointment::class);
     }
 
+    // public function patient()
+    // {
+    //     return $this->belongsTo(Patient::class , 'appointments');
+    // }
     // العلاقة مع جدول النشاطات (activities) تبقى كما هي
     public function activities()
     {

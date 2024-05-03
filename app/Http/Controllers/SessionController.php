@@ -48,21 +48,36 @@ class SessionController extends Controller
     }
     public function show($session_id)
     {
-        dd($session = Session::with(['appointment', 'activities'])->find($session_id));
+       $session = Session::with(['appointment', 'activities'])->find($session_id);
 
-        if (!$session) {
-            return $this->errorResponse('Session not found', 404);
-        }
-        return $this->successResponse(new SessionResource($session), 'Session details retrieved successfully', 200);
+        // if (!$session) {
+        //     return $this->errorResponse('Session not found', 404);
+        // }
+        // return $this->successResponse(new SessionResource($session), 'Session details retrieved successfully', 200);
+        $activitiesInfo = [];
+        //    (sessions) نحاول الوصول إلى الخصائص (النشاط) في الكائن الحالي   
+        foreach ($session->activities as $activity) {
+            $activitiesInfo[] = [
+                'name' => $activity->activity_name,
+                'value' => $activity->pivot->value,
+                'time' => $activity->pivot->time,
+            ];
     }
-
+    }
 
     // ______________________________________
 
     public function create($appointmentId)
     {
+        $appointment = Appointment::findOrFail($appointmentId);
+        $service = $appointment->service_id;
+      dd( $appointment = Appointment::with(['activities'])->findOrFail($appointmentId));
+
+        // احصل على تاريخ الموعد
+        $appointmentDate = $appointment->appointment_date;
+
         // ابحث عن الموعد
-        $appointment = Appointment::with('service.activities', 'sessions')->findOrFail($appointmentId);
+       dd( $appointment = Appointment::with('service.activities', 'sessions')->findOrFail($appointmentId));
 
         // احصل على تاريخ الموعد
         $appointmentDate = $appointment->date;
