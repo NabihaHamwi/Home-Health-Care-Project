@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use App\Models\Measurement;
+
 use App\Models\Activity;
 use App\Models\Session;
 
@@ -16,67 +16,97 @@ class SessionResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    // public function toArray(Request $request ): array
-    // {
-    //     return parent::toArray($request);  // }
     public function toArray($request)
     {
         if ($request->route()->named('sessions.index')) {
-
             return [
-                'Session_Id' => $this->session_id,
-                'Duration' => $this->duration,
-                'Session_Date' => $this->session_date,
-            ];} 
-
-
-            else if($request->route()->named('sessions.show'))
-             {
-                  return [
-                'session_id' => $this->session_id,
-                'activity_name' => $this->activity_name,
-                'duration' => $this->duration ,
-                'observation'=>$this->observation ,
-                'date'=>$this->session_date ,
-                'value'=>$this->value ,
-                'time'=>$this->time 
-                  
-            ];
-        }
-
-            
-         else if ($request->route()->named('sessions.create')) {
-
-            return [
-                'id' => $this->activity_id,
-                'name' => $this->activity_name,
-            ];
-        } else if ($request->route()->named('sessions.summary')) {
-            return [
-                'id' => $this->measurments_id,
-                'session_id' => $this->session_id,
-                'activity_id' => $this->activity_id,
-                'value' => $this->value,
-                
-            
-            ];
-        } else if ($request->route()->named('sessions.store')) {
-          
-            return [
-                'id' => $this->measurments_id,
-                'activity_id' => $this->activity_id,
-                'value' => $this->value,
-                'time' => $this->time,
-                'session_id' => $this->session_id,
+                'id' => $this->id,
+                //هكذا يتم الوصول لتاريخ الموعد من جدول الجلسة
+                //appointment : هو اسم العلاقة المعرفة بالمودل
+                'appointment_date' => $this->appointment->appointment_date,
                 'observation' => $this->observation,
                 'start_time' => $this->start_time,
-                'end_time' => $this->end_time,
-                'session_date' => $this->session_date,
+
             ];
-           
+        } else if ($request->route()->named('sessions.patientsession')) {
+            foreach ($this->appointments as $appointment) {
+                $sessionsDetails = [];
+                foreach ($appointment->sessions as $session) {
+                    $sessionsDetails[] = [
+                        'observation' => $session->observation,
+                        'start_time' => $session->start_time,
+                        'end_time' => $session->end_time,
+                        'duration' => $session->duration,
+                    ];
+                }
+        
+            }
+            return [
+                'appointment_date' => $appointment->appointment_date,
+                'sessions' => $sessionsDetails,
+            ];
+        } else if ($request->route()->named('sessions.show')) {
 
+            $activitiesInfo = [];
+            foreach ($this->activities as $activity) {
+                $activitiesInfo[] = [
+                    'name' => $activity->activity_name,
+                    'value' => $activity->pivot->value,
+                    'time' => $activity->pivot->time,
+                ];
+            }
 
+            return [
+                'appointment_date' => $this->appointment->appointment_date,
+                'session_start_time' => $this->start_time,
+                'session_observation' => $this->observation,
+                // 'activities' => ActivityResource::collection($this->activities),
+                'activities' => $activitiesInfo,
+            ];
+        } else if ($request->route()->named('sessions.create')) {
 
+            return [
+                'date' => $this->appointment->date,
+                'notes' => $this->notes,
+                'name' => $this->name,
+                'is_related_to_service' => $this->flag == $this->pivot->service_id,
+
+            ];
+        } else if ($request->route()->named('sessions.summary')) {
+            $activitiesInfo = [];
+            foreach ($this->activities as $activity) {
+                $activitiesInfo[] = [
+                    'name' => $activity->activity_name,
+                    'value' => $activity->pivot->value,
+                    'time' => $activity->pivot->time,
+                ];
+            }
+
+            return [
+                'appointment_date' => $this->appointment->appointment_date,
+                'session_start_time' => $this->start_time,
+                // 'session_duration' => $this->duration,
+                'session_observation' => $this->observation,
+                'activities' => $activitiesInfo,
+            ];
+        } else if ($request->route()->named('sessions.store')) {
+
+            $activities = [];
+            foreach ($this->activities as $activity) {
+                $activities[] = [
+                    'id' => $activity->id,
+                    'value' => $activity->pivot->value,
+                    'time' => $activity->pivot->time,
+                ];
+            }
+
+            return [
+                'id' => $this->id,
+                'start_time' => $this->start_time,
+                'observation' => $this->observation,
+                'activities' => $activities,
+
+            ];
         }
     }
 }

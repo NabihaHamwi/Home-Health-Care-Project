@@ -25,7 +25,7 @@ return new class extends Migration
             $table->text('allergies')->nullable(); // حساسيات
             $table->text('family_medical_history')->nullable(); //التاريخ العائلي
             $table->boolean('smoker')->default(false);
-            $table->boolean('addiction')->default(false); //  مدمن
+            $table->string('addiction')->nullable(); //  مدمن
             $table->string('exercise_frequency')->nullable(); //التمارين الرياضبة
             $table->string('diet_description')->nullable(); //وصف النظام الغذائي
             $table->text('current_symptoms')->nullable(); //الاعراض الحالية

@@ -23,8 +23,10 @@ use Illuminate\Support\Facades\Route;
 
 //create route to "index sessions":
 Route::get('/sessions', [SessionController::class, 'index'])->name('sessions.index');
+Route::get('/sessions/patientsessoins/{patient}', [SessionController::class, 'patientSessions'])->name('sessions.sessions');
 //create route to "create session":
-Route::get('/sessions/create', [SessionController::class, 'create'])->name('sessions.create');
+Route::get('/sessions/create/{appintments}', [SessionController::class, 'create'])->name('sessions.create');
+Route::get('/sessions/create1/{services}', [SessionController::class, 'create1'])->name('sessions.create1');
 //create route to "store session":
 Route::post('/sessions', [SessionController::class, 'store'])->name('sessions.store');
 //create route to "show session"
@@ -36,7 +38,6 @@ Route::put('sessions/{session}', function () {
     return 'hello';
 })->name('sessions.update');
 Route::get('/sessions/summary/{session}', [SessionController::class, 'session_summary'])->name('sessions.summary');
-Route::post('/sessions/li',[SessionController::class, 'li'])->name('sessions.li');
 
 
 

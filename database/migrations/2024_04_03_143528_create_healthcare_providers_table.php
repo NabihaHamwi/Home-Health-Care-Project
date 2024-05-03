@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('specialization');
             $table->integer('experience');
             $table->binary('personal_image')->nullable();
-            $table->string('physical_strength');
+            $table->string('physical_strength'); //القة البدنية
             $table->timestamps();
         });
     }

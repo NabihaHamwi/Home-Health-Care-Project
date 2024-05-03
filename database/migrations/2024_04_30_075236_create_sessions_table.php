@@ -14,18 +14,11 @@ return new class extends Migration
         Schema::create('sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('appointment_id')->constrained()->onDelete('cascade');
-            $table->float('duration');
+            $table->time('duration');
             $table->text('observation', 1000);
             $table->time('start_time');
+            $table->time('end_time');
             $table->timestamps();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('sessions');
     }
 };

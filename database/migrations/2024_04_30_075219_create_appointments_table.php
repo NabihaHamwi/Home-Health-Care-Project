@@ -20,9 +20,9 @@ return new class extends Migration
             $table->time('appointment_start_time'); // وقت بداية الموعد
             $table->float('appointment_duration');
             $table->string('patient_location'); // موقع المريض
-            $table->enum('appointment_status', ['الطلب مرفوض', 'الطلب مقبول', 'الطلب قيد الانتظار']); // حالة الموعد
+            $table->enum('appointment_status', ['الطلب مرفوض', 'الطلب مقبول', 'الطلب قيدالانتظار']); // حالة الموعد
             $table->unsignedTinyInteger('appointment_rating')->nullable(); // تقييم الموعد
-            $table->enum('caregiver_status', ['حضور', 'غياب']); // حالة مقدم الرعاية
+            $table->enum('caregiver_status', ['حضور', 'غياب' , '-']); // حالة مقدم الرعاية
             $table->text('complaint', 1000); // يسمح بحتى 1000 حرف//    شكاوي المريض  
 
             $table->timestamps();

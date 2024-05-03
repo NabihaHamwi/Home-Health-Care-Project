@@ -9,25 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Activity extends Model
 {
     use HasFactory;
-    
-//     public function sessions():BelongsToMany
-// {
-//     return $this->belongsToMany(Session::class, 'measurements', 'activity_id', 'session_id');
-// }
 
-    
-    public function getRouteKeyName()
+    // علاقة many-to-many مع جدول الجلسات (sessions)
+    public function sessions()
     {
-        return 'actvity_id';
+        return $this->belongsToMany(Session::class)
+        ->withPivot('value', 'time');
     }
-
-// public function measurements()
-// {
-//     return $this->belongsToMany(Measurement::class, 'measurements', 'activity_id', 'session_id');
-// }
-
-    }
-    
-
-
-
+}

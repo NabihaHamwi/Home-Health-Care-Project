@@ -17,10 +17,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//create route to "index sessions":
+
 Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
-//create route to "create session":
-Route::get('/sessions/create', [ApiSessionController::class, 'create'])->name('sessions.create');
+Route::get('/sessions/patientsessoins/{patient}', [ApiSessionController::class, 'patientSessions'])->name('sessions.patientsession');
+Route::get('/sessions/create/{service}', [ApiSessionController::class, 'create'])->name('sessions.create');
 //create route to "show session"
 Route::get('/sessions/{session}', [ApiSessionController::class, 'show'])->name('sessions.show');
 //create route to "edit(show) session":
@@ -28,7 +28,7 @@ Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->na
 //update route to "update session":
 Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name('sessions.update');
 //مسار ملخص لوحة المتابعة
-Route::get('sessions/summary/{session}', [ApiSessionController::class, 'session_summary'])->name('sessions.summary');
+Route::get('sessions/summary/{patient_id}', [ApiSessionController::class, 'session_summary'])->name('sessions.summary');
 //"store session"
 Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
 
