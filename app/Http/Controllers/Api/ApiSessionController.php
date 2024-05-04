@@ -30,7 +30,7 @@ class ApiSessionController extends Controller
     }
 
 
-//_______________________________________________________________________________
+    //_______________________________________________________________________________
 
     // عرض جميع جلسات المرضى من قبل الادمن
     public function index()
@@ -155,68 +155,69 @@ class ApiSessionController extends Controller
     //_________________________________________________________________________________________________________
 
 
-    public function create(Request $request)
+    public function create($appointmentid)
     {
         try {
-            $serviceId = $request->serviceId;
-            $activities = Service::findOrFail($serviceId)->activities;
-    
-            return $this->successResponse(SessionResource::collection($activities), 'Activities retrieved successfully', 200);
+           $appointment=Appointment::where('id' ,$appointmentid);
+           return $appointment;
+           // return $this->successResponse(SessionResource::collection($activities), 'Activities retrieved successfully', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Sessions not found', 404);
         } catch (\Illuminate\Database\QueryException $e) {
             return $this->errorResponse('Error querying the database', 500);
         }
     }
-    
 
-    
+
+
 
 
     //___________________________________________________________________________
 
 
     public function store(Request $request)
-    { 
+    {
         $validator = Validator::make($request->all(), [
-            'start_time' => 'required', 
+            'start_time' => 'required',
             'appointment_id' => 'required',
             'activities.*.value' => 'required|max:255',
-            'activities.*.time' => 'required' 
+            'activities.*.time' => 'required'
         ]);
-    
+
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 400);
         }
-    
+
+
         try {
             $session = new Session;
-            $session->appointment_id = $request->input('appointment_id');
-            $session->start_time = $request->input('start_time'); 
-            $session->end_time = $request->input('end_time'); 
-            $session->duration = $this->calculateDuration($session->start_time, $session->end_time);
-            $session->observation = $request->input('observation');
-            $session->save(); // هذا سيُنشئ الجلسة ويُعيد الـ ID الجديد
-    
-           
-        // $activities = $request->input('activities');
-        // foreach ($activities as $activity) {
-        //     $session->activities()->attach($activity['id'], [
-        //         'session_id' => $session->id ,
-        //         'value' => $activity['value'],
-        //         'time' => $activity['time'],
-               
-        //     ]);
-        // }
+            $session->duration = $request->duration;
+            $session->observation = $request->observation;
+            $session->appointment_id = $request->appointment_id;
+            $session->start_time = $request->start_time;
+            $session->end_time = date('h:i');
+            $session->save();
+
+
+
+            $activities = $request->input('activities');
+            foreach ($activities as $activity) {
+                $session->activities()->attach($activity['id'], [
+                    'session_id' => $session->id,
+                    'value' => $activity['value'],
+                    'time' => $activity['time'],
+
+                ]);
+            }
             $sessionResource = new SessionResource($session);
-    
+
             return $this->successResponse($sessionResource, 'Session stored successfully', 201);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Sessions not found', 404);
         }
     }
-    
-    
+
+
     //_____________________________________________________________________________________________
 
 

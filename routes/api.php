@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\ApiSessionController as ApiSessionController;
 use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\SessionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -29,7 +31,7 @@ Route::group([] ,
         //عرض ملخص الجلسة
         Route::get('sessions/summary/{patient_id}', [ApiSessionController::class, 'session_summary'])->name('sessions.summary');
         // انشاء جلسة
-        Route::get('/sessions/create/{service}', [ApiSessionController::class, 'create'])->name('sessions.create');
+        Route::get('/sessions/create/{appointment}', [ApiSessionController::class, 'create'])->name('sessions.create');
         Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
         //عرض واجهة التعديل على الجلسة
         Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->name('sessions.edit');
@@ -40,7 +42,8 @@ Route::group([] ,
     }
 );
 
-
-
 // Route to search page
-Route::get('/search', [SearchController::class, 'index'])->name(name: 'search.index');
+ Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+
+// Api for the result of search (care providers)
+// Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name('providers.index');

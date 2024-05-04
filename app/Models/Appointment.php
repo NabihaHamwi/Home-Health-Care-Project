@@ -25,17 +25,17 @@ class Appointment extends Model
         return $this->hasMany(Session::class);
     }
 
-    public function activities()
-{
-    return $this->hasManyThrough(
-        Activity::class, //الجدول الهدف
-        Session::class, //الجدول الوسيط
-        'appointment_id', // Foreign key on the sessions table...
-        'id', // Foreign key on the activities table...
-        'id', // Local key on the appointments table...
-        'activity_id' // Local key on the sessions table...
-    );
-}
+//     public function activities()
+// {
+//     return $this->hasManyThrough(
+//         Activity::class, //الجدول الهدف
+//         Session::class, //الجدول الوسيط
+//         'appointment_id', // Foreign key on the sessions table...
+//         'id', // Foreign key on the activities table...
+//         'id', // Local key on the appointments table...
+//         'activity_id' // Local key on the sessions table...
+//     );
+// }
 
     
 //     // العلاقة many-to-many مع Activity من خلال Session
