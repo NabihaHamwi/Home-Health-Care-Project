@@ -15,10 +15,14 @@ class HealthcareProviderResource extends JsonResource
     public function toArray(Request $request): array
     {
         if ($request->route()->named('search.result'))
+            {
+                $skills = $this->skills;
             return [
                 'id' => $this->id,
-                'name'=> $this->user->name,
+                'name'=> $this->user->first_name,
+                // 'skills'=>$skills,
                 'experience' => $this->experience
             ];
+        }
     }
 }

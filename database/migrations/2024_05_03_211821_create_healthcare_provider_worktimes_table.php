@@ -11,19 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('healthcare_provider_skill', function (Blueprint $table) {
+        Schema::create('healthcare_provider_worktimes', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('healthcare_provider_id')->constrained()->onDelete('cascade');
-            $table->foreignId('skill_id')->constrained()->onDelete('cascade');
-
+            $table->string('day_name');
+            $table->integer('work_hours');
+            $table->time('start_time');
+            $table->time('end_time');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('healthcare_provider_skill');
-    }
 };
