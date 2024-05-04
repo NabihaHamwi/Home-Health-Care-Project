@@ -27,4 +27,23 @@ class ServiceController extends Controller
         }
         return response($response); // إرسال الخدمات 
     }
+
+    public function show(Request $request){
+        // $service = new ServiceResource(Service::find($request)); // استرجاع الخدمة الواحدة
+        // if($service){
+        //     $response = [
+        //         'msg' => 'service found',
+        //         'status' => 200,
+        //         'data' => $service,
+        //     ];
+        // } 
+        // else{
+        //     $response = [
+        //         'msg' => 'Service not found',
+        //         'status' => 404,
+        //         'data' => null,
+        //     ];
+        // }
+        // return response($response); // إرسال اسم و تفاصيل الخدمة
+    }
 }

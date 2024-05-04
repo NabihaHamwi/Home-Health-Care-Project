@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\HealthcareProviderController as ApiHealthcareProviderController;
 use App\Http\Controllers\Controller;
+use App\Models\HealthcareProvider;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -15,7 +17,13 @@ class SearchController extends Controller
         // $data2 = json_decode($servicesResopnse, true);
         // $data = array_merge($data1, $data2);
         // $response =json_encode($data);
-        $response = ['skills'=>$skillsResopnse, 'services'=>$servicesResopnse];
+        $response = ['skills' => $skillsResopnse, 'services' => $servicesResopnse];
+        return response($response);
+    }
+
+    public function search(Request $request, ApiHealthcareProviderController $providers)
+    {
+        $response = $providers->index($request);
         return response($response);
     }
 }
