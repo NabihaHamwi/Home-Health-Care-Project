@@ -25,4 +25,9 @@ class Service extends Model
     {
         return $this->belongsToMany(Activity::class, 'activity_service');
     }
+
+    public function healthcareProviders()
+    {
+        return $this->belongsToMany(HealthcareProvider::class);
+    }
 }

@@ -18,6 +18,11 @@ class HealthcareProvider extends Model
         return $this->belongsToMany(Skill::class);
     }
 
+    public function services()
+    {
+        return $this->belongsToMany(Service::class);
+    }
+
     public function appointments()
     {
         // العلاقة one-to-many مع Appointment

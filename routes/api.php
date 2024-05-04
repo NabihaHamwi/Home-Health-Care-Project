@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ApiSessionController as ApiSessionController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SkillController;
+use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -42,8 +43,14 @@ Route::group([] ,
     }
 );
 
-// Route to search page
- Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+// Api for search page
+Route::get('/search', [SearchController::class, 'index'])->name(name: 'search.index');
 
-// Api for the result of search (care providers)
-// Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name('providers.index');
+//Api for show all services
+Route::get('/services', [ServiceController::class, 'index'])->name(name: 'services.index');
+
+//Api for the result of search (care providers)
+Route::get('/search/result', [SearchController::class, 'search'])->name(name: 'search.result');
+
+
+//Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');

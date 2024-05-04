@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreignId('service_id')->constrained()->onDelete('cascade');
+            $table->enum('gender' , ['أنثى', 'ذكر'] ); 
             $table->integer('age');
             $table->enum('relationship_status' , ['أعزب','متزوج','أرمل','مطلق' ,'-' ]);
             $table->integer('experience');

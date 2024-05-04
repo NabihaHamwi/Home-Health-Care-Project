@@ -14,9 +14,17 @@ class ServiceResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'id'=> $this-> id,
-            'name'=> $this->name
-        ];
+        if ($request->route()->named('search.index'))
+            return [
+                'id' => $this->id,
+                'name' => $this->name
+            ];
+        else if ($request->route()->named('services.index'))
+            return [
+                'id' => $this->id,
+                'name' => $this->name,
+                'description' => $this->description
+            ];
+        return ['not found route name'];
     }
 }
