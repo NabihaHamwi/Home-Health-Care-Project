@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('full_name');
+            $table->enum('gender' , ['أنثى', 'ذكر'] ); 
             $table->date('birth_date');
             $table->string('address');
             $table->decimal('weight', 5, 2); // إضافة وزن المريض

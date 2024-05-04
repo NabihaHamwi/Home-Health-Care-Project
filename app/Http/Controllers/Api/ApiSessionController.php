@@ -141,30 +141,25 @@ class ApiSessionController extends Controller
 
 
 
-    public function create($appointmentId)
+    public function create($appointment_id)
     {
 
-        $appointment = Appointment::findOrFail($appointmentId);
-        $service = $appointment->service_id;
-        $appointment = Appointment::with(['activities'])->findOrFail($appointmentId);
-
-        // احصل على تاريخ الموعد
-        $appointmentDate = $appointment->appointment_date;
-
-        // احصل على الخدمة المرتبطة بالموعد
+        // الحصول على تاريخ الموعد والخدمةالمرتبطة 
+        $serviceId = Appointment::where('id', $appointment_id)->value('service_id', 'appointment_date');
 
 
-        $sessions = Session::with(['appointment.service', 'activities' => function ($query) use ($service) {
+        
+        $sessions = Session::with(['appointment.service', 'activities' => function ($query) use ($serviceId) {
             $query->where('flag', 'shared')
-                ->orWhere('flag', $service);
-        }])->whereHas('appointment.service', function ($query) use ($service) {
-            $query->where('id', $service);
+                ->orWhere('flag', $serviceId);
+        }])->whereHas('appointment.service', function ($query) use ($serviceId) {
+            $query->where('id', $serviceId);
         })->get();
 
         return SessionResource::collection($sessions);
 
-        // احصل على الملاحظات الخاصة بالجلسة
-        $sessionNotes = $appointment->sessions->pluck('observation');
+        // // احصل على الملاحظات الخاصة بالجلسة
+        // $sessionNotes = $appointment->sessions->pluck('observation');
 
         // // قم بتجميع البيانات في مصفوفة وارجعها
         // return [
@@ -287,7 +282,7 @@ class ApiSessionController extends Controller
 
 
 
-    
+
     public function destroy($sessionId)
     {
         try {

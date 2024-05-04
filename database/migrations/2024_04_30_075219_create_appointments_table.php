@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
             $table->date('appointment_date'); // تاريخ الموعد
             $table->time('appointment_start_time'); // وقت بداية الموعد
-            $table->float('appointment_duration');
+            $table->time('appointment_duration');
             $table->string('patient_location'); // موقع المريض
             $table->enum('appointment_status', ['الطلب مرفوض', 'الطلب مقبول', 'الطلب قيدالانتظار']); // حالة الموعد
             $table->unsignedTinyInteger('appointment_rating')->nullable(); // تقييم الموعد
