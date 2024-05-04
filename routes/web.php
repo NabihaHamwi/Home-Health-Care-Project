@@ -7,22 +7,22 @@ use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
 
-// //create route to "index sessions":
-// Route::get('/sessions', [SessionController::class, 'index'])->name('sessions.index');
-// Route::get('/sessions/patientsessoins/{patient}', [SessionController::class, 'patientSessions'])->name('sessions.sessions');
-// //create route to "create session":
-// Route::get('/sessions/create/{appintments}', [SessionController::class, 'create'])->name('sessions.create');
-// //create route to "store session":
-// Route::post('/sessions', [SessionController::class, 'store'])->name('sessions.store');
-// //create route to "show session"
-// Route::get('/sessions/{session}', [SessionController::class, 'show'])->name('sessions.show');
-// //create route to "edit(show) session":
-// Route::get('sessions/{session}/edit', [SessionController::class, 'edit'])->name('sessions.edit');
-// //update route to "update session":
-// Route::put('sessions/{session}', function () {
-//     return 'hello';
-// })->name('sessions.update');
-// Route::get('/sessions/summary/{session}', [SessionController::class, 'session_summary'])->name('sessions.summary');
+//create route to "index sessions":
+Route::get('/sessions', [SessionController::class, 'index'])->name('sessions.index');
+Route::get('/sessions/patientsessoins/{patient}', [SessionController::class, 'patientSessions'])->name('sessions.sessions');
+//create route to "create session":
+Route::get('/sessions/create/{appintments}', [SessionController::class, 'create'])->name('sessions.create');
+//create route to "store session":
+Route::post('/sessions', [SessionController::class, 'store'])->name('sessions.store');
+//create route to "show session"
+Route::get('/sessions/{session}', [SessionController::class, 'show'])->name('sessions.show');
+//create route to "edit(show) session":
+Route::get('sessions/{session}/edit', [SessionController::class, 'edit'])->name('sessions.edit');
+//update route to "update session":
+Route::put('sessions/{session}', function () {
+    return 'hello';
+})->name('sessions.update');
+Route::get('/sessions/summary/{session}', [SessionController::class, 'session_summary'])->name('sessions.summary');
 
 
 

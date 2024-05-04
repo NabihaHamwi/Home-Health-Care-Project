@@ -157,12 +157,25 @@ class ApiSessionController extends Controller
 
     public function create($appointmentid)
     {
+
         try {
-           $appointment=Appointment::where('id' ,$appointmentid);
-           return $appointment;
-           // return $this->successResponse(SessionResource::collection($activities), 'Activities retrieved successfully', 200);
+            $appointment = Appointment::findOrFail($appointmentid);
+            $serviceId = $appointment->service_id;
+            $date = $appointment->appointment_date;
+
+            // استرجاع النشاطات حيث flag يساوي 0 أو يساوي service_id
+            $activities = Activity::where('flag', 0)
+                ->orWhere('flag', $serviceId)
+                ->get(['activity_name']);
+
+                $data =[
+                    'appointment_date' => $date ,
+                    'activities_name' => $activities
+                ];
+         return $this->successResponse($data , 'Activities retrieved successfully', 200);
+            return $this->successResponse($activities, 'Activities retrieved successfully', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Sessions not found', 404);
+            return $this->errorResponse('Appointment not found', 404);
         } catch (\Illuminate\Database\QueryException $e) {
             return $this->errorResponse('Error querying the database', 500);
         }
