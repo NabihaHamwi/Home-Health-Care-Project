@@ -7,6 +7,7 @@ use App\Http\Resources\SessionResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\Service;
 use App\Models\Patient;
 use App\Models\Session;
 use App\Models\Appointment;
@@ -17,6 +18,20 @@ use Illuminate\Support\Facades\DB;
 class ApiSessionController extends Controller
 {
     use ApiResponseTrait;
+
+    // ...
+
+    private function calculateDuration($startTime, $endTime)
+    {
+        $start = new \DateTime($startTime);
+        $end = new \DateTime($endTime);
+        $interval = $start->diff($end);
+        return $interval->format('%h:%i'); // تنسيق المدة لساعات ودقائق
+    }
+
+
+//_______________________________________________________________________________
+
     // عرض جميع جلسات المرضى من قبل الادمن
     public function index()
     {
@@ -140,81 +155,68 @@ class ApiSessionController extends Controller
     //_________________________________________________________________________________________________________
 
 
-
-    public function create($appointment_id)
+    public function create(Request $request)
     {
-
-        // الحصول على تاريخ الموعد والخدمةالمرتبطة 
-        $serviceId = Appointment::where('id', $appointment_id)->value('service_id', 'appointment_date');
-
-
-        
-        $sessions = Session::with(['appointment.service', 'activities' => function ($query) use ($serviceId) {
-            $query->where('flag', 'shared')
-                ->orWhere('flag', $serviceId);
-        }])->whereHas('appointment.service', function ($query) use ($serviceId) {
-            $query->where('id', $serviceId);
-        })->get();
-
-        return SessionResource::collection($sessions);
-
-        // // احصل على الملاحظات الخاصة بالجلسة
-        // $sessionNotes = $appointment->sessions->pluck('observation');
-
-        // // قم بتجميع البيانات في مصفوفة وارجعها
-        // return [
-        //     'appointment_date' => $appointmentDate,
-        //     'shared_activities' => $sharedActivities,
-        //     'specific_activities' => $specificActivities,
-        //     'session_notes' => $sessionNotes,
-        // ];
+        try {
+            $serviceId = $request->serviceId;
+            $activities = Service::findOrFail($serviceId)->activities;
+    
+            return $this->successResponse(SessionResource::collection($activities), 'Activities retrieved successfully', 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Sessions not found', 404);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $this->errorResponse('Error querying the database', 500);
+        }
     }
+    
+
+    
 
 
     //___________________________________________________________________________
 
 
-
     public function store(Request $request)
-    {
+    { 
         $validator = Validator::make($request->all(), [
-            'start_time' => 'required',
-            'observation' => 'required',
-            'appointment_id' => 'required', // تأكد من توفير appointment_id
+            'start_time' => 'required', 
+            'appointment_id' => 'required',
             'activities.*.value' => 'required|max:255',
-            'activities.*.time' => 'required'
+            'activities.*.time' => 'required' 
         ]);
-
-        // في حال عدم وجودها ارسال رسالة الخطأ
+    
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 400);
         }
-
+    
         try {
-            // إنشاء جلسة جديدة
             $session = new Session;
             $session->appointment_id = $request->input('appointment_id');
-            $session->start_time =  $request->input('start_time');
-            $session->end_time = date('H:i');
+            $session->start_time = $request->input('start_time'); 
+            $session->end_time = $request->input('end_time'); 
+            $session->duration = $this->calculateDuration($session->start_time, $session->end_time);
             $session->observation = $request->input('observation');
-            $session->save();
-
-            // الحصول على الأنشطة من الطلب
-            $activities = $request->input('activities');
-
-            // تكرار على كل الأنشطة وحفظها في الجدول المشترك
-            foreach ($activities as $activity) {
-                $session->activities()->attach($activity['id'], ['value' => $activity['value'], 'time' => $activity['time']]);
-            }
-
+            $session->save(); // هذا سيُنشئ الجلسة ويُعيد الـ ID الجديد
+    
+           
+        // $activities = $request->input('activities');
+        // foreach ($activities as $activity) {
+        //     $session->activities()->attach($activity['id'], [
+        //         'session_id' => $session->id ,
+        //         'value' => $activity['value'],
+        //         'time' => $activity['time'],
+               
+        //     ]);
+        // }
             $sessionResource = new SessionResource($session);
-
+    
             return $this->successResponse($sessionResource, 'Session stored successfully', 201);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Sessions not found', 404);
         }
     }
-
+    
+    
     //_____________________________________________________________________________________________
 
 

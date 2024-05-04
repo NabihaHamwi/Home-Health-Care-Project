@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
+            $table->foreignId('service_id')->constrained()->onDelete('cascade');
             $table->integer('age');
-            $table->string('specialization');
+            $table->enum('relationship_status' , ['أعزب','متزوج','أرمل','مطلق' ,'-' ]);
             $table->integer('experience');
             $table->binary('personal_image')->nullable();
-            $table->string('physical_strength'); //القة البدنية
+            $table->string('physical_strength'); //القوة البدنية
             $table->timestamps();
         });
     }

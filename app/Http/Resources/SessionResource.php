@@ -82,24 +82,25 @@ class SessionResource extends JsonResource
                 'date' => $this->appointment->aapointment_date,
                 //   'notes' => $this->notes,
                 //  'name' => $this->name,
-                'is_related_to_service' => $this->flag == $this->pivot->service_id,
+               // 'is_related_to_service' => $this->flag == $this->pivot->service_id,
 
             ];
-        } else if ($request->route()->named('sessions.store')) {
-            foreach ($this->activities as $activity) {
-                $activities[] = [
-                    'id' => $activity->id,
-                    'value' => $activity->pivot->value,
-                    'time' => $activity->pivot->time,
-                ];
-            }
+        // } else if ($request->route()->named('sessions.store')) {
+        //     foreach ($this->activities as $activity) {
+        //         $activities[] = [
+        //             'id' => $activity->id,
+        //             'value' => $activity->pivot->value,
+        //             'time' => $activity->pivot->time,
+        //         ];
+        //     }
 
             return [
                 'id' => $this->id,
-                'appointment_date' => $this->appointment->appointment_date, // إضافة تاريخ الموعد
+             //   'appointment_date' => $this->appointment->appointment_date, // إضافة تاريخ الموعد
                 'start_time' => $this->start_time,
                 'observation' => $this->observation,
-                'activities' => $activities,
+                'duration' => $this->duration,
+                // 'activities' => $activities,
 
             ];
         } else if ($request->route()->named('sessions.edit')) {
@@ -132,6 +133,8 @@ class SessionResource extends JsonResource
                 'start_time' => $this->start_time,
                 'end_time' => $this->end_time,
                 'observation' => $this->observation,
+                                'duration' => $this->duration,
+
                 'appointment_date' => $this->appointment->appointment_date,
                 'activities' => $activities,
             ];

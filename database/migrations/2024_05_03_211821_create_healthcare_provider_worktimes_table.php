@@ -18,16 +18,8 @@ return new class extends Migration
             $table->integer('work_hours');
             $table->time('start_time');
             $table->time('end_time');
-            $table->enum('status', ['متفرغ', 'محجوز']);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('healthcare_provider_worktimes');
-    }
 };

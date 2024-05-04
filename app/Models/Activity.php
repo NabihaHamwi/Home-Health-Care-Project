@@ -16,4 +16,10 @@ class Activity extends Model
         return $this->belongsToMany(Session::class)
         ->withPivot('value', 'time');
     }
+    
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'activity_service');
+    }
+
 }

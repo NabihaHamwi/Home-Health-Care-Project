@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('healthcare_provider_skill', function (Blueprint $table) {
             $table->foreignId('healthcare_provider_id')->constrained()->onDelete('cascade');
             $table->foreignId('skill_id')->constrained()->onDelete('cascade');
+
             $table->timestamps();
         });
     }
