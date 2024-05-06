@@ -48,26 +48,6 @@ class ApiPatientController extends Controller
     //______________________________________________________________
 
 
-
-
-    public function edit($sessionId)
-    {
-        try {
-            $patient = Patient::findOrFail($sessionId);
-            return $this->successResponse(new PatientResource($patient), 'Patient retrieved successfully', 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Patient not found', 404);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse('Error querying the database', 500);
-        }
-    }
-
-
-
-    //_________________________________________________________________
-
-
-
     public function store(request $request)
     {
 
@@ -84,15 +64,15 @@ class ApiPatientController extends Controller
                 'height' => 'required|numeric|min:20|max:220',
                 'chronic_diseases' => 'required|min:3|max:500',
                 'allergies' => 'required|string|min:3|max:500',
-                'smoker' => 'required|boolean',
+                'smoker' => 'required',
             ],
             [
                 'full_name.required' => 'يرجى إدخال الاسم الكامل.',
-                'full_name.min' => 'يجب ألا يقل الاسم الكامل عن 3 أحرف.',
-                'full_name.max' => 'يجب ألا يزيد الاسم الكامل عن 10 أحرف.',
+                'full_name.min' => 'هل أنت متأكد من أنك قد أدخلت اسمك بشكل صحيح؟',
+                'full_name.max' => 'هل أنت متأكد من أنك قد أدخلت اسمك بشكل صحيح؟',
                 'gender.required' => 'يرجى تحديد الجنس.',
                 'gender.in' => 'الرجاء اختيار الجنس من القائمة المحددة.',
-                'birth_date.required' => 'يرجى إدخال تاريخ الميلاد.',
+                'birth_date.required' => 'يرجى ملء تاريخ الميلاد.',
                 'birth_date.date' => 'الرجاء التأكد من صحة تاريخ الميلاد المدخل.',
                 'relationship_status.required' => 'يرجى تحديد الحالة الاجتماعية.',
                 'address.required' => 'يرجى إدخال العنوان.',
@@ -152,6 +132,24 @@ class ApiPatientController extends Controller
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Patient not found', 404);
         } 
+    }
+
+
+
+    //_________________________________________________________________
+
+
+
+    public function edit($sessionId)
+    {
+        try {
+            $patient = Patient::findOrFail($sessionId);
+            return $this->successResponse(new PatientResource($patient), 'Patient retrieved successfully', 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Patient not found', 404);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $this->errorResponse('Error querying the database', 500);
+        }
     }
 
 
