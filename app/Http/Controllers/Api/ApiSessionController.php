@@ -209,6 +209,7 @@ class ApiSessionController extends Controller
             $session->appointment_id = $request->appointment_id;
             $session->start_time = $request->start_time;
             $session->end_time = date('h:i');
+            $session->created_at = now();
             $session->save();
 
 
@@ -219,6 +220,7 @@ class ApiSessionController extends Controller
                     'session_id' => $session->id,
                     'value' => $activity['value'],
                     'time' => $activity['time'],
+                    'created_at' => now(),
 
                 ]);
             }
@@ -274,6 +276,7 @@ class ApiSessionController extends Controller
 
             // تحديث الجلسة
             $session->observation = $request->input('observation');
+            $session->updated_at = now();
             $session->save();
 
             // الحصول على الأنشطة من الطلب
@@ -281,7 +284,7 @@ class ApiSessionController extends Controller
 
             // تكرار على كل الأنشطة وتحديثها في الجدول المشترك
             foreach ($activities as $activity) {
-                $session->activities()->updateExistingPivot($activity['id'], ['value' => $activity['value'], 'time' => $activity['time']]);
+                $session->activities()->updateExistingPivot($activity['id'], ['value' => $activity['value'], 'time' => $activity['time']] );
             }
 
             $sessionResource = new SessionResource($session);

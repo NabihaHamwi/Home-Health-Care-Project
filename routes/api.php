@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\ApiSessionController as ApiSessionController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\ApiSurveyController;
+use App\Http\Controllers\Api\ApiPatientController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
@@ -21,7 +23,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 // لوحة المتابعة
-Route::group([] ,
+Route::group(
+    [],
     function ($router) {
         //عرض جميع جلسات المرضى للادمن
         Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
@@ -42,6 +45,52 @@ Route::group([] ,
         Route::delete('/sessions/{session}', [ApiSessionController::class, 'destroy'])->name('sessions.destroy');
     }
 );
+
+
+//___________________________________________________________________
+
+
+
+//عرض اسئلة الاستبيان
+Route::group(
+    [],
+    function ($router) {
+        //عرض اسئلة الاستبيان
+        Route::get('/survey', [ApiSurveyController::class, 'index'])->name('survey.index');
+        //اضافة سؤال جديد للاستبيان من قبل الادمن
+        Route::post('/survey/add-question', [ApiSurveyController::class, 'addQuestion'])->name('survey.add');
+        // التعديل على سؤال من قبل الادمن
+        Route::put('/survey/update-question', [ApiSurveyController::class, 'updateQuestion'])->name('survey.update');
+        //حذف سؤال من الاستبيان من قبل الادمن
+        Route::delete('/survey/delete-question',  [ApiSurveyController::class, 'deleteQuestion'])->name('survey.delete');
+    }
+);
+
+
+//___________________________________________________________________
+
+
+
+//عرض معلومات المريض
+Route::group(
+    [],
+    function ($router) {
+        //عرض جميع المرضى (بعض المعلومات) للادمن
+        Route::get('/patients', [ApiPatientController::class, 'index'])->name('patients.index');
+        //عرض معلومات السجل الطبي لمريض معين
+        Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
+        //  واجهة عرض معلومات المريض قبل التعديل
+        Route::get('/patients/{patient}/edit', [ApiPatientController::class, 'edit'])->name('patients.edit');
+        //تحديث المعلومات 
+        Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
+    }
+);
+
+
+
+//___________________________________________________________________
+
+
 
 // Api for search page
 Route::get('/search', [SearchController::class, 'index'])->name(name: 'search.index');

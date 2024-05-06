@@ -76,15 +76,6 @@ class SessionResource extends JsonResource
                 'session_observation' => $this->observation,
                 'activities' => $activitiesInfo,
             ];
-        } else if ($request->route()->named('sessions.create')) {
-
-            return [
-                'date' => $this->appointment->aapointment_date,
-                //   'notes' => $this->notes,
-                //  'name' => $this->name,
-                // 'is_related_to_service' => $this->flag == $this->pivot->service_id,
-
-            ];
         } else if ($request->route()->named('sessions.store')) {
             foreach ($this->activities as $activity) {
                 $activities[] = [
@@ -120,7 +111,7 @@ class SessionResource extends JsonResource
                 'activities' => $activitiesInfo,
             ];
         } else if ($request->route()->named('sessions.update')) {
-            $activities  =[];
+            $activities  = [];
             foreach ($this->activities as $activity) {
                 $activities[] = [
                     'id' => $activity->id,

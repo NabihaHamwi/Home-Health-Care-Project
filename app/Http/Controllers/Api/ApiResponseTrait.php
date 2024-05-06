@@ -9,6 +9,7 @@ trait ApiResponseTrait
     const HTTP_FORBIDDEN = 403;
     const HTTP_NOT_FOUND = 404;
     const HTTP_METHOD_NOT_ALLOWED = 405;
+    const HTTP_UNPROCESSABLE_ENTITY = 422;
     const HTTP_METHOD_ERROR_QUERY = 500;
 
 
@@ -23,6 +24,10 @@ trait ApiResponseTrait
             self::HTTP_METHOD_ERROR_QUERY => [
                 'error_type' => 'wrong query',
                 'solution' => 'استعلام خاطىء يرجى إعادة المحاولة مرة أخرى.'
+            ],
+            self::HTTP_UNPROCESSABLE_ENTITY => [
+                'error_type' => 'Unprocessable Entity',
+                'solution' => 'البيانات المُرسلة لا يمكن معالجتها، تحقق من البيانات وأعد المحاولة.'
             ],
         ];
         // التعامل مع الأخطاء غير المعروفة: إذا لم يتم العثور على رمز الحالة داخل مصفوفة $errorDetails، يتم استخدام قيمة افتراضية تمثل خطأ غير معروف وحل مقترح للاتصال بالدعم الفني
@@ -43,5 +48,4 @@ trait ApiResponseTrait
             'data' => $data
         ], $code);
     }
-    
 }
