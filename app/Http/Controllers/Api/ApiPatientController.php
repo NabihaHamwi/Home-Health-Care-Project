@@ -28,6 +28,7 @@ class ApiPatientController extends Controller
     }
 
 
+
     //___________________________________________________________________
 
 
@@ -47,12 +48,13 @@ class ApiPatientController extends Controller
     //______________________________________________________________
 
 
+
+
     public function edit($sessionId)
     {
-
         try {
             $patient = Patient::findOrFail($sessionId);
-            return $this->successResponse(new PatientResource($patient), 'Session retrieved successfully', 200);
+            return $this->successResponse(new PatientResource($patient), 'Patient retrieved successfully', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Patient not found', 404);
         } catch (\Illuminate\Database\QueryException $e) {
@@ -61,23 +63,27 @@ class ApiPatientController extends Controller
     }
 
 
+
     //_________________________________________________________________
+
+
+
     public function store(request $request)
     {
 
         $validator = Validator::make(
             $request->all(),
-            [
+             [
                 'full_name' => 'required|min:3|max:10',
-                'gender' => 'required|in:male,female,other',
+                'gender' => 'required|in:أنثى,ذكر',
                 'birth_date' => 'required|date',
-                'relationship_status' => 'required|in:single,married,divorced,widowed',
+                'relationship_status' => 'required|in:أعزب,متزوج,مطلق,أرمل',
                 'address' => 'required|max:255',
                 'phone_number' => ['required', 'regex:/^(00963|\+963)?\d{9}$/'],
-                'weight' => 'required|numeric|min:1.5|max:130',
+                'weight' => 'required|numeric|min:1|max:130',
                 'height' => 'required|numeric|min:20|max:220',
-                'chronic_diseases' => 'required|min:5|max:500',
-                'allergies' => 'required|string|min:5|max:500',
+                'chronic_diseases' => 'required|min:3|max:500',
+                'allergies' => 'required|string|min:3|max:500',
                 'smoker' => 'required|boolean',
             ],
             [
@@ -119,6 +125,7 @@ class ApiPatientController extends Controller
 
             // تعيين معلومات المريض من الطلب
             $patient->full_name = $request->full_name;
+            $patient->user_id = $request->user_id;
             $patient->gender = $request->gender;
             $patient->birth_date = $request->birth_date;
             $patient->relationship_status = $request->relationship_status;
@@ -141,11 +148,16 @@ class ApiPatientController extends Controller
 
             $patient->save();
 
-            return $this->successResponse(new PatientResource($patient), 'Patient created successfully', 201);
-        } catch (\Exception $e) {
-            return $this->errorResponse('Error occurred while creating the patient', 500);
-        }
+            return $this->successResponse('Patient created successfully', 201);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Patient not found', 404);
+        } 
     }
+
+
+
+    //_______________________________________________________________
+
 
 
     public function update(Request $request, $sessionId)
@@ -153,15 +165,13 @@ class ApiPatientController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'birth_date' => 'required|date',
-                'relationship_status' => 'required|in:single,married,divorced,widowed',
                 'address' => 'required|max:255',
                 'phone_number' => ['required', 'regex:/^(00963|\+963)?\d{9}$/'],
                 'weight' => 'required|numeric|min:1.5|max:130',
                 'height' => 'required|numeric|min:20|max:220',
-                'chronic_diseases' => 'required|min:5|max:500',
-                'allergies' => 'required|string|min:5|max:500',
-                'smoker' => 'required|boolean',
+                'chronic_diseases' => 'required|min:3|max:500',
+                'allergies' => 'required|string|min:3|max:500',
+                'smoker' => 'required',
             ],
             [
                 'relationship_status.required' => 'يرجى تحديد الحالة الاجتماعية.',
@@ -177,9 +187,9 @@ class ApiPatientController extends Controller
                 'height.numeric' => 'الرجاء التأكد من أن الطول المدخل عبارة عن رقم.',
                 'height.min' => 'الطول المدخل أقل من الحد الأدنى المسموح به.',
                 'height.max' => 'الطول المدخل يتجاوز الحد الأقصى المسموح به.',
-                'chronic_diseases.required' => 'يرجى إدخال الأمراض المزمنة إن وجدت.',
+                'chronic_diseases.required' => 'يرجى إدخال الأمراض المزمنة .',
                 'chronic_diseases.max' => 'الرجاء التأكد من أن المعلومات المدخلة ضمن الحد المسموح.',
-                'allergies.required' => 'يرجى إدخال الحساسية إن وجدت.',
+                'allergies.required' => 'يرجى إدخال الحساسية .',
                 'allergies.string' => 'الرجاء التأكد من أن المعلومات المدخلة نصية.',
                 'allergies.min' => 'الحساسية المدخلة أقل من الحد الأدنى المسموح به.',
                 'allergies.max' => 'الحساسية المدخلة تتجاوز الحد الأقصى المسموح به.',
@@ -195,11 +205,6 @@ class ApiPatientController extends Controller
 
         try {
             $patient = Patient::findOrFail($sessionId);
-
-            // تحديث معلومات المريض
-            //  $patient->full_name = $request->full_name;
-            //   $patient->gender = $request->gender;
-            //      $patient->birth_date = $request->birth_date;
             $patient->relationship_status = $request->relationship_status;
             $patient->address = $request->address;
             $patient->phone_number = $request->phone_number;
@@ -219,8 +224,9 @@ class ApiPatientController extends Controller
             $patient->updated_at = now();
 
             $patient->save();
+          //  $patientupdate = Patient::findOrFail($sessionId);
 
-            return $this->successResponse(new PatientResource($patient), 'Patient updated successfully', 200);
+            return $this->successResponse(new PatientResource ($patient), 'Patient updated successfully', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Patient not found', 404);
         } catch (\Exception $e) {

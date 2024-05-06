@@ -31,7 +31,10 @@ class PatientResource extends JsonResource
 
             return $this->filterNullValues();
         }
-        else if($request->reoute()->named('patients.store')){}
+        // else if($request->reoute()->named('patients.store')){
+
+
+        // }
         else if ($request->route()->named('patients.edit')) {
 
             return $this->filterNullValues();
@@ -41,18 +44,6 @@ class PatientResource extends JsonResource
 
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

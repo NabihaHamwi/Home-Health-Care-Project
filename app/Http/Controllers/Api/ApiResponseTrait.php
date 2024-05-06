@@ -16,11 +16,26 @@ trait ApiResponseTrait
     public function errorResponse($message, $code)
     {
         $errorDetails = [
-            self::HTTP_BAD_REQUEST => ['error_type' => 'Bad Request', 'solution' => 'تحقق من صيغة الطلب.'],
-            self::HTTP_UNAUTHORIZED => ['error_type' => 'Unauthorized', 'solution' => 'التحقق من بيانات المصادقة.'],
-            self::HTTP_FORBIDDEN => ['error_type' => 'Forbidden', 'solution' => 'تحقق من الصلاحيات.'],
-            self::HTTP_NOT_FOUND => ['error_type' => 'Not Found', 'solution' => 'تحقق من العنوان المطلوب.'],
-            self::HTTP_METHOD_NOT_ALLOWED => ['error_type' => 'Method Not Allowed', 'solution' => 'استخدم الطريقة الصحيحة للطلب.'],
+            self::HTTP_BAD_REQUEST => [
+                'error_type' => 'Bad Request',
+                'solution' => 'تحقق من صيغة الطلب.'
+            ],
+            self::HTTP_UNAUTHORIZED => [
+                'error_type' => 'Unauthorized',
+                'solution' => 'التحقق من بيانات المصادقة.'
+            ],
+            self::HTTP_FORBIDDEN => [
+                'error_type' => 'Forbidden',
+                'solution' => 'تحقق من الصلاحيات.'
+            ],
+            self::HTTP_NOT_FOUND => [
+                'error_type' => 'Not Found',
+                'solution' => 'تحقق من العنوان المطلوب.'
+            ],
+            self::HTTP_METHOD_NOT_ALLOWED => [
+                'error_type' => 'Method Not Allowed',
+                'solution' => 'استخدم الطريقة الصحيحة للطلب.'
+            ],
             self::HTTP_METHOD_ERROR_QUERY => [
                 'error_type' => 'wrong query',
                 'solution' => 'استعلام خاطىء يرجى إعادة المحاولة مرة أخرى.'

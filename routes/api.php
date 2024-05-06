@@ -79,6 +79,8 @@ Route::group(
         Route::get('/patients', [ApiPatientController::class, 'index'])->name('patients.index');
         //عرض معلومات السجل الطبي لمريض معين
         Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
+        //انشاء مريض من فبل المستخدم
+        Route::post('/patients', [ApiPatientController::class, 'store'])->name('patients.store');
         //  واجهة عرض معلومات المريض قبل التعديل
         Route::get('/patients/{patient}/edit', [ApiPatientController::class, 'edit'])->name('patients.edit');
         //تحديث المعلومات 
