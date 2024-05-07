@@ -5,11 +5,14 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\ApiSurveyController;
 use App\Http\Controllers\Api\ApiPatientController;
+use App\Http\Controllers\Api\HealthcareProviderWorktimeController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
+use App\Models\HealthcareProviderWorktime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use PHPUnit\Framework\Attributes\Group;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,12 +33,13 @@ Route::group(
         Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
         //عرض جميع جلسات المريض
         Route::get('/sessions/patientsessoins/{patient}', [ApiSessionController::class, 'patientSessions'])->name('sessions.patientsession');
+        // انشاء جلسة
+        Route::get('/sessions/create/{appointment}', [ApiSessionController::class, 'create'])->name('sessions.create');
         //عرض جلسة للمريض
         Route::get('/sessions/{session}', [ApiSessionController::class, 'show'])->name('sessions.show');
         //عرض ملخص الجلسة
         Route::get('sessions/summary/{patient_id}', [ApiSessionController::class, 'session_summary'])->name('sessions.summary');
-        // انشاء جلسة
-        Route::get('/sessions/create/{appointment}', [ApiSessionController::class, 'create'])->name('sessions.create');
+        //تخزين بيانات جلسة
         Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
         //عرض واجهة التعديل على الجلسة
         Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->name('sessions.edit');
@@ -58,11 +62,11 @@ Route::group(
         //عرض اسئلة الاستبيان
         Route::get('/survey', [ApiSurveyController::class, 'index'])->name('survey.index');
         //اضافة سؤال جديد للاستبيان من قبل الادمن
-        Route::post('/survey/add-question', [ApiSurveyController::class, 'addQuestion'])->name('survey.add');
+        Route::post('/survey/add-question', [ApiSurveyController::class, 'addQuestions'])->name('survey.add');
         // التعديل على سؤال من قبل الادمن
-        Route::put('/survey/update-question', [ApiSurveyController::class, 'updateQuestion'])->name('survey.update');
+        Route::put('/survey/update-question', [ApiSurveyController::class, 'updateQuestions'])->name('survey.update');
         //حذف سؤال من الاستبيان من قبل الادمن
-        Route::delete('/survey/delete-question',  [ApiSurveyController::class, 'deleteQuestion'])->name('survey.delete');
+        Route::delete('/survey/delete-question',  [ApiSurveyController::class, 'deleteQuestions'])->name('survey.delete');
     }
 );
 
@@ -91,6 +95,42 @@ Route::group(
 
 
 //___________________________________________________________________
+
+
+
+Route::group(
+    [],
+    function ($router) {
+        // عرض ايام عمل مقدم الرعاية
+        Route::get('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
+        // تعبئة ايام العمل
+        Route::post('/careprovidersworktimes', [HealthcareProviderWorktimeController::class, 'store'])->name('careprovidersworktimes.store');
+        // تحديث بيانات ايام العمل
+        Route::put('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'update'])->name('careprovidersworktimes.update');
+        // حذف ايام العمل وإعادة تعبئتها من جديد
+        Route::delete('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'destroy'])->name('careprovidersworktimes.destroy');
+    }
+);
+
+
+
+
+//_____________________________________________________________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

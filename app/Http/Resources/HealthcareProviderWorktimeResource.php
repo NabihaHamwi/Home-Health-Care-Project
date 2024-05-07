@@ -1,19 +1,37 @@
-// HealthcareProviderWorktimeResource.php
+<?php
 
 namespace App\Http\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class HealthcareProviderWorktimeResource extends JsonResource
 {
-    public function toArray($request)
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
     {
-        return [
-            'id' => $this->id,
-            'provider_id' => $this->provider_id,
-            'day' => $this->day,
-            'start_time' => $this->start_time,
-            'end_time' => $this->end_time,
-        ];
+        if ($request->route()->named('careprovidersworktimes.show')) {
+            return [
+                'day_name' => $this->day_name,
+                'work_hours' => $this->work_hours,
+                'start_time' => $this->start_time,
+                'end_time' => $this->end_time,
+
+
+
+            ];
+        } else if ($request->route()->named('careprovidersworktimes.store')) {
+
+            return [
+                'day_name' => $this->day_name,
+                'work_hours' => $this->work_hours,
+                'start_time' => $this->start_time,
+                'end_time' => $this->end_time,
+            ];
+        }
     }
 }

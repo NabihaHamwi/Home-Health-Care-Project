@@ -44,7 +44,8 @@ class SessionResource extends JsonResource
                 'sessions' => $sessionsDetails,
             ];
         } else if ($request->route()->named('sessions.show')) {
-            //    (sessions) نحاول الوصول إلى الخصائص (النشاط) في الكائن الحالي   
+            //    (sessions) نحاول الوصول إلى الخصائص (النشاط) في الكائن الحالي 
+            $activitiesInfo= []; 
             foreach ($this->activities as $activity) {
                 $activitiesInfo[] = [
                     'name' => $activity->activity_name,

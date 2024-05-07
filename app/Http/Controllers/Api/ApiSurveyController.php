@@ -25,55 +25,77 @@ class ApiSurveyController extends Controller
     //___________________________________________________________________
 
 
-    public function addQuestion(Request $request)
+    public function addQuestions(Request $request)
     {
         // تحقق من وجود البيانات المطلوبة في الطلب
         $this->validate($request, [
             'section' => 'required|string',
-            'question' => 'required|string',
+            'questions' => 'required|array',
+            'questions.*' => 'required|string',
         ]);
-
+    
         // قراءة الاستبيان الحالي
         $surveyJson = file_get_contents(config_path('survey_questions.json'));
         $surveyData = json_decode($surveyJson, true);
-
+    
         if ($surveyData === null) {
             return $this->errorResponse('لا يمكن قراءة الاستبيان', 404);
         }
-
-        // إضافة السؤال الجديد
-        $surveyData[$request->section][] = $request->question;
-
+    
+        // إضافة الأسئلة الجديدة
+        foreach ($request->questions as $question) {
+            $surveyData[$request->section][] = $question;
+        }
+    
         // حفظ الاستبيان المعدل
         file_put_contents(config_path('survey_questions.json'), json_encode($surveyData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-        return $this->successResponse($surveyData, 'تم إضافة السؤال بنجاح');
+    
+        return $this->successResponse($surveyData, 'تم إضافة الأسئلة بنجاح');
     }
-    public function updateQuestion(Request $request)
-{
-    // تحقق من وجود البيانات المطلوبة في الطلب
-    $this->validate($request, [
-        'section' => 'required|string',
-        'question_key' => 'required',
-        'new_question' => 'required|string',
-    ]);
+    
 
-    // قراءة الاستبيان الحالي
-    $surveyJson = file_get_contents(config_path('survey_questions.json'));
-    $surveyData = json_decode($surveyJson, true);
+    //___________________________________________________________________________________
 
-    if ($surveyData === null || !isset($surveyData[$request->section][$request->question_key])) {
-        return $this->errorResponse('لا يمكن العثور على السؤال', 404);
+
+
+    public function updateQuestions(Request $request)
+    {
+        // تحقق من وجود البيانات المطلوبة في الطلب
+        $this->validate($request, [
+            'section' => 'required|string',
+            'questions' => 'required|array',
+            'questions.*.key' => 'required',
+            'questions.*.new_question' => 'required|string',
+        ]);
+    
+        // قراءة الاستبيان الحالي
+        $surveyJson = file_get_contents(config_path('survey_questions.json'));
+        $surveyData = json_decode($surveyJson, true);
+    
+        if ($surveyData === null) {
+            return $this->errorResponse('لا يمكن قراءة الاستبيان', 404);
+        }
+    
+        // تحديث الأسئلة
+        foreach ($request->questions as $questionData) {
+            $key = $questionData['key'];
+            if (isset($surveyData[$request->section][$key])) {
+                $surveyData[$request->section][$key] = $questionData['new_question'];
+            }
+        }
+    
+        // حفظ الاستبيان المعدل
+        file_put_contents(config_path('survey_questions.json'), json_encode($surveyData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    
+        return $this->successResponse($surveyData, 'تم تحديث الأسئلة بنجاح');
     }
 
-    // تحديث السؤال
-    $surveyData[$request->section][$request->question_key] = $request->new_question;
+    
 
-    // حفظ الاستبيان المعدل
-    file_put_contents(config_path('survey_questions.json'), json_encode($surveyData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+//_______________________________________________________________________________________
 
-    return $this->successResponse($surveyData, 'تم تحديث السؤال بنجاح');
-}
+
+
 public function deleteQuestion(Request $request)
 {
     // تحقق من وجود البيانات المطلوبة في الطلب

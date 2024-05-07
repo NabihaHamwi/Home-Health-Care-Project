@@ -29,6 +29,12 @@ class HealthcareProvider extends Model
         return $this->hasMany(Appointment::class);
     }
 
+    
+    public function worktimes()
+    {
+        return $this->hasMany(HealthcareProviderWorktime::class);
+    }
+
 
 
     

@@ -19,7 +19,7 @@ class ApiSessionController extends Controller
 {
     use ApiResponseTrait;
 
-    // ...
+    
 
     private function calculateDuration($startTime, $endTime)
     {

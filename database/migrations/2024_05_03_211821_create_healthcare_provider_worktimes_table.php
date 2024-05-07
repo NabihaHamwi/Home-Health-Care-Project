@@ -15,11 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('healthcare_provider_id')->constrained()->onDelete('cascade');
             $table->string('day_name');
-            $table->integer('work_hours');
+            $table->float('work_hours');
             $table->time('start_time');
             $table->time('end_time');
             $table->timestamps();
         });
     }
-
 };
