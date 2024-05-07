@@ -19,7 +19,7 @@ class ApiSessionController extends Controller
 {
     use ApiResponseTrait;
 
-    
+
 
     private function calculateDuration($startTime, $endTime)
     {
@@ -168,11 +168,11 @@ class ApiSessionController extends Controller
                 ->orWhere('flag', $serviceId)
                 ->get(['activity_name']);
 
-                $data =[
-                    'appointment_date' => $date ,
-                    'activities_name' => $activities
-                ];
-         return $this->successResponse($data , 'Activities retrieved successfully', 200);
+            $data = [
+                'appointment_date' => $date,
+                'activities_name' => $activities
+            ];
+            return $this->successResponse($data, 'Activities retrieved successfully', 200);
             return $this->successResponse($activities, 'Activities retrieved successfully', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Appointment not found', 404);
@@ -284,7 +284,7 @@ class ApiSessionController extends Controller
 
             // تكرار على كل الأنشطة وتحديثها في الجدول المشترك
             foreach ($activities as $activity) {
-                $session->activities()->updateExistingPivot($activity['id'], ['value' => $activity['value'], 'time' => $activity['time']] );
+                $session->activities()->updateExistingPivot($activity['id'], ['value' => $activity['value'], 'time' => $activity['time']]);
             }
 
             $sessionResource = new SessionResource($session);

@@ -47,7 +47,7 @@ class HealthcareProviderWorktimeController extends Controller
             'worktimes.*.end_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
             'worktimes.*.work_hours' => 'sometimes|numeric|required_without_all:worktimes.*.start_time,worktimes.*.end_time',
         ]);
-    
+
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 422);
         }
@@ -65,10 +65,8 @@ class HealthcareProviderWorktimeController extends Controller
                 if ($end < $start) {
                     $end += 24 * 3600; // أضف 24 ساعة
                 }
-    
+
                 $workHours = ($end - $start) / 3600;
-
-
             } else {
                 return $this->errorResponse('يجب إدخال وقت البداية والنهاية أو ساعات العمل.', 422);
             }
@@ -96,50 +94,69 @@ class HealthcareProviderWorktimeController extends Controller
 
 
 
-    public function update(Request $request, $id)
+    // تعريف دالة التحديث التي تأخذ طلبًا ومعرف مقدم الرعاية كمعاملات
+    public function update(Request $request, $healthcareProviderId)
     {
+        // التحقق من صحة البيانات المرسلة مع الطلب
         $validator = Validator::make($request->all(), [
             'worktimes' => 'required|array',
             'worktimes.*.day_name' => 'required|string',
-            'worktimes.*.work_hours' => 'required|integer',
-            'worktimes.*.start_time' => 'required|date_format:H:i',
-            'worktimes.*.end_time' => 'required|date_format:H:i|after:worktimes.*.start_time',
+            'worktimes.*.start_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
+            'worktimes.*.end_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
+            'worktimes.*.work_hours' => 'sometimes|numeric|required_without_all:worktimes.*.start_time,worktimes.*.end_time',
         ]);
 
+        // إذا فشل التحقق من الصحة، إرجاع رسالة خطأ
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 422);
         }
 
-        try {
-            foreach ($request->worktimes as $worktimeData) {
+        // استرجاع جميع سجلات أوقات العمل الحالية لمقدم الرعاية وتجميعها حسب 'day_name'
+        $existingWorktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $healthcareProviderId)->get()->keyBy('day_name');
+
+        // تكرار كل عنصر في مصفوفة 'worktimes' المرسلة مع الطلب
+        foreach ($request->worktimes as $worktimeData) {
+            // تحقق من 'work_hours' وتعيين 'start_time' و 'end_time' ليوم كامل إذا كانت تساوي 24
+            if (isset($worktimeData['work_hours']) && $worktimeData['work_hours'] == 24) {
+                $worktimeData['start_time'] = '00:00';
+                $worktimeData['end_time'] = '23:59';
+                $workHours = 24;
+            } elseif (isset($worktimeData['start_time']) && isset($worktimeData['end_time'])) {
+                // حساب 'work_hours' بناءً على الفرق بين 'start_time' و 'end_time'
                 $start = strtotime($worktimeData['start_time']);
                 $end = strtotime($worktimeData['end_time']);
-                $duration = ($end - $start) / 60; // حساب الفرق بالدقائق
-
-                // التحقق من أن مدة العمل تساوي الفرق بين وقت البداية ووقت النهاية
-                if ($duration !== $worktimeData['work_hours'] * 60) {
-                    return $this->errorResponse('يجب أن يكون الفرق بين وقت البداية ووقت النهاية يساوي مدة العمل المحددة', 422);
+                if ($end < $start) {
+                    $end += 24 * 3600; // أضف 24 ساعة إذا كان 'end_time' أقل من 'start_time'
                 }
+                $workHours = ($end - $start) / 3600;
+            } else {
+                // إرجاع رسالة خطأ إذا لم يتم إدخال 'start_time' و 'end_time' أو 'work_hours'
+                return $this->errorResponse('يجب إدخال وقت البداية والنهاية أو ساعات العمل.', 422);
+            }
 
-                $worktime = HealthcareProviderWorktime::where('healthcare_provider_id', $id)
-                    ->where('day_name', $worktimeData['day_name'])
-                    ->firstOrFail();
-
-                $worktime->update([
-                    'work_hours' => $duration / 60, // تحويل الدقائق إلى ساعات
+            // تحديث السجل إذا كان موجودًا أو إضافة يوم جديد إذا لم يكن موجودًا
+            if (isset($existingWorktimes[$worktimeData['day_name']])) {
+                // تحديث السجل الموجود
+                $existingWorktimes[$worktimeData['day_name']]->update([
+                    'work_hours' => $workHours,
+                    'start_time' => $worktimeData['start_time'],
+                    'end_time' => $worktimeData['end_time'],
+                ]);
+            } else {
+                // إضافة يوم عمل جديد
+                HealthcareProviderWorktime::create([
+                    'healthcare_provider_id' => $healthcareProviderId,
+                    'day_name' => $worktimeData['day_name'],
+                    'work_hours' => $workHours,
                     'start_time' => $worktimeData['start_time'],
                     'end_time' => $worktimeData['end_time'],
                 ]);
             }
-
-            return $this->successResponse(null, 'تم تحديث بيانات أيام العمل بنجاح', 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('worktimes not found', 404);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse('Error querying the database', 500);
         }
-    }
 
+        // إرجاع رسالة نجاح بعد تحديث البيانات أو إضافة الأيام الجديدة بنجاح
+        return $this->successResponse(null, 'تم تحديث بيانات أيام العمل بنجاح', 200);
+    }
 
 
 
@@ -149,10 +166,28 @@ class HealthcareProviderWorktimeController extends Controller
 
 
 
-
-
-
-    public function destroy()
+    // تعريف دالة الحذف التي تأخذ معرف مقدم الرعاية كمعامل
+    public function destroy($healthcareProviderId)
     {
+        // محاولة استرجاع جميع سجلات أوقات العمل لمقدم الرعاية
+        $worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $healthcareProviderId)->get();
+
+        // التحقق من نجاح عملية الاسترجاع
+        if ($worktimes->isEmpty()) {
+            // إرجاع رسالة خطأ إذا لم يتم العثور على سجلات
+            return $this->errorResponse('لم يتم العثور على أيام عمل لمقدم الرعاية المحدد.', 404);
+        }
+
+        // إجراء عملية الحذف
+        $deleteCount = HealthcareProviderWorktime::where('healthcare_provider_id', $healthcareProviderId)->delete();
+
+        // التحقق من نجاح عملية الحذف
+        if ($deleteCount == 0) {
+            // إرجاع رسالة خطأ إذا لم تنجح عملية الحذف
+            return $this->errorResponse('فشل في حذف أيام العمل.', 500);
+        }
+
+        // إرجاع رسالة نجاح بعد حذف البيانات بنجاح
+        return $this->successResponse(null, 'تم حذف بيانات أيام العمل بنجاح', 200);
     }
 }
