@@ -39,14 +39,29 @@ class HealthcareProviderWorktimeController extends Controller
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'worktimes' => 'required|array',
-            'worktimes.*.healthcare_provider_id' => 'required|integer|exists:healthcare_providers,id',
-            'worktimes.*.day_name' => 'required|string',
-            'worktimes.*.start_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
-            'worktimes.*.end_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
-            'worktimes.*.work_hours' => 'sometimes|numeric|required_without_all:worktimes.*.start_time,worktimes.*.end_time',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'worktimes' => 'required|array',
+                'worktimes.*.healthcare_provider_id' => 'required|integer|exists:healthcare_providers,id',
+                'worktimes.*.day_name' => 'required|string',
+                'worktimes.*.start_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
+                'worktimes.*.end_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
+                'worktimes.*.work_hours' => 'sometimes|numeric|required_without_all:worktimes.*.start_time,worktimes.*.end_time',
+            ],
+            [
+                'worktimes.*.day_name.required' => 'يجب تحديدأيام العمل .',
+                'worktimes.*.start_time.required_without' => 'يجب تحديد أوقات العمل.',
+                'worktimes.*.end_time.required_without' => 'يجب تحديد أوقات العمل.',
+                'worktimes.*.work_hours.required_without_all' =>  'يجب تحديد أوقات العمل.',
+            ]
+        );
+
+
+
+
+
+
 
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 422);
@@ -98,13 +113,23 @@ class HealthcareProviderWorktimeController extends Controller
     public function update(Request $request, $healthcareProviderId)
     {
         // التحقق من صحة البيانات المرسلة مع الطلب
-        $validator = Validator::make($request->all(), [
-            'worktimes' => 'required|array',
-            'worktimes.*.day_name' => 'required|string',
-            'worktimes.*.start_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
-            'worktimes.*.end_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
-            'worktimes.*.work_hours' => 'sometimes|numeric|required_without_all:worktimes.*.start_time,worktimes.*.end_time',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'worktimes' => 'required|array',
+                'worktimes.*.day_name' => 'required|string',
+                'worktimes.*.start_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
+                'worktimes.*.end_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
+                'worktimes.*.work_hours' => 'sometimes|numeric|required_without_all:worktimes.*.start_time,worktimes.*.end_time',
+            ],
+            [
+                'worktimes.*.day_name.required' => 'يجب تحديدأيام العمل .',
+                'worktimes.*.start_time.required_without' => 'يجب تحديد أوقات العمل.',
+                'worktimes.*.end_time.required_without' => 'يجب تحديد أوقات العمل.',
+                'worktimes.*.work_hours.required_without_all' =>  'يجب تحديد أوقات العمل.',
+            ]
+
+        );
 
         // إذا فشل التحقق من الصحة، إرجاع رسالة خطأ
         if ($validator->fails()) {
