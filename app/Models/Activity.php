@@ -14,12 +14,14 @@ class Activity extends Model
     public function sessions()
     {
         return $this->belongsToMany(Session::class)
-        ->withPivot('value', 'time');
+            ->withPivot('value', 'time');
     }
-    
+    //_________________________________________________
+
+
+
     public function services()
     {
         return $this->belongsToMany(Service::class, 'activity_service');
     }
-
 }
