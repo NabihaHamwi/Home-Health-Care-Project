@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('relationship_status' , ['أعزب','متزوج','أرمل','مطلق' ,'-' ]);
             $table->integer('experience');
             $table->binary('personal_image')->nullable();
-            $table->string('physical_strength'); //القوة البدنية
+            $table->enum('physical_strength', ['basic', 'advanced', 'professional']); //القوة البدنية
             $table->float('min_working_hours_per_day'); 
             $table->timestamps();
         });

@@ -42,5 +42,23 @@ class UsersTableSeeder extends Seeder
             'email' => 'nabiha@gmail.com',
             'password' => '12345678'
         ]);
+        User::create([
+            'id' => 4,
+            'role' => 'provider',
+            'first_name' => 'Lili',
+            'last_name' => 'pr',
+            'phone_number' => '0933XXXXXX',
+            'email' => 'lili@gmail.com',
+            'password' => '1234567lili'
+        ]);
+        User::create([
+            'id' => 5,
+            'role' => 'provider',
+            'first_name' => 'Lolo',
+            'last_name' => 'pr',
+            'phone_number' => '0933XXXXXX',
+            'email' => 'lolo@gmail.com',
+            'password' => '1234567lolo'
+        ]);
     }
 }
