@@ -9,10 +9,6 @@ class Service extends Model
 {
     use HasFactory;
 
-    public function appointments()
-    {
-        return $this->hasMany(Appointment::class);
-    }
 
 
     public function sessions()
@@ -21,13 +17,24 @@ class Service extends Model
     }
 
 
-    public function activities()
-    {
-        return $this->belongsToMany(Activity::class, 'activity_service');
-    }
+
+    //_____________________________________________
+
+
 
     public function healthcareProviders()
     {
         return $this->belongsToMany(HealthcareProvider::class);
+    }
+
+
+
+    //_______________________________________________
+
+
+
+    public function activities()
+    {
+        return $this->belongsToMany(Activity::class, 'activity_service');
     }
 }

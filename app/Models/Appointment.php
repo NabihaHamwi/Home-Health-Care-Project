@@ -9,11 +9,6 @@ class Appointment extends Model
 {
     use HasFactory;
 
-    // العلاقة many-to-one مع Service
-    public function service()
-    {
-        return $this->belongsTo(Service::class);
-    }
 
     public function patient()
     {
