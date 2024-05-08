@@ -19,7 +19,10 @@ class Appointment extends Model
     {
         return $this->hasMany(Session::class);
     }
-
+    public function services()
+    {
+        return $this->hasMany(Service::class);
+    }
 //     public function activities()
 // {
 //     return $this->hasManyThrough(

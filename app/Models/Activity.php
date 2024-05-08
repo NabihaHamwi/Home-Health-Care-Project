@@ -17,11 +17,9 @@ class Activity extends Model
             ->withPivot('value', 'time');
     }
     //_________________________________________________
-
-
-
-    public function services()
+  
+    public function flags()
     {
-        return $this->belongsToMany(Service::class, 'activity_service');
+        return $this->hasMany(ActivityFlag::class);
     }
 }

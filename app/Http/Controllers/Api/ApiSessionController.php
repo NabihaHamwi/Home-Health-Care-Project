@@ -11,6 +11,7 @@ use App\Models\Service;
 use App\Models\Patient;
 use App\Models\Session;
 use App\Models\Appointment;
+use App\Models\ActivityFlag;
 use App\Models\Activity;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Support\Facades\DB;
@@ -153,37 +154,41 @@ class ApiSessionController extends Controller
 
 
     //_________________________________________________________________________________________________________
-
-
     public function create($appointmentid)
     {
-
         try {
             $appointment = Appointment::findOrFail($appointmentid);
             $serviceId = $appointment->service_id;
             $date = $appointment->appointment_date;
-
-            // استرجاع النشاطات حيث flag يساوي 0 أو يساوي service_id
-            $activities = Activity::where('flag', 0)
-                ->orWhere('flag', $serviceId)
-                ->get(['activity_name']);
-
+    
+            // استرجاع الأعلام المرتبطة بال service_id من جدول activity_flags
+            $flags = ActivityFlag::where('flag', $serviceId)->get();
+    
+            if ($flags->isEmpty()) {
+                return $this->errorResponse('لا توجد أنشطة مرتبطة بهذا العلم.', 404);
+            }
+    
+            // استرجاع أسماء الأنشطة المرتبطة بالأعلام
+            $activitiesNames = $flags->pluck('activity.activity_name');
+    
+            if ($activitiesNames->isEmpty()) {
+                return $this->errorResponse('لا توجد أسماء أنشطة متاحة.', 404);
+            }
+    
             $data = [
                 'appointment_date' => $date,
-                'activities_name' => $activities
+                'activities_name' => $activitiesNames
             ];
-            return $this->successResponse($data, 'Activities retrieved successfully', 200);
-            return $this->successResponse($activities, 'Activities retrieved successfully', 200);
+    
+            return $this->successResponse($data, 'تم استرجاع الأنشطة بنجاح.', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Appointment not found', 404);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse('Error querying the database', 500);
+            return $this->errorResponse('لم يتم العثور على الموعد.', 404);
+        } catch (\Exception $e) {
+            return $this->errorResponse('حدث خطأ غير متوقع.', 500);
         }
     }
-
-
-
-
+    
+    
 
     //___________________________________________________________________________
 
