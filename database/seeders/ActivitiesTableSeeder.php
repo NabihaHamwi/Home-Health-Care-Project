@@ -19,6 +19,7 @@ class ActivitiesTableSeeder extends Seeder
             ['id' => 3, 'activity_name' => 'درجة الوعي'],
             ['id' => 4, 'activity_name' => 'قياس السكر'],
             ['id' => 5, 'activity_name' => 'التمرينات الرّياضيّة'],     
+            ['id' => 6, 'activity_name' => 'العناية بالفم والأسنان'],     
         ];
 
         foreach ($activities as $activity) {

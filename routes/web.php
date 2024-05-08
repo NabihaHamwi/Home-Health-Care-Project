@@ -34,23 +34,23 @@ Route::get('/sessions/summary/{session}', [SessionController::class, 'session_su
 
 
 
-// routes to the ServiceController
-Route::get('/services', [ServiceController::class, 'index'])->name(name: 'services.index');
-Route::get('/services/create', [ServiceController::class, 'create'])->name(name: 'services.create');
-Route::post('/services', [ServiceController::class, 'store'])->name(name: 'services.store');
-Route::get('/services/{service}', [ServiceController::class, 'show'])->name(name: 'services.show');
-Route::get('/services/{service}/edit', [ServiceController::class, 'edit'])->name(name: 'services.edit');
-Route::put('/services/{service}', [ServiceController::class, 'update'])->name(name: 'services.update');
-Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name(name: 'services.destroy');
+// // routes to the ServiceController
+// Route::get('/services', [ServiceController::class, 'index'])->name(name: 'services.index');
+// Route::get('/services/create', [ServiceController::class, 'create'])->name(name: 'services.create');
+// Route::post('/services', [ServiceController::class, 'store'])->name(name: 'services.store');
+// Route::get('/services/{service}', [ServiceController::class, 'show'])->name(name: 'services.show');
+// Route::get('/services/{service}/edit', [ServiceController::class, 'edit'])->name(name: 'services.edit');
+// Route::put('/services/{service}', [ServiceController::class, 'update'])->name(name: 'services.update');
+// Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name(name: 'services.destroy');
 
-//routes to the HealthcareProviderController
-Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');
-Route::get('/providers/create', [HealthcareProviderController::class, 'create']) -> name(name:'providers.create');
-Route::post('/providers', [HealthcareProviderController::class, 'store']) -> name(name:'providers.store');
-Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show']) -> name(name:'providers.show');
-Route::get('/providers/{provider}/edit', [HealthcareProviderController::class, 'edit']) -> name(name:'providers.edit');
-Route::put('/providers/{provider}', [HealthcareProviderController::class, 'update']) -> name(name:'providers.update');
-Route::delete('/providers/{provider}', [HealthcareProviderController::class, 'destroy']) -> name(name:'providers.destroy');
+// //routes to the HealthcareProviderController
+// Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');
+// Route::get('/providers/create', [HealthcareProviderController::class, 'create']) -> name(name:'providers.create');
+// Route::post('/providers', [HealthcareProviderController::class, 'store']) -> name(name:'providers.store');
+// Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show']) -> name(name:'providers.show');
+// Route::get('/providers/{provider}/edit', [HealthcareProviderController::class, 'edit']) -> name(name:'providers.edit');
+// Route::put('/providers/{provider}', [HealthcareProviderController::class, 'update']) -> name(name:'providers.update');
+// Route::delete('/providers/{provider}', [HealthcareProviderController::class, 'destroy']) -> name(name:'providers.destroy');
 
-//route to search page
-Route::get('/search', [SearchController::class, 'index']) -> name(name: 'search.index');
+// //route to search page
+// Route::get('/search', [SearchController::class, 'index']) -> name(name: 'search.index');

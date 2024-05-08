@@ -30,23 +30,33 @@ Route::group(
     [],
     function ($router) {
         //عرض جميع جلسات المرضى للادمن
-        Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
+        //   Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
         //عرض جميع جلسات المريض
-        Route::get('/sessions/patientsessoins/{patient}', [ApiSessionController::class, 'patientSessions'])->name('sessions.patientsession');
+        //    Route::get('/sessions/patientsessoins/{patient}', [ApiSessionController::class, 'patientSessions'])->name('sessions.patientsession');
+
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
         // انشاء جلسة
         Route::get('/sessions/create/{appointment}', [ApiSessionController::class, 'create'])->name('sessions.create');
         //عرض جلسة للمريض
         Route::get('/sessions/{session}', [ApiSessionController::class, 'show'])->name('sessions.show');
-        //عرض ملخص الجلسة
-        Route::get('sessions/summary/{patient_id}', [ApiSessionController::class, 'session_summary'])->name('sessions.summary');
+        //عرض لوحة المتابعة 
+        Route::get('sessions/panel/{patient_id}', [ApiSessionController::class, 'monitoring_panel'])->name('sessions.panel');
         //تخزين بيانات جلسة
         Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
         //عرض واجهة التعديل على الجلسة
-        Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->name('sessions.edit');
+        // Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->name('sessions.edit');
+
+
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //تحديث بيانات الجلسة
         Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name('sessions.update');
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
         //حذف بيانات الجلسة 
-        Route::delete('/sessions/{session}', [ApiSessionController::class, 'destroy'])->name('sessions.destroy');
+        // Route::delete('/sessions/{session}', [ApiSessionController::class, 'destroy'])->name('sessions.destroy');
     }
 );
 
@@ -80,14 +90,18 @@ Route::group(
     function ($router) {
         //عرض جميع المرضى (بعض المعلومات) للادمن
         Route::get('/patients', [ApiPatientController::class, 'index'])->name('patients.index');
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //عرض معلومات السجل الطبي لمريض معين
         Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
         //انشاء مريض من فبل المستخدم
         Route::post('/patients', [ApiPatientController::class, 'store'])->name('patients.store');
-        //  واجهة عرض معلومات المريض قبل التعديل
-        Route::get('/patients/{patient}/edit', [ApiPatientController::class, 'edit'])->name('patients.edit');
         //تحديث المعلومات 
         Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        //  واجهة عرض معلومات المريض قبل التعديل
+        //  Route::get('/patients/{patient}/edit', [ApiPatientController::class, 'edit'])->name('patients.edit');
+
     }
 );
 
@@ -99,6 +113,7 @@ Route::group(
 Route::group(
     [],
     function ($router) {
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // عرض ايام عمل مقدم الرعاية
         Route::get('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
         // تعبئة ايام العمل
@@ -107,6 +122,7 @@ Route::group(
         Route::put('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'update'])->name('careprovidersworktimes.update');
         // حذف ايام العمل وإعادة تعبئتها من جديد
         Route::delete('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'destroy'])->name('careprovidersworktimes.destroy');
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
 );
 

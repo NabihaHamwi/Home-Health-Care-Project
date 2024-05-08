@@ -61,7 +61,7 @@ class SessionResource extends JsonResource
                 // 'activities' => ActivityResource::collection($this->activities),
                 'activities' => $activitiesInfo,
             ];
-        } else if ($request->route()->named('sessions.summary')) {
+        } else if ($request->route()->named('sessions.panel')) {
             foreach ($this->activities as $activity) {
                 $activitiesInfo[] = [
                     'name' => $activity->activity_name,
