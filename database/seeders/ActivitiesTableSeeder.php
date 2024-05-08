@@ -13,8 +13,17 @@ class ActivitiesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        Activity::create([
-            //
-        ]);
+        $activities = [
+            ['id' => 1, 'activity_name' => 'ضغط الدم'],
+            ['id' => 2, 'activity_name' => 'درجة الحرارة'],
+            ['id' => 3, 'activity_name' => 'درجة الوعي'],
+            ['id' => 4, 'activity_name' => 'قياس السكر'],
+            ['id' => 5, 'activity_name' => 'التمرينات الرّياضيّة'],     
+        ];
+
+        foreach ($activities as $activity) {
+            Activity::create($activity);
+        }
+        
     }
 }

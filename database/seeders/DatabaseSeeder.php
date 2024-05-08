@@ -28,7 +28,11 @@ class DatabaseSeeder extends Seeder
             HealthcareProviderSkillTableSeeder::class,
             PatientsTableSeeder::class,
             AppointmentsTableSeeder::class,
-            SessionsTableSeeder::class
+            SessionsTableSeeder::class,
+            ActivitiesTableSeeder::class,
+            ActivitySessionTableSeeder::class,
+            HealthcareProviderWorktimesTableSeeder::class,
+            ActivityFlagTableSeeder::class,
         ]);
     }
 }
