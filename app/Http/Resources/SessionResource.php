@@ -45,7 +45,7 @@ class SessionResource extends JsonResource
             ];
         } else if ($request->route()->named('sessions.show')) {
             //    (sessions) نحاول الوصول إلى الخصائص (النشاط) في الكائن الحالي 
-            $activitiesInfo= []; 
+            $activitiesInfo = [];
             foreach ($this->activities as $activity) {
                 $activitiesInfo[] = [
                     'name' => $activity->activity_name,
@@ -97,7 +97,9 @@ class SessionResource extends JsonResource
             ];
         } else if ($request->route()->named('sessions.edit')) {
 
+
             //    (sessions) نحاول الوصول إلى الخصائص (النشاط) في الكائن الحالي   
+            $activitiesInfo = [];
             foreach ($this->activities as $activity) {
                 $activitiesInfo[] = [
                     'name' => $activity->activity_name,

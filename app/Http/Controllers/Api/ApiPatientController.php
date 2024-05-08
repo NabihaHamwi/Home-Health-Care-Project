@@ -50,10 +50,14 @@ class ApiPatientController extends Controller
 
     public function store(request $request)
     {
-
+        // فحص إذا كان المريض موجود بالفعل في قاعدة البيانات
+        $existingPatient = Patient::where('full_name', $request->full_name)->first();
+        if ($existingPatient) {
+            return $this->errorResponse('المريض لديه سجل بالفعل.', 409); // كود الحالة 409 يعني "Conflict"
+        }
         $validator = Validator::make(
             $request->all(),
-             [
+            [
                 'full_name' => 'required|min:3|max:10',
                 'gender' => 'required|in:أنثى,ذكر',
                 'birth_date' => 'required|date',
@@ -131,7 +135,7 @@ class ApiPatientController extends Controller
             return $this->successResponse('Patient created successfully', 201);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Patient not found', 404);
-        } 
+        }
     }
 
 
@@ -222,9 +226,9 @@ class ApiPatientController extends Controller
             $patient->updated_at = now();
 
             $patient->save();
-          //  $patientupdate = Patient::findOrFail($sessionId);
+            //  $patientupdate = Patient::findOrFail($sessionId);
 
-            return $this->successResponse(new PatientResource ($patient), 'Patient updated successfully', 200);
+            return $this->successResponse(new PatientResource($patient), 'Patient updated successfully', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Patient not found', 404);
         } catch (\Exception $e) {

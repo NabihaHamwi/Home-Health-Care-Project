@@ -11,6 +11,7 @@ trait ApiResponseTrait
     const HTTP_METHOD_NOT_ALLOWED = 405;
     const HTTP_UNPROCESSABLE_ENTITY = 422;
     const HTTP_METHOD_ERROR_QUERY = 500;
+    const HTTP_CONFLICT = 409;
 
 
     public function errorResponse($message, $code)
@@ -40,6 +41,10 @@ trait ApiResponseTrait
                 'error_type' => 'wrong query',
                 'solution' => 'استعلام خاطىء يرجى إعادة المحاولة مرة أخرى.'
             ],
+            // ... تفاصيل الأخطاء الأخرى
+            self::HTTP_CONFLICT => [
+                'error_type' => 'Conflict',
+                'solution' => 'البيانات المُرسلة تتعارض مع البيانات الحالية، تحقق من البيانات وأعد المحاولة.'],
             self::HTTP_UNPROCESSABLE_ENTITY => [
                 'error_type' => 'Unprocessable Entity',
                 'solution' => 'البيانات المُرسلة لا يمكن معالجتها، تحقق من البيانات وأعد المحاولة.'
