@@ -47,4 +47,11 @@ class HealthcareProviderController extends Controller
         }
         return response($response);
     }
+public function 
+
+
+
+
+
+
 }
