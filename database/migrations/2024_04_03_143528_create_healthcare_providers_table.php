@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('experience');
             $table->binary('personal_image')->nullable();
             $table->string('physical_strength'); //القوة البدنية
+            $table->float('min_working_hours_per_day'); 
             $table->timestamps();
         });
     }

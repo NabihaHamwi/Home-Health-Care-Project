@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('full_name');
             $table->enum('gender' , ['أنثى', 'ذكر'] ); 
             $table->date('birth_date');
-            $table->enum('relationship_status' , ['أعزب','متزوج','أرمل','مطلق']);
+            $table->enum('relationship_status' , ['أعزب','متزوج','أرمل','مطلق' ,'-' ]);
             $table->string('address');
             $table->string('phone_number');
             $table->decimal('weight', 5, 2); // إضافة وزن المريض
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->text('current_medications')->nullable(); //الدواء الحالي
             $table->text('allergies')->nullable(); // حساسيات
             $table->text('family_medical_history')->nullable(); //التاريخ العائلي
-            $table->enum('smoker' , ['غير مدخن','مدخن']);
+            $table->boolean('smoker')->default(false);
             $table->string('addiction')->nullable(); //  مدمن
             $table->string('exercise_frequency')->nullable(); //التمارين الرياضبة
             $table->string('diet_description')->nullable(); //وصف النظام الغذائي
