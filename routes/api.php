@@ -97,7 +97,6 @@ Route::group(
 //___________________________________________________________________
 
 
-
 Route::group(
     [],
     function ($router) {
@@ -119,6 +118,11 @@ Route::group(
 
 
 
+Route::group(
+    [],
+    function ($router) {
+    }
+);
 
 
 
