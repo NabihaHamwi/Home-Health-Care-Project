@@ -24,7 +24,6 @@ return new class extends Migration
             $table->unsignedTinyInteger('appointment_rating')->nullable(); // تقييم الموعد
             $table->enum('caregiver_status', ['حضور', 'غياب' , '-']); // حالة مقدم الرعاية
             $table->text('complaint', 1000)->nullable(); // يسمح بحتى 1000 حرف//    شكاوي المريض  
-
             $table->timestamps();
         });
     }

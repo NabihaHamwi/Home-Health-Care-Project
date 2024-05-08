@@ -15,7 +15,7 @@ return new class extends Migration
            
             $table->timestamps();
             $table->id();
-            $table->string('role');
+            $table->enum('role', ['admin', 'provider', 'user']);
             $table->string('first_name');
             $table->string('last_name');
             $table->string('phone_number');
