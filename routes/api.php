@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\ApiSurveyController;
 use App\Http\Controllers\Api\ApiPatientController;
+use App\Http\Controllers\Api\HealthcareProviderController;
 use App\Http\Controllers\Api\HealthcareProviderWorktimeController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
@@ -146,5 +147,5 @@ Route::get('/services', [ServiceController::class, 'index'])->name(name: 'servic
 //Api for the result of search (care providers)
 Route::get('/search/result', [SearchController::class, 'search'])->name(name: 'search.result');
 
-
-//Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');
+//Api for show all providers (just for make sure what we have in database)
+Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');

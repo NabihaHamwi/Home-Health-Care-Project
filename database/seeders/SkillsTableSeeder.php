@@ -15,11 +15,59 @@ class SkillsTableSeeder extends Seeder
     {
         Skill::create([
             'id' => 1,
-            'skill_name' => 'الصبر'
+            'skill_name' => 'الإسعافات الأوليّة'
         ]);
         Skill::create([
             'id' => 2,
+            'skill_name' => 'القدرة علر أخذ الحقن الوريدية'
+        ]);
+        Skill::create([
+            'id' => 3,
+            'skill_name' => 'إدخال المريض إلى الحمام (نظافة + استحمام)'
+        ]);
+        Skill::create([
+            'id' => 4,
+            'skill_name' => 'العناية باللباس'
+        ]);
+        Skill::create([
+            'id' => 5,
+            'skill_name' => 'العناية بالجروح والالتهابات'
+        ]);
+        Skill::create([
+            'id' => 6,
+            'skill_name' => 'العناية بالفم والأسنان'
+        ]);
+        Skill::create([
+            'id' => 7,
+            'skill_name' => 'العناية بالفسطرة البولية'
+        ]);
+        Skill::create([
+            'id' => 8,
+            'skill_name' => 'العناية بالنظافة الشخصيّة للمريض'
+        ]);
+        Skill::create([
+            'id' => 9,
+            'skill_name' => 'العناية بالمرضى طريحي الفراش'
+        ]);
+        Skill::create([
+            'id' => 10,
+            'skill_name' => 'إطعام المريض'
+        ]);
+        Skill::create([
+            'id' => 11,
+            'skill_name' => 'الصبر'
+        ]);
+        Skill::create([
+            'id' => 12,
             'skill_name' => 'المرونة'
+        ]);
+        Skill::create([
+            'id' => 13,
+            'skill_name' => 'الدعم النفسي'
+        ]);
+        Skill::create([
+            'id' => 14,
+            'skill_name' => 'مهارات التواصل مع كبار السن'
         ]);
     }
 }
