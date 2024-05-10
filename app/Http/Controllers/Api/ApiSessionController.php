@@ -117,7 +117,7 @@ class ApiSessionController extends Controller
 
 
     //عرض ملخص الجلسة
-    public function session_summary($patient_id)
+    public function monitoring_panel($patient_id)
     {
         try {
             // البحث عن اخر موعد للمريض حيث مقدم الرعاية كان حاضرا 
@@ -242,20 +242,20 @@ class ApiSessionController extends Controller
 
 
 
-    public function edit($session_id)
-    {
-        try {
-            // التحقق من وجود جلسة
-            $session = Session::with(['appointment', 'activities'])->findOrFail($session_id);
+    // public function edit($session_id)
+    // {
+    //     try {
+    //         // التحقق من وجود جلسة
+    //         $session = Session::with(['appointment', 'activities'])->findOrFail($session_id);
 
-            return $this->successResponse(new SessionResource($session), 'Session details retrieved successfully');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Session not found', 404);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse('Error query', 500);
-        }
-    }
-
+    //         return $this->successResponse(new SessionResource($session), 'Session details retrieved successfully');
+    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+    //         return $this->errorResponse('Session not found', 404);
+    //     } catch (\Illuminate\Database\QueryException $e) {
+    //         return $this->errorResponse('Error query', 500);
+    //     }
+    // }
+   
 
 
     //______________________________________________________________________________________

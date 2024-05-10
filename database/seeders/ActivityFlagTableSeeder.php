@@ -43,5 +43,10 @@ class ActivityFlagTableSeeder extends Seeder
             'activity_id' => 5,
             'flag' => 2,
         ]);
+        ActivityFlag::create([
+            'id' => 7,
+            'activity_id' => 6,
+            'flag' => 3,
+        ]);
     }
 }

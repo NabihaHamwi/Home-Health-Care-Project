@@ -37,7 +37,7 @@ class ApiPatientController extends Controller
     {
         try {
             $patient = Patient::findOrFail($sessionId);
-            return $this->successResponse(new PatientResource($patient), 'Session retrieved successfully', 200);
+            return $this->successResponse(new PatientResource($patient), 'Patient retrieved successfully', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Patient not found', 404);
         } catch (\Illuminate\Database\QueryException $e) {
@@ -144,17 +144,17 @@ class ApiPatientController extends Controller
 
 
 
-    public function edit($sessionId)
-    {
-        try {
-            $patient = Patient::findOrFail($sessionId);
-            return $this->successResponse(new PatientResource($patient), 'Patient retrieved successfully', 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Patient not found', 404);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse('Error querying the database', 500);
-        }
-    }
+    // public function edit($sessionId)
+    // {
+    //     try {
+    //         $patient = Patient::findOrFail($sessionId);
+    //         return $this->successResponse(new PatientResource($patient), 'Patient retrieved successfully', 200);
+    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+    //         return $this->errorResponse('Patient not found', 404);
+    //     } catch (\Illuminate\Database\QueryException $e) {
+    //         return $this->errorResponse('Error querying the database', 500);
+    //     }
+    // }
 
 
 
