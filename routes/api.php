@@ -149,3 +149,6 @@ Route::get('/search/result', [SearchController::class, 'search'])->name(name: 's
 
 //Api for show all providers (just for make sure what we have in database)
 Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');
+
+//Api for show info about one care provider
+Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show']) -> name(name: 'providers.show');

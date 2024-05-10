@@ -16,7 +16,8 @@ class ServiceResource extends JsonResource
     {
         if ($request->route()->named('search.index') ||
             $request->route()->named('search.result') || 
-            $request->route()->named('providers.index'))
+            $request->route()->named('providers.index') ||
+            $request->route()->named('providers.show'))
             return [
                 'id' => $this->id,
                 'name' => $this->name
@@ -27,6 +28,5 @@ class ServiceResource extends JsonResource
                 'name' => $this->name,
                 'description' => $this->description
             ];
-        return ['not found route name'];
     }
 }
