@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             ServicesTableSeeder::class,
             SkillsTableSeeder::class,
             HealthcareProviderSkillTableSeeder::class,
+            HealthcareProviderServiceTableSeeder::class,
             PatientsTableSeeder::class,
             AppointmentsTableSeeder::class,
             SessionsTableSeeder::class,

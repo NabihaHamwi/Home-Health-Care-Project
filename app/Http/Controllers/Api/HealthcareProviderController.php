@@ -9,30 +9,14 @@ use Illuminate\Http\Request;
 
 class HealthcareProviderController extends Controller
 {
-    public function index(Request $request)
+    use ApiResponseTrait;
+    
+    public function index()
     {
         // $healthcareproviders = HealthcareProviderResource::collection();
-        $providers = HealthcareProviderResource::collection(
-            HealthcareProvider::when($request->input('service'), function ($query, $services) { // الفلترة حسب الخدمات
-                return $query->whereHas('services', function ($q) use ($services) {
-                    $q->whereIn('id', $services);
-                });
-            })->when($request->input('gender'), function ($query, $gender) { // حسب الجنس
-                return $query->whereIn('gender', $gender);
-            })->when($request->age, function ($query, $age) { // حسب العمر
-                return $query->where('age', '<=', $age);
-            })->when($request->input('physicalStrength'), function ($query, $strength) { // حسب القوة البدنية
-                return $query->whereIn('physical_strength', $strength);
-            })->when($request->experience, function ($query, $experience) { // حسب الخبرة
-                return $query->where('experience', '>=', $experience);
-            })->when($request->input('skill'), function ($query, $skills) { // حسب المهارات
-                return $query->whereHas('skills', function ($q) use ($skills) {
-                    $q->whereIn('id', $skills);
-                });
-            })->get()
-        );
-
-        if ($providers->isEmpty()) {
+        $providers = HealthcareProviderResource::collection(HealthcareProvider::all());
+        // @dd($providers);   
+            if ($providers->isEmpty()) {
             $response = [
                 'msg' => 'providers not found',
                 'status' => 404,
@@ -47,11 +31,17 @@ class HealthcareProviderController extends Controller
         }
         return response($response);
     }
-public function 
-
-
-
-
-
-
+    
+    public function show($provider_id){
+        try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
+            $provider = HealthcareProvider::findOrFail($provider_id);
+            return $this->successResponse(new HealthcareProviderResource($provider), 'Provider details retrieved successfully');
+        } 
+        catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Provider not found', 404);
+        } 
+        catch (\Illuminate\Database\QueryException $e) {
+            return $this->errorResponse('erorr query', 500);
+        }
+    }
 }

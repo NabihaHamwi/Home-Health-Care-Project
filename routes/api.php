@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ApiSurveyController;
 use App\Http\Controllers\Api\ApiPatientController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HealthcareProviderWorktimeController;
+use App\Http\Controllers\Api\HealthcareProviderController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
@@ -131,16 +132,6 @@ Route::group(
 
 
 //_____________________________________________________________________
-
-
-
-Route::group(
-    [],
-    function ($router) {
-    }
-);
-
-//______________________________________________________________________
 
 
 
