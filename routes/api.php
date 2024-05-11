@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\ApiSurveyController;
 use App\Http\Controllers\Api\ApiPatientController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HealthcareProviderWorktimeController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
@@ -139,6 +140,22 @@ Route::group(
     }
 );
 
+//______________________________________________________________________
+
+
+
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'auth'
+], function ($router) {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::get('/user-profile', [AuthController::class, 'userProfile']);    
+});
+
+//___________________________________________________________________________
 
 
 
