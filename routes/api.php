@@ -171,8 +171,8 @@ Route::get('/services', [ServiceController::class, 'index'])->name(name: 'servic
 //Api for the result of search (care providers)
 Route::get('/search/result', [SearchController::class, 'search'])->name(name: 'search.result');
 
-
-//Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');
+//Api for show all providers (just for testing)
+Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');
 
 //Api for show info about one care provider
 Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show']) -> name(name: 'providers.show');
