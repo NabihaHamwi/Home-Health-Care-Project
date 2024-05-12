@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\ApiSurveyController;
 use App\Http\Controllers\Api\ApiPatientController;
+use App\Http\Controllers\Api\AppointmentsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HealthcareProviderWorktimeController;
 use App\Http\Controllers\Api\HealthcareProviderController;
@@ -172,3 +173,9 @@ Route::get('/search/result', [SearchController::class, 'search'])->name(name: 's
 
 
 //Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');
+
+//Api for show info about one care provider
+Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show']) -> name(name: 'providers.show');
+
+//Api for show the available days in week
+Route::get('/available-days/{provider}', [AppointmentsController::class, 'show_available_days']) -> name(name: 'appointment.show_available_days');
