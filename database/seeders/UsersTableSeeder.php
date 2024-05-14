@@ -18,8 +18,8 @@ class UsersTableSeeder extends Seeder
         User::create([
             'id' => 1,
             'role' => 'admin',
-            'first_name' => 'Sara',
-            'last_name' => 'Mlla',
+            'first_name' => 'سارة',
+            'last_name' => 'ملا',
             'phone_number' => '0933XXXXXX',
             'email' => 'sara@gmail.com',
             'password' => '123456'
@@ -27,47 +27,83 @@ class UsersTableSeeder extends Seeder
         User::create([
             'id' => 2,
             'role' => 'provider',
-            'first_name' => 'Laila',
-            'last_name' => 'Danoun',
+            'first_name' => 'أحمد',
+            'last_name' => 'شاهين',
             'phone_number' => '0933XXXXXX',
-            'email' => 'laila@gmail.com',
+            'email' => 'Shaheen@gmail.com',
             'password' => '1234567'
         ]);
         User::create([
             'id' => 3,
-            'role' => 'user',
-            'first_name' => 'Nabiha',
-            'last_name' => 'Hamwi',
-            'phone_number' => '0933XXXXXX',
-            'email' => 'nabiha@gmail.com',
-            'password' => '12345678'
-        ]);
-        User::create([
-            'id' => 4,
             'role' => 'provider',
-            'first_name' => 'Lili',
-            'last_name' => 'pr',
+            'first_name' => 'أنور',
+            'last_name' => 'فنيش',
             'phone_number' => '0933XXXXXX',
-            'email' => 'lili@gmail.com',
-            'password' => '1234567lili'
+            'email' => 'anwarfi23@gmail.com',
+            'password' => '1234567fi'
         ]);
         User::create([
             'id' => 5,
             'role' => 'provider',
-            'first_name' => 'Lolo',
-            'last_name' => 'pr',
+            'first_name' => 'أنس',
+            'last_name' => 'محمد',
             'phone_number' => '0933XXXXXX',
-            'email' => 'lolo@gmail.com',
-            'password' => '1234567lolo'
+            'email' => 'AnasMd@gmail.com',
+            'password' => '1234567'
         ]);
         User::create([
             'id' => 6,
             'role' => 'provider',
-            'first_name' => 'Soso',
-            'last_name' => 'km',
+            'first_name' => 'أيمن',
+            'last_name' => 'سعود',
             'phone_number' => '0936XXXXXX',
-            'email' => 'soso@gmail.com',
-            'password' => '1234567soso'
+            'email' => 'Aymansu@gmail.com',
+            'password' => '1234567An'
+        ]);
+        User::create([
+            'id' => 7,
+            'role' => 'provider',
+            'first_name' => 'تهاني',
+            'last_name' => 'الفرا',
+            'phone_number' => '0933XXXXXX',
+            'email' => 'alfarra@gmail.com',
+            'password' => '1234567'
+        ]);
+        User::create([
+            'id' => 8,
+            'role' => 'provider',
+            'first_name' => 'تهاني',
+            'last_name' => 'الفرا',
+            'phone_number' => '0933XXXXXX',
+            'email' => 'alfarra@gmail.com',
+            'password' => '1234567'
+        ]);
+        User::create([
+            'id' => 9,
+            'role' => 'user',
+            'first_name' => 'ريما',
+            'last_name' => 'تُرماني',
+            'phone_number' => '0936XXXXXX',
+            'email' => 'rema@gmail.com',
+            'password' => '1234567roro'
+        ]);
+        User::create([
+            'id' => 10,
+            'role' => 'user',
+            'first_name' => 'منى',
+            'last_name' => 'دلال',
+            'phone_number' => '0936XXXXXX',
+            'email' => 'mona@gmail.com',
+            'password' => '1234567mona'
+        ]);
+        User::create([
+            'id' => 11,
+            'role' => 'user',
+            'first_name' => 'فايز',
+            'last_name' => 'موالدي',
+            'phone_number' => '0936XXXXXX',
+            'email' => 'foz@gmail.com',
+            'password' => '1234567foz'
         ]);
     }
 }
