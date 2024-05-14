@@ -60,5 +60,14 @@ class UsersTableSeeder extends Seeder
             'email' => 'lolo@gmail.com',
             'password' => '1234567lolo'
         ]);
+        User::create([
+            'id' => 6,
+            'role' => 'provider',
+            'first_name' => 'Soso',
+            'last_name' => 'km',
+            'phone_number' => '0936XXXXXX',
+            'email' => 'soso@gmail.com',
+            'password' => '1234567soso'
+        ]);
     }
 }
