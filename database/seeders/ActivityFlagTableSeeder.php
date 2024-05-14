@@ -13,46 +13,63 @@ class ActivityFlagTableSeeder extends Seeder
      */
     public function run(): void
     {
+        /*
+       service_id:
+       1: تمريض 
+       2: علاج فيزيائي
+       3: مرافق صحي  
+        */
+
         ActivityFlag::create([
             'id' => 1,
-            'activity_id' => 1,
-            'flag' => 1,
+            'activity_id' => 1, // ضغط الدم 
+            'flag' => 1, // تمريض
         ]);
         ActivityFlag::create([
             'id' => 2,
-            'activity_id' => 1,
-            'flag' => 3,
+            'activity_id' => 1, // ضغط الدم
+            'flag' => 2, // علاج فيزيائي
         ]);
         ActivityFlag::create([
             'id' => 3,
-            'activity_id' => 1,
-            'flag' => 3,
+            'activity_id' => 1,  // ضغط الدم 
+            'flag' => 3, // مرافق صحي
         ]);
         ActivityFlag::create([
             'id' => 4,
-            'activity_id' => 2,
-            'flag' => 1,
+            'activity_id' => 2, //درجة الحرارة
+            'flag' => 1, // تمريض 
         ]);
         ActivityFlag::create([
             'id' => 5,
+            'activity_id' => 2, 
+            'flag' => 2,
+        ]);
+        ActivityFlag::create([
+            'id' => 6,
             'activity_id' => 2,
             'flag' => 3,
         ]);
         ActivityFlag::create([
-            'id' => 6,
-            'activity_id' => 5,
-            'flag' => 2,
+            'id' => 7,
+            'activity_id' => 3,
+            'flag' => 1,
         ]);
         ActivityFlag::create([
-            'id' => 7,
-            'activity_id' => 6,
+            'id' => 8,
+            'activity_id' => 3,
             'flag' => 3,
         ]);
 
         ActivityFlag::create([
-            'id' => 8,
-            'activity_id' => 6,
-            'flag' => 3,
+            'id' => 9,
+            'activity_id' => 4, // قياس السكر
+            'flag' => 1,
+        ]);
+        ActivityFlag::create([
+            'id' => 10,
+            'activity_id' => 4,
+            'flag' =>2,
         ]);
         ActivityFlag::create([
             'id' => 9,

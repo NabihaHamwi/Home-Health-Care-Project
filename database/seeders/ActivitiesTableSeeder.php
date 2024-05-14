@@ -31,7 +31,7 @@ class ActivitiesTableSeeder extends Seeder
             ['id' => 15, 'activity_name' => 'الإجراءات المتخذة للسلامة'],
             ['id' => 16, 'activity_name' => 'الأعراض التي تمت ملاحظتها'],
             ['id' => 17, 'activity_name' => 'قياس وزن المريض'],
-            ['id' => 18, 'activity_name' => 'قياس  المريض'],
+            ['id' => 18, 'activity_name' => 'تمارين الاسترخاء'],
             ['id' => 19, 'activity_name' => 'التحاليل المخبرية'],
             ['id' => 20, 'activity_name' => 'تعزيز التأقلم الفعال'], //التأقلم على المرض
             ['id' => 21, 'activity_name' => 'معدل النبض'],
@@ -51,6 +51,7 @@ class ActivitiesTableSeeder extends Seeder
             ['id' => 35, 'activity_name' => 'تمارين تحسين الثبات'],//للعلاج الفيزيائي
             ['id' => 36, 'activity_name' => 'طريقة العلاج'],
             ['id' => 37, 'activity_name' => 'تمارين الدعم النفسي'],
+            ['id' => 38, 'activity_name' => 'معدل التنفس'],
 
         ];
 
