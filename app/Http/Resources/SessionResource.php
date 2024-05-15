@@ -44,7 +44,7 @@ class SessionResource extends JsonResource
                 'sessions' => $sessionsDetails,
             ];
         } else if ($request->route()->named('sessions.show')) {
-            //    (sessions) نحاول الوصول إلى الخصائص (النشاط) في الكائن الحالي 
+            // (sessions) نحاول الوصول إلى الخصائص (النشاط) في الكائن الحالي 
             $activitiesInfo = [];
             foreach ($this->activities as $activity) {
                 $activitiesInfo[] = [
@@ -55,6 +55,8 @@ class SessionResource extends JsonResource
             }
 
             return [
+                'patient_id' => $this->appointment->patient_id,
+                'patient_name' => $this->patient_name,
                 'appointment_date' => $this->appointment->appointment_date,
                 'session_start_time' => $this->start_time,
                 'session_observation' => $this->observation,
@@ -71,6 +73,7 @@ class SessionResource extends JsonResource
             }
 
             return [
+                'patient_name' => $this->patient_name,
                 'appointment_date' => $this->appointment->appointment_date,
                 'session_start_time' => $this->start_time,
                 // 'session_duration' => $this->duration,
@@ -93,6 +96,13 @@ class SessionResource extends JsonResource
                 'observation' => $this->observation,
                 'duration' => $this->duration,
                 'activities' => $activities,
+
+            ];
+        } else if ($request->route()->named('sessions.create')) {
+            return [
+                'appointment_date' => $this->appointment_date,
+                'patient_name' => $this->patient_name
+
 
             ];
         } else if ($request->route()->named('sessions.edit')) {

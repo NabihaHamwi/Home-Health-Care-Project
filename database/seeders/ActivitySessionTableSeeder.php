@@ -14,14 +14,12 @@ class ActivitySessionTableSeeder extends Seeder
     public function run(): void
     {
         ActivitySession::create([
-            'id' => 1,
             'session_id' => 1,
             'activity_id' => 1,
             'value' => '12, 8',
             'time' => '01:15:00'
         ]);
         ActivitySession::create([
-            'id' => 2,
             'session_id' => 1,
             'activity_id' => 2,
             'value' => '35 degree',
