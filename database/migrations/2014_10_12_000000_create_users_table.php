@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
            
-            $table->timestamps();
             $table->id();
             $table->enum('role', ['admin', 'provider', 'user']);
             $table->string('first_name');
@@ -23,7 +22,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-   
+            $table->timestamps();
+
         });
     }
 
