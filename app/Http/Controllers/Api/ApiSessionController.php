@@ -104,6 +104,11 @@ class ApiSessionController extends Controller
     {
         try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
             $session = Session::with(['appointment', 'activities'])->findOrFail($session_id);
+            $patient_id = $session->appointment->patient_id;
+            $patient_name = Patient::where('id', $patient_id)->firstOrFail()->full_name;
+            // إضافة patient_name كخاصية لكائن session
+            $session->patient_name = $patient_name;
+            @dd($session);
             return $this->successResponse(new SessionResource($session), 'Session details retrieved successfully');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Sessions not found', 404);
@@ -116,7 +121,7 @@ class ApiSessionController extends Controller
     //_______________________________________________________________________________________
 
 
-    //عرض ملخص الجلسة
+    //عرض لوحةالمتابعة
     public function monitoring_panel($patient_id)
     {
         try {
@@ -124,8 +129,8 @@ class ApiSessionController extends Controller
             $latestAppointment = Appointment::where('patient_id', $patient_id)
                 ->where('caregiver_status', 'حضور')
                 ->latest('id')
-                ->first();
-
+                ->firstOrFail();
+            $patient_name = Patient::where('id', $patient_id)->firstOrFail()->full_name;
             // وجودها ضروري لانه هي يلي بترمي الاستثناء في حال المتحول رجع قيمة null
             if (!$latestAppointment) {
                 return $this->errorResponse('No appointments found for the patient', 404);
@@ -135,7 +140,9 @@ class ApiSessionController extends Controller
             $latestSession = $latestAppointment->sessions()
                 ->latest('id')
                 ->with(['activities'])
-                ->first();
+                ->firstOrFail();
+            $latestSession->patient_name = $patient_name;
+            //@dd($latestSession);
             // وجودها ضروري لانه هي يلي بترمي الاستثناء في حال المتحول رجع قيمة null
             if (!$latestSession) {
                 return $this->errorResponse('No sessions found for the latest appointment', 404);
@@ -154,32 +161,39 @@ class ApiSessionController extends Controller
 
 
     //_________________________________________________________________________________________________________
-    public function create($appointmentid)
+    public function create($appointment_id)
     {
         try {
-            $appointment = Appointment::findOrFail($appointmentid);
+            // استرجاع الموعد حسب معرف الموعد
+            $appointment = Appointment::findOrFail($appointment_id);
+            //من الموعد حصلت على معرف المريض
+            $patient_id  = $appointment->patient_id;
+            //باستخدام نموذج المريض حيث معرف المريض حصلت على اسم المريض
+            $patient_name = Patient::where('id', $patient_id)->firstOrFail('full_name');
+            //من الموعد حصلت على معرف الخدمة
             $serviceId = $appointment->service_id;
             $date = $appointment->appointment_date;
-    
             // استرجاع الأعلام المرتبطة بال service_id من جدول activity_flags
             $flags = ActivityFlag::where('flag', $serviceId)->get();
-    
+
             if ($flags->isEmpty()) {
                 return $this->errorResponse('لا توجد أنشطة مرتبطة بهذا العلم.', 404);
             }
-    
+
             // استرجاع أسماء الأنشطة المرتبطة بالأعلام
             $activitiesNames = $flags->pluck('activity.activity_name');
-    
+
             if ($activitiesNames->isEmpty()) {
                 return $this->errorResponse('لا توجد أسماء أنشطة متاحة.', 404);
             }
-    
+
             $data = [
+                'patient_name' =>  $patient_name,
                 'appointment_date' => $date,
                 'activities_name' => $activitiesNames
+
             ];
-    
+
             return $this->successResponse($data, 'تم استرجاع الأنشطة بنجاح.', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('لم يتم العثور على الموعد.', 404);
@@ -187,8 +201,8 @@ class ApiSessionController extends Controller
             return $this->errorResponse('حدث خطأ غير متوقع.', 500);
         }
     }
-    
-    
+
+
 
     //___________________________________________________________________________
 
@@ -255,7 +269,7 @@ class ApiSessionController extends Controller
     //         return $this->errorResponse('Error query', 500);
     //     }
     // }
-   
+
 
 
     //______________________________________________________________________________________

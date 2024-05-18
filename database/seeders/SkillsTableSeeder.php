@@ -19,7 +19,7 @@ class SkillsTableSeeder extends Seeder
         ]);
         Skill::create([
             'id' => 2,
-            'skill_name' => 'القدرة علر أخذ الحقن الوريدية'
+            'skill_name' => 'القدرة على أخذ الحقن الوريدية'
         ]);
         Skill::create([
             'id' => 3,
@@ -39,7 +39,7 @@ class SkillsTableSeeder extends Seeder
         ]);
         Skill::create([
             'id' => 7,
-            'skill_name' => 'العناية بالفسطرة البولية'
+            'skill_name' => 'العناية بالقسطرة البولية'
         ]);
         Skill::create([
             'id' => 8,
@@ -68,6 +68,10 @@ class SkillsTableSeeder extends Seeder
         Skill::create([
             'id' => 14,
             'skill_name' => 'مهارات التواصل مع كبار السن'
+        ]);
+        Skill::create([
+            'id' => 15,
+            'skill_name' => ''
         ]);
     }
 }
