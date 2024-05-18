@@ -1,0 +1,102 @@
+.schedule-container {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f8;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.schedule-container:hover {
+  transform: translateY(-5px);
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.schedule-table .time-header,
+.schedule-table .day-header {
+  background-color: #5cb85c;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.schedule-table .hour {
+  background-color: #fff;
+  color: #333;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.slot {
+  cursor: pointer;
+  text-align: center;
+  padding: 10px;
+  transition: background-color 0.3s, color 0.3s;
+  border: 1px solid #ddd;
+}
+
+.slot.available {
+  background-color: #dff0d8;
+  color: #3c763d;
+}
+
+.slot.booked {
+  background-color: #f2dede;
+  color: #a94442;
+  cursor: not-allowed;
+}
+
+.booking-form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.booking-form h3 {
+  color: #5cb85c;
+  margin-bottom: 10px;
+}
+
+.booking-form p {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.booking-form input,
+.booking-form button {
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.booking-form input:focus,
+.booking-form button:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.booking-form button {
+  background-color: #5cb85c;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.booking-form button:hover {
+  background-color: #4cae4c;
+}
+
+.booking-form button:active {
+  transform: translateY(2px);
+}

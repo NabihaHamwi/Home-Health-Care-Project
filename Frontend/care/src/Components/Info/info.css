@@ -1,0 +1,79 @@
+/* info.css */
+.info-container {
+  background: #f7f7f7;
+  border-radius: 15px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  transition: transform 0.3s ease-in-out !important;
+  width: 80vw; /* استخدام نسبة مئوية من عرض الشاشة */
+  max-width: 900px; /* الحد الأقصى للعرض */
+}
+
+.info-container:hover {
+  transform: translateY(-5px) !important;
+}
+
+.tittle{
+  background: linear-gradient(45deg, #6e48aa, #9d50bb);
+  color: white;
+  padding: 20px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.form-label {
+  color: #5d5d5d;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.form-control {
+  border: none !important;
+  border-bottom: 2px solid  #3f94e4 !important;
+  border-radius: 0;
+  transition: border-color 0.3s;
+}
+
+.form-control:focus {
+  border-bottom-color: #6e48aa;
+  box-shadow: none;
+}
+
+.info-btn {
+  background: #9d50bb !important;
+  border: none;
+  padding: 10px 20px !important;
+  color: white !important;
+  border-radius: 20px !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s !important;
+}
+
+.info-btn:hover {
+  background: #6e48aa !important;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .info-container {
+    width: 95vw; /* زيادة العرض ليتناسب مع الشاشات الصغيرة */
+  }
+
+  h2 {
+    font-size: 1.5rem; /* تصغير حجم الخط للعناوين */
+  }
+
+  .form-control, .info-btn {
+    padding: 8px 16px; /* تعديل الحشوة للعناصر */
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 1.2rem; /* تصغير حجم الخط للعناوين أكثر */
+  }
+
+  .form-label {
+    font-size: 0.9rem; /* تصغير حجم الخط للتسميات */
+  }
+}
