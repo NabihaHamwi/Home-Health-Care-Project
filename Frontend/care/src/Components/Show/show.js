@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import './show.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { FaUserNurse, FaUserMd, FaUserFriends } from 'react-icons/fa'; // استيراد أيقونات FontAwesome
+import { FaUserNurse, FaUserMd, FaUserFriends } from 'react-icons/fa'; 
 import { Link } from "react-router-dom";
 
-// يمكنك إزالة تعريف الأيقونات الافتراضية هنا
 
 const ShowServices = () => {
   const [services, setServices] = useState([]); // حالة لتخزين الخدمات
@@ -16,7 +15,7 @@ const ShowServices = () => {
       .then(response => response.json())
       .then(data => {
         if (data.status === 200) {
-          // تحديث الخدمات مع الأيقونات المقابلة
+          //  الخدمات مع الأيقونات المقابلة
           const updatedServices = data.data.map(service => {
             switch (service.name) {
               case 'تمريض منزلي':
@@ -26,7 +25,7 @@ const ShowServices = () => {
               case 'مرافق صحّي':
                 return { ...service, icon: <FaUserFriends size={50} /> };
               default:
-                return service; // أو يمكنك تحديد أيقونة افتراضية هنا
+                return service; 
             }
           });
           setServices(updatedServices);
