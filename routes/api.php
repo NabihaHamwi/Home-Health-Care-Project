@@ -181,4 +181,4 @@ Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show'
 Route::get('/available-days/{provider}', [AppointmentsController::class, 'show_available_days']) -> name(name: 'appointment.show_available_days');
 
 //Api for show the pending appointments (care providers)
-Route::get('/pending-appointment/{provider}', [AppointmentsController::class, 'show_pending_appointment']) -> name(name: 'appointment.show_pending_appointment');
+Route::get('/pending-appointment/{provider}', [AppointmentsController::class, 'show_pending_appointments']) -> name(name: 'appointment.show_pending_appointments');

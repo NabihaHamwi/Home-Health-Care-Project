@@ -3,26 +3,35 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AppointmentsController extends Controller
 {
-    public function show_available_days(){
+    use ApiResponseTrait;
+
+    public function show_available_days()
+    {
         $today = Carbon::now();
         $day = new Carbon();
         $day->setDate(2024, 5, 4)->locale('en_US');
         $startOfWeek = $day->startOfWeek()->format('Y-m-d');
         $endOfWeek = $day->endOfWeek()->format('Y-m-d');
-        
+
         $reserved_days = Appointment::whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
         @dd($endOfWeek);
-        return ;
+        return;
     }
 
-    public function show_pending_appointment($providerID){
+    public function show_pending_appointments($providerID)
+    {
         $appointments = Appointment::where('appointment_status', 'الطلب قيدالانتظار')->where('healthcare_provider_id', $providerID)->get();
-        @dd($appointments);
+        // التحقق من وجود مواعيد
+        if ($appointments->isEmpty()) {
+            return $this->errorResponse('No pending appointments found for this care provider', 404);
+        }
+        return $this->successResponse(AppointmentResource::collection($appointments), 'pending appointment retrieved successfully', 200);
     }
 }
