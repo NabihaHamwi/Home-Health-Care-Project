@@ -15,7 +15,7 @@ const ShowServices = () => {
       .then(response => response.json())
       .then(data => {
         if (data.status === 200) {
-          //  الخدمات مع الأيقونات المقابلة
+          //  الخدمات مع الأيقونات 
           const updatedServices = data.data.map(service => {
             switch (service.name) {
               case 'تمريض منزلي':
