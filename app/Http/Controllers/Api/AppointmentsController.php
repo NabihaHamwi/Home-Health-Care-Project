@@ -20,4 +20,9 @@ class AppointmentsController extends Controller
         @dd($reserved_days);
         return ;
     }
+
+    public function show_pending_appointment($providerID){
+        $appointments = Appointment::where('appointment_status', 'الطلب قيدالانتظار')->where('healthcare_provider_id', $providerID)->get();
+        @dd($appointments);
+    }
 }
