@@ -1,0 +1,58 @@
+/* pstate.css */
+.dashboard {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    margin-top: 90px;
+
+  }
+  
+  .patient-form .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .patient-table {
+    margin-top: 2rem;
+    background-image: linear-gradient(to right, #6fa8dc, #4a69bd);
+    color: #fff;
+  }
+  
+  .patient-table th {
+    background-color: #6fa8dc;
+  }
+  
+ 
+  
+  .patient-form .btn-primary {
+    padding: 0.5rem 2rem;
+    font-size: 1rem;
+  }
+  .activities{
+    text-align: center;
+  }
+ .btnn{
+  margin-top: 10px;
+  width: 160px !important;
+  height: 50px !important;
+  border-radius: 10px !important;
+  background-color : #6fa8dc !important;
+  border: 1px solid #6fa8dc !important;
+  font-weight: bold !important;
+  font-size: 15px !important;
+  margin-right: 250px;
+  }
+  .btnn:hover{
+    background-color: #6fa7dcdc !important;
+  }
+ 
+  
+ .center option{
+    text-align: center;
+  }
+  thead{
+    background-color:  #6fa8dc !important;
+  }

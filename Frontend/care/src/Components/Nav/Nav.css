@@ -1,0 +1,129 @@
+
+nav{
+ background-color: #ffff;
+width:100%;
+height: 90px;
+border-radius: 0px !important;
+margin-top: 0px;
+
+/* direction: rtl; */
+
+}
+.navs{
+  position: fixed !important;
+    top: 0;
+    opacity: 0.9;
+    z-index: 100;
+
+   
+}
+.logo{
+    height: 70px;
+    width: 80px;
+    border-radius: 50%;
+    margin-top: 10px;
+}
+nav .navbar-nav{
+    margin-top: 20px;
+    margin-left:190px ;
+
+}
+.active{
+    margin-top: 9px;
+}
+nav .navbar-nav a{
+color:var(--main-color--) !important;
+font-weight: 600;
+letter-spacing: 1px;
+margin-right: 20px;
+font-size: 16px;
+transition: 0.5s ease all;
+}
+nav .navbar-nav a:hover ,nav .navbar-nav a:focus {
+color: var(--orange-color--) !important;
+}
+nav .navbar-nav Link:active{
+    color: var(--orange-color--) !important;
+}
+nav .navbar-nav .active{
+    color: var(--orange-color--) !important;
+}
+
+nav .navbar-nav button{
+    background-color: var(--btn-color--) !important;
+    border: 1px solid var(--btn-color--);
+    width : 180px;
+    height: 50px;
+    color:#ffffff;
+    text-transform: uppercase;
+    font-size: 15px;
+    margin-top: -10px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items:center ;
+    font-weight: 500;
+    
+}
+nav .navbar-nav button:hover{
+  background-color:#072750ea !important ;  
+    border: 1px solid #072750ea ;
+}
+nav .navbar-nav button span{
+    background-color: #ffff;
+    color: var(--btn-color--);
+    width: 35px;
+    border-radius: 10px;
+    height: 40px;
+    text-align: center;
+    line-height: 32px;
+    margin-left: 19px;
+    font-weight:700;
+    font-size: 30px;
+    
+}
+.navbar-nav .dropdown-menu{
+    
+    position: static;
+    background-color: #ffff;
+    border: 1px solid #ffff;
+    position: relative;
+    width: 200px;
+    
+}
+.navbar-nav .dropdown-menu Link{
+  color: #444444;
+  font-size: 14px; 
+  line-height:30px !important ;
+  position: relative; 
+
+}
+.dropdown-menu a{
+    display: block;
+    line-height: 40px !important;
+    padding-left: 30px;
+}
+/* .navbar-nav .dropdown-menu li{
+    position: absolute;
+    content: "";
+    bottom: -5px;
+    left: 0;
+    width: 10px;
+    height: 4px;
+    background-color: var(--main-color--);
+    
+} */
+/* .navbar-nav .dropdown-menu li:hover a{
+    color: var(--btn-color--) ;
+} */
+.navbar-nav .dropdown-menu Link:hover{
+    color: var(--btn-color--) ;
+}
+[type=button]:not(:disabled),[type=reset]:not(:disabled),[type=submit]:not(:disabled){
+    cursor: pointer;
+    background-color: var(--btn-color--);
+    border: 1px solid var(--btn-color--);
+    border-radius: 0px;
+}
+
+

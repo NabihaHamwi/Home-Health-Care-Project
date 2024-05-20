@@ -1,0 +1,70 @@
+/* Nstate.css */
+
+  .search-card {
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    margin-top: 90px;
+  }
+  
+  .header {
+    background-color: #2980b9;
+    color: white;
+    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 500;
+    padding: 20px 0;
+  }
+  
+  .form-label {
+    font-weight: bold;
+    color: #3f4143;
+  }
+  
+  .form-control, .form-control:focus {
+    border: 1px solid #3f4041;
+    box-shadow: none;
+    margin-bottom: 15px;
+  }
+  
+  .form-control:focus {
+    border-color: #2980b9;
+    box-shadow: 0 0 0 0.2rem  #297fb985;
+  }
+  
+  .nbtn, .nbtn:active, .nbtn:focus {
+    background-color: #61a5e4 !important;
+    border: none !important;
+    font-size: 1.4rem !important;
+    font-weight: 500 !important;
+    color: white;
+    border-radius: 10px !important;
+    transition:  #4a9ce8 0.3s ease !important;
+    text-align: center !important;
+    width: 100px !important;
+    height: 40px !important;
+    margin: auto !important;
+   
+  }
+  
+  .nbtn:hover {
+    background-color: #6fa7dcef !important;
+  }
+.select-style option {
+  font-size: 20px;
+  border: 1px solid black;
+  height: 40px;
+  width: 40px;
+  color: black;
+
+}
+
+.select-style{
+  font-size: 20px;
+}
+  

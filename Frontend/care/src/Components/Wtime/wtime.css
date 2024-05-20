@@ -1,0 +1,159 @@
+/* wtime.css
+.time-container {
+  font-family: 'Arial', sans-serif;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: auto;
+  direction:rtl;
+}
+
+.header-title {
+  font-size: 1.5rem;
+  color: #0056b3;
+  text-align: center;
+  margin-bottom: 20px;
+ 
+}
+
+.day-selection {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.day-button {
+  padding: 8px 12px !important;
+  font-size: 0.9rem !important;
+  border-radius: 10px !important;
+  background-color: #fff;
+  border: 1px solid blue;
+  transition: background-color 0.3s, color 0.3s;
+  height: 40px;
+  width: 70px;
+}
+
+.day-button:hover, .day-button.active {
+  background-color: #0056b3 !important;
+  color: #ffffff;
+}
+  .schedule-table .availability-toggle {
+    text-align: center;
+  }
+  
+  .schedule-table .form-control {
+    margin-top: 5px;
+  }
+  
+  .btn-outline-secondary {
+    color: #0056b3;
+    border-color: #0056b3;
+
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: #0056b3 !important;
+    color: #ffffff;
+  }
+  .schedule-table{
+  
+  }
+  .time-btn{
+    margin: auto;
+  }
+   */
+
+   /* wtime.css */
+.time-container {
+    font-family: 'Arial', sans-serif;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: auto;
+    direction: rtl;
+  }
+  
+  .header-title {
+    font-size: 1.5rem;
+    color: #0056b3;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .day-selection {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .day-button {
+   
+    font-size: 1rem !important;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px !important;
+    background-color: #fff !important;
+    border: 2px solid #0056b3 !important;
+    color: #0056b3;
+    transition: background-color 0.3s, color 0.3s;
+    height: 40px;
+    width: 70px;
+    
+  }
+  
+  .day-button:hover,
+  .day-button:focus  
+ {
+    background-color: #0056b3 !important;
+    color: #ffffff;
+    border-color: #0056b3; /* إضافة لون الإطار الأزرق */
+  }
+  
+  .schedule-table .availability-toggle {
+    text-align: center;
+  }
+  
+  .schedule-table .form-control {
+    margin-top: 5px;
+  }
+  
+  .btn-outline-secondary {
+    color: #0056b3;
+    border-color: #0056b3;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: #0056b3 !important;
+    color: #ffffff;
+  }
+  
+
+  
+  .time-btn {
+    margin: auto;
+    text-align: center;
+    
+  }
+  .bttun{
+    font-size: 1rem !important;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px !important;
+    background-color:#0056b3!important;
+    border: none !important;
+    color: #fff ;
+    transition: background-color 0.3s, color 0.3s;
+    height: 40px;
+    width: 130px;
+  }
+  .bttun:hover{
+    background-color:#0057b3e7!important;
+  }

@@ -1,0 +1,32 @@
+/* monitor.css */
+.monitor {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f8f9fa; /* لون خلفية خفيف ومنعش */
+  }
+  
+  .title {
+    background-color: #6fa8dc !important; /* لون خلفية العنوان باللون الأصفر */
+    color: #fff; /* لون النص الأبيض */
+    padding: 0.5rem 0; /* تبطين للعنوان */
+    border-radius: 0.5rem 0.5rem 0 0; /* تقريب الزوايا العلوية */
+    line-height: 50px;
+  }
+  
+  .value {
+    font-weight: bold; /* جعل القيم غامقة */
+    color: #277331; /* لون القيم باللون الأخضر */
+    
+  }
+  
+  .list-group-item {
+    background-color: #e9ecef; /* لون خلفية كل عنصر باللون الرمادي الفاتح */
+    border: none; /* إزالة الحدود */
+    padding: 1rem; /* تبطين أكبر لكل عنصر */
+    border-radius: 0; /* إزالة تقريب الزوايا */
+  }
+  
+  .list-group-item:not(:last-child) {
+    border-bottom: 2px dashed #dee2e6; /* إضافة خط متقطع بين العناصر */
+  }
