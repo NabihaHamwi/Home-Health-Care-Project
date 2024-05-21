@@ -144,7 +144,7 @@ Route::group([
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
-    Route::get('/user-profile', [AuthController::class, 'userProfile']);    
+    Route::get('/user-profile', [AuthController::class, 'userProfile']);
 });
 
 //___________________________________________________________________________
@@ -172,13 +172,16 @@ Route::get('/services', [ServiceController::class, 'index'])->name(name: 'servic
 Route::get('/search/result', [SearchController::class, 'search'])->name(name: 'search.result');
 
 //Api for show all providers (just for testing)
-Route::get('/providers', [HealthcareProviderController::class, 'index']) -> name(name: 'providers.index');
+Route::get('/providers', [HealthcareProviderController::class, 'index'])->name(name: 'providers.index');
 
 //Api for show info about one care provider
-Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show']) -> name(name: 'providers.show');
+Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show'])->name(name: 'providers.show');
 
 //Api for show the available days in week
-Route::get('/available-days/{provider}', [AppointmentsController::class, 'show_available_days']) -> name(name: 'appointment.show_available_days');
+Route::get('/available-days/{provider}', [AppointmentsController::class, 'show_available_days'])->name(name: 'appointment.show_available_days');
 
-//Api for show the pending appointments (for care providers)
-Route::get('/pending-appointment/{provider}', [AppointmentsController::class, 'show_pending_appointments']) -> name(name: 'appointment.show_pending_appointments');
+//Api for show the pending appointments (for care providers) for a one week
+Route::get('/pending-appointment/{provider}', [AppointmentsController::class, 'show_pending_appointments'])->name(name: 'appointment.show_pending_appointments');
+
+//Api for show the reserved appointments (for care providers) for a one week
+Route::get('/reserved-appointment/{provider}', [AppointmentsController::class, 'reserved_days'])->name(name: 'appointment.reserved_days');

@@ -40,14 +40,11 @@ class AppointmentsController extends Controller
             $date = $date->copy()->next('friday');
         if ($day_name == ('saturday'))
             $date = $date->copy()->next('saturday');
-        return $date;
+        return $date->copy();
     }
 
-    public function show_available_days($providerID)
+    public function reserved_days($providerID)
     {
-        /// worktimes for provider who has id = $providerID
-        $worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $providerID)->get();
-
         /// return the date of today and the week we are in
         $today = Carbon::now()->locale('en_US');
 
@@ -61,52 +58,93 @@ class AppointmentsController extends Controller
         /// return the reserved days in this week from the appointment table
         $reserved_appointments = Appointment::where('healthcare_provider_id', $providerID)->where('appointment_status', 'الطلب مقبول')->whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
 
+        if ($reserved_appointments->isEmpty()) {
+            return $this->errorResponse('No reserveed appointments for this care provider', 404);
+        }
+
+        return $this->successResponse(AppointmentResource::collection($reserved_appointments), 'reserved appointment retrieved successfully', 200);
+    }
+
+    public function show_available_days($providerID)
+    {
+        /// worktimes for provider who has id = $providerID
+        $worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $providerID)->get();
+
+        /// return the date of today and the week we are in
+        $today = Carbon::now()->locale('en_US');
+        $startOfWeek = $today->startOfWeek()->format('Y-m-d');
+        $endOfWeek = $today->endOfWeek()->format('Y-m-d');
+
+        /// return the reserved days in this week from the appointment table
+        $reserved_appointments = Appointment::where('healthcare_provider_id', $providerID)->where('appointment_status', 'الطلب مقبول')->whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
+
         /// if the work time is not reserved append it to available_times
         $available_times = [];
-        $date = $today->startOfWeek();
-
         foreach ($worktimes as $worktime) {
+            $date = $today->startOfWeek();
             $date = $this->set_the_date($worktime->day_name, $date);
+
             /// start & end of work time
             $workStart = Carbon::createFromFormat('H:i:s', "$worktime->start_time");
             $workEnd = Carbon::createFromFormat('H:i:s', "$worktime->end_time");
-
+            
+            $status = false; // non-reserved
             foreach ($reserved_appointments as $appointment) {
                 /// start & end of appointment
+                
                 $app_start = Carbon::createFromFormat('H:i:s', $appointment->appointment_start_time);
                 $app_end = $this->calculate_end_of_the_appointment($appointment);
 
+                /// if appointmentday != worktimeday
                 $day = Carbon::parse($appointment->appointment_date)->isDayOfWeek($worktime->day_name);
                 if (!$day) {
                     continue;
                 }
 
                 if ($workStart->get('hour') <= $app_start->get('hour') && $workEnd->get('hour') >= $app_end->get('hour')) {
-                    if ($workStart->get('hour') < $app_start->get('hour') && $workStart->get('minute') <= $app_start->get('minute'))
+                    if ($workStart->get('hour') < $app_start->get('hour') && $workStart->get('minute') <= $app_start->get('minute')) {
                         $available_times[] = [
                             'date' => $date,
                             'day_name' => $worktime->day_name,
                             'start' => $workStart->format('H:i:s'),
                             'end' => $app_start->format('H:i:s')
                         ];
-                    if ($workEnd->get('hour') >= $app_end->get('hour') && $workEnd->get('minute') >= $app_end->get('minute'))
+                        $status = true; // reserved
+                    }
+                    if ($workEnd->get('hour') >= $app_end->get('hour') && $workEnd->get('minute') >= $app_end->get('minute')) {
                         $available_times[] = [
                             'date' => $date,
                             'day_name' => $worktime->day_name,
                             'start' => $app_end->format('H:i:s'),
                             'end' => $workEnd->format('H:i:s')
                         ];
+                        $status = true; // reserved
+                    }
                     // @dd($available_times);
-                } else $available_times[] =
+                } else {
+                    $available_times[] =
+                        [
+                            'date' => $date,
+                            'day_name' => $worktime->day_name,
+                            'start' => $workStart->format('H:i:s'),
+                            'end' => $workEnd->format('H:i:s')
+                        ];
+                        $status = true; // reserved
+                }
+            }
+            if (!$status)
+                $available_times[] =
                     [
                         'date' => $date,
                         'day_name' => $worktime->day_name,
                         'start' => $workStart->format('H:i:s'),
                         'end' => $workEnd->format('H:i:s')
                     ];
-            }
         }
-        return $this->successResponse($available_times,'available times retrieved successfully', 200);
+        // if ($available_times->isEmpty()) {
+        //     return $this->errorResponse('No reserveed appointments for this care provider', 404);
+        // }
+        return $this->successResponse($available_times, 'available times retrieved successfully', 200);
     }
 
     public function show_pending_appointments($providerID)
