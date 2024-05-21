@@ -14,7 +14,7 @@ class HealthcareProviderWorktimeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        if ($request->route()->named('careprovidersworktimes.show')) {
+        if ($request->route()->named('careprovidersworktimes.show') || $request->route()->named('appointment.show_available_days')) {
             return [
                 'day_name' => $this->day_name,
                 'work_hours' => $this->work_hours,
