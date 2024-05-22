@@ -44,55 +44,16 @@ class AppointmentsController extends Controller
         return $date->copy();
     }
 
-    public function reserved_days($providerID, $week = 1)
-    {
-        /// return the date of today and the week we are in
-        ///day = today
-        $day = Carbon::now()->locale('en_US');
-
-        ///go to the next dayweek
-        for ($i = 2; $i <= $week; $i++)
-            $day = $day->next();
-
-        /// test for another date but today
-        // $day = new Carbon();
-        // $day->setDate(2024, 5, 4)->locale('en_US');
-
-        $startOfWeek = $day->startOfWeek()->format('Y-m-d');
-        $endOfWeek = $day->endOfWeek()->format('Y-m-d');
-
-        /// return the reserved days in this week from the appointment table
-        $reserved_appointments = Appointment::where('healthcare_provider_id', $providerID)->where('appointment_status', 'الطلب مقبول')->whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
-
-        if ($reserved_appointments->isEmpty()) {
-            return $this->errorResponse('No reserveed appointments for this care provider', 404);
-        }
-
-        return $this->successResponse(AppointmentResource::collection($reserved_appointments), 'reserved appointment retrieved successfully', 200);
-    }
-
-    // public function show_reserved_appointment($appointmentID)
-    // {
-    //     try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
-    //         $appointment = Appointment::findOrFail($appointmentID);
-    //         return $this->successResponse(new AppointmentResource($appointment), 'appointment details retrieved successfully');
-    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-    //         return $this->errorResponse('Provider not found', 404);
-    //     } catch (\Illuminate\Database\QueryException $e) {
-    //         return $this->errorResponse('erorr query', 500);
-    //     }
-    // }
-
     public function show_available_days($providerID)
     {
         /// worktimes for provider who has id = $providerID
         $worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $providerID)->get();
-
+        
         /// return the date of today and the week we are in
         $today = Carbon::now()->locale('en_US');
         $startOfWeek = $today->startOfWeek()->format('Y-m-d');
         $endOfWeek = $today->endOfWeek()->format('Y-m-d');
-
+        
         /// return the reserved days in this week from the appointment table
         $reserved_appointments = Appointment::where('healthcare_provider_id', $providerID)->where('appointment_status', 'الطلب مقبول')->whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
 
@@ -101,17 +62,17 @@ class AppointmentsController extends Controller
         foreach ($worktimes as $worktime) {
             $date = $today->startOfWeek();
             $date = $this->set_the_date($worktime->day_name, $date);
-
+            
             /// start & end of work time
             $workStart = Carbon::createFromFormat('H:i:s', "$worktime->start_time");
             $workEnd = Carbon::createFromFormat('H:i:s', "$worktime->end_time");
-
+            
             /// for controling to add a non reserved worktime to available_appointment[]
             $status = false; // non-reserved
-
+            
             foreach ($reserved_appointments as $appointment) {
                 /// start & end of appointment
-
+                
                 $app_start = Carbon::createFromFormat('H:i:s', $appointment->appointment_start_time);
                 $app_end = $this->calculate_end_of_the_appointment($appointment);
 
@@ -156,7 +117,7 @@ class AppointmentsController extends Controller
                     $index++;
                 }
 
-
+                
                 /// if there is a part of worktime reserved and part not reserved add non-reserved
                 if ($workStart->get('hour') <= $app_start->get('hour') && $workEnd->get('hour') >= $app_end->get('hour')) {
                     if ($workStart->get('hour') < $app_start->get('hour')) {
@@ -194,6 +155,46 @@ class AppointmentsController extends Controller
         }
         return $this->successResponse($available_times, 'available times retrieved successfully', 200);
     }
+    
+    // public function show_reserved_appointment($appointmentID)
+    // {
+        //     try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
+            //         $appointment = Appointment::findOrFail($appointmentID);
+            //         return $this->successResponse(new AppointmentResource($appointment), 'appointment details retrieved successfully');
+            //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                //         return $this->errorResponse('Provider not found', 404);
+    //     } catch (\Illuminate\Database\QueryException $e) {
+    //         return $this->errorResponse('erorr query', 500);
+    //     }
+    // }
+    
+    
+    public function show_reserved_appointments($providerID, $week = 1)
+    {
+        /// return the date of today and the week we are in
+        ///day = today
+        $day = Carbon::now()->locale('en_US');
+
+        ///go to the next dayweek
+        for ($i = 2; $i <= $week; $i++)
+            $day = $day->next();
+
+        /// test for another date but today
+        // $day = new Carbon();
+        // $day->setDate(2024, 5, 4)->locale('en_US');
+
+        $startOfWeek = $day->startOfWeek()->format('Y-m-d');
+        $endOfWeek = $day->endOfWeek()->format('Y-m-d');
+
+        /// return the reserved days in this week from the appointment table
+        $reserved_appointments = Appointment::where('healthcare_provider_id', $providerID)->where('appointment_status', 'الطلب مقبول')->whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
+
+        if ($reserved_appointments->isEmpty()) {
+            return $this->errorResponse('No reserveed appointments for this care provider', 404);
+        }
+
+        return $this->successResponse(AppointmentResource::collection($reserved_appointments), 'reserved appointment retrieved successfully', 200);
+    }
 
     public function show_pending_appointments($providerID)
     {
@@ -216,31 +217,6 @@ class AppointmentsController extends Controller
             return $this->errorResponse('erorr query', 500);
         }
     }
+
+    
 }
-
-// foreach ($reservedAppointments as $appointment) {
-//     $appointmentStart = Carbon::createFromFormat('H:i:s', $appointment['start']);
-//     $appointmentEnd = Carbon::createFromFormat('H:i:s', $appointment['end']);
-
-//     // التحقق من الفترة قبل الموعد المحجوز
-//     if ($workStart->lt($appointmentStart)) {
-//         $availableSlots[] = [
-//             'start' => $workStart->format('H:i:s'),
-//             'end' => $appointmentStart->format('H:i:s')
-//         ];
-//     }
-
-//     // تحديث وقت بداية العمل للفترة التالية
-//     $workStart = $appointmentEnd;
-// }
-
-// // التحقق من الفترة بعد آخر موعد محجوز
-// if ($workStart->lt($workEnd)) {
-//     $availableSlots[] = [
-//         'start' => $workStart->format('H:i:s'),
-//         'end' => $workEnd->format('H:i:s')
-//     ];
-// }
-
-// // إرجاع الفترات المتاحة
-// return $availableSlots;
