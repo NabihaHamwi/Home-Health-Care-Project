@@ -71,6 +71,18 @@ class AppointmentsController extends Controller
         return $this->successResponse(AppointmentResource::collection($reserved_appointments), 'reserved appointment retrieved successfully', 200);
     }
 
+    // public function show_reserved_appointment($appointmentID)
+    // {
+    //     try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
+    //         $appointment = Appointment::findOrFail($appointmentID);
+    //         return $this->successResponse(new AppointmentResource($appointment), 'appointment details retrieved successfully');
+    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+    //         return $this->errorResponse('Provider not found', 404);
+    //     } catch (\Illuminate\Database\QueryException $e) {
+    //         return $this->errorResponse('erorr query', 500);
+    //     }
+    // }
+
     public function show_available_days($providerID)
     {
         /// worktimes for provider who has id = $providerID
@@ -191,6 +203,18 @@ class AppointmentsController extends Controller
             return $this->errorResponse('No pending appointments found for this care provider', 404);
         }
         return $this->successResponse(AppointmentResource::collection($appointments), 'pending appointment retrieved successfully', 200);
+    }
+
+    public function show_appointment($appointmentID)
+    {
+        try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
+            $appointment = Appointment::findOrFail($appointmentID);
+            return $this->successResponse(new AppointmentResource($appointment), 'appointment details retrieved successfully');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Provider not found', 404);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $this->errorResponse('erorr query', 500);
+        }
     }
 }
 

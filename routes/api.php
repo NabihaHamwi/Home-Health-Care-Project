@@ -179,10 +179,16 @@ Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show'
 
 //this api is not working yet we have the logic in front side
 //Api for show the available days in week
-Route::get('/available-days/{provider}', [AppointmentsController::class, 'show_available_days'])->name(name: 'appointment.show_available_days');
+//Route::get('/available-days/{provider}', [AppointmentsController::class, 'show_available_days'])->name(name: 'appointment.show_available_days');
 
 //Api for show the pending appointments (for care providers) for a one week
 Route::get('/pending-appointments/{provider}', [AppointmentsController::class, 'show_pending_appointments'])->name(name: 'appointment.show_pending_appointments');
 
+//Api for show one of pending appointments
+Route::get('/pending-appointment/{appointment}', [AppointmentsController::class, 'show_appointment'])->name(name: 'appointment.show_pending_appointment');
+
 //Api for show the reserved appointments (for care providers) for a one week
 Route::get('/reserved-appointments/{provider}/{week}', [AppointmentsController::class, 'reserved_days'])->name(name: 'appointment.reserved_days');
+
+//Api for show one of reserved appointments
+Route::get('/reserved-appointments/{appointment}', [AppointmentsController::class, 'show_appointment'])->name(name: 'appointment.show_reserved_appointment');
