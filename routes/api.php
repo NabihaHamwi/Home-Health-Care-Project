@@ -190,7 +190,8 @@ Route::get('/pending-appointments/{provider}', [AppointmentsController::class, '
 //Api for show the reserved appointments (for care providers) for a one week
 Route::get('/reserved-appointments/{provider}/{week}', [AppointmentsController::class, 'show_reserved_appointments'])->name(name:'appointments.show_reserved_appointments');
 
-Route::post('/setappointmentstatus', [AppointmentsController::class, 'update'])->name(name:'appointments.update');
-
 //Api for show one of reserved appointments
 // Route::get('/reserved-appointments/{appointment}', [AppointmentsController::class, 'show_appointment'])->name(name: 'appointment.show_reserved_appointment');
+
+//Api for set appointment status
+Route::put('/set_appointment_status/{appointment}', [AppointmentsController::class, 'update'])->name(name:'appointments.update');
