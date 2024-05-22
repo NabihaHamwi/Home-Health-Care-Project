@@ -28,6 +28,7 @@ class AppointmentsController extends Controller
 
     private function set_the_date($day_name, $date)
     {
+        /// to set the date to the date of current week
         if ($day_name == ('monday'))
             $date = $date->copy()->next('monday');
         if ($day_name == ('tuesday'))
@@ -43,17 +44,22 @@ class AppointmentsController extends Controller
         return $date->copy();
     }
 
-    public function reserved_days($providerID)
+    public function reserved_days($providerID, $week = 1)
     {
         /// return the date of today and the week we are in
-        $today = Carbon::now()->locale('en_US');
+        ///day = today
+        $day = Carbon::now()->locale('en_US');
+
+        ///go to the next dayweek
+        for ($i = 2; $i <= $week; $i++)
+            $day = $day->next();
 
         /// test for another date but today
         // $day = new Carbon();
         // $day->setDate(2024, 5, 4)->locale('en_US');
 
-        $startOfWeek = $today->startOfWeek()->format('Y-m-d');
-        $endOfWeek = $today->endOfWeek()->format('Y-m-d');
+        $startOfWeek = $day->startOfWeek()->format('Y-m-d');
+        $endOfWeek = $day->endOfWeek()->format('Y-m-d');
 
         /// return the reserved days in this week from the appointment table
         $reserved_appointments = Appointment::where('healthcare_provider_id', $providerID)->where('appointment_status', 'الطلب مقبول')->whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
@@ -87,11 +93,11 @@ class AppointmentsController extends Controller
             /// start & end of work time
             $workStart = Carbon::createFromFormat('H:i:s', "$worktime->start_time");
             $workEnd = Carbon::createFromFormat('H:i:s', "$worktime->end_time");
-            
+
             $status = false; // non-reserved
             foreach ($reserved_appointments as $appointment) {
                 /// start & end of appointment
-                
+
                 $app_start = Carbon::createFromFormat('H:i:s', $appointment->appointment_start_time);
                 $app_end = $this->calculate_end_of_the_appointment($appointment);
 
@@ -129,7 +135,7 @@ class AppointmentsController extends Controller
                             'start' => $workStart->format('H:i:s'),
                             'end' => $workEnd->format('H:i:s')
                         ];
-                        $status = true; // reserved
+                    $status = true; // reserved
                 }
             }
             if (!$status)
