@@ -94,7 +94,9 @@ class AppointmentsController extends Controller
             $workStart = Carbon::createFromFormat('H:i:s', "$worktime->start_time");
             $workEnd = Carbon::createFromFormat('H:i:s', "$worktime->end_time");
 
+            /// for controling to add a non reserved worktime to available_appointment[]
             $status = false; // non-reserved
+
             foreach ($reserved_appointments as $appointment) {
                 /// start & end of appointment
 
@@ -107,49 +109,77 @@ class AppointmentsController extends Controller
                     continue;
                 }
 
+                /// check if allredy available times from this work time are in the available times
+                $index = 0;
+                foreach ($available_times as $available_time) {
+                    if ($appointment->appointment_date == $available_time['date']) {
+                        $Start = Carbon::createFromFormat('H:i:s', $available_time['start']);
+                        $End = Carbon::createFromFormat('H:i:s', $available_time['end']);
+                        if ($Start->get('hour') <= $app_start->get('hour') && $End->get('hour') >= $app_end->get('hour')) {
+                            if ($Start->get('hour') < $app_start->get('hour')) {
+                                $available_times[$index] = [
+                                    'date' => $date,
+                                    'day_name' => $worktime->day_name,
+                                    'start' => $Start->format('H:i:s'),
+                                    'end' => $app_start->format('H:i:s')
+                                ];
+                                $status = true; // reserved
+                            }
+                            if ($End->get('hour') > $app_end->get('hour')) {
+                                $available_times[$index] = [
+                                    'date' => $date,
+                                    'day_name' => $worktime->day_name,
+                                    'start' => $app_end->format('H:i:s'),
+                                    'end' => $End->format('H:i:s')
+                                ];
+                                $status = true; // reserved
+                            }
+                            /// the all available_time is reserved
+                            // $available_times[$index]= null;
+                            unset($available_times[$index]);
+                            $status = true; // reserved
+                            continue;
+                        }
+                    }
+                    $index++;
+                }
+
+
+                /// if there is a part of worktime reserved and part not reserved add non-reserved
                 if ($workStart->get('hour') <= $app_start->get('hour') && $workEnd->get('hour') >= $app_end->get('hour')) {
-                    if ($workStart->get('hour') < $app_start->get('hour') && $workStart->get('minute') <= $app_start->get('minute')) {
+                    if ($workStart->get('hour') < $app_start->get('hour')) {
                         $available_times[] = [
-                            'date' => $date,
+                            'date' => $date->format('Y-m-d'),
                             'day_name' => $worktime->day_name,
                             'start' => $workStart->format('H:i:s'),
                             'end' => $app_start->format('H:i:s')
                         ];
                         $status = true; // reserved
                     }
-                    if ($workEnd->get('hour') >= $app_end->get('hour') && $workEnd->get('minute') >= $app_end->get('minute')) {
+                    if ($workEnd->get('hour') > $app_end->get('hour')) {
                         $available_times[] = [
-                            'date' => $date,
+                            'date' => $date->format('Y-m-d'),
                             'day_name' => $worktime->day_name,
                             'start' => $app_end->format('H:i:s'),
                             'end' => $workEnd->format('H:i:s')
                         ];
                         $status = true; // reserved
                     }
-                    // @dd($available_times);
-                } else {
-                    $available_times[] =
-                        [
-                            'date' => $date,
-                            'day_name' => $worktime->day_name,
-                            'start' => $workStart->format('H:i:s'),
-                            'end' => $workEnd->format('H:i:s')
-                        ];
+                    /// the all worktime is reserved
                     $status = true; // reserved
                 }
             }
+
+            /// if work time is not reserved by any appointment
             if (!$status)
                 $available_times[] =
                     [
-                        'date' => $date,
+                        'date' => $date->format('Y-m-d'),
                         'day_name' => $worktime->day_name,
                         'start' => $workStart->format('H:i:s'),
                         'end' => $workEnd->format('H:i:s')
                     ];
         }
-        // if ($available_times->isEmpty()) {
-        //     return $this->errorResponse('No reserveed appointments for this care provider', 404);
-        // }
         return $this->successResponse($available_times, 'available times retrieved successfully', 200);
     }
 
