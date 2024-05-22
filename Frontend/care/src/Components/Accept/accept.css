@@ -3,8 +3,7 @@
   }
 
   .button-reject,.button-accept {
-    /* margin-left: 50px !important; */
-    background-color: rgba(95, 167, 36, 0.932) !important;
+    background-color: rgba(98, 179, 33, 0.932) !important;
     height: 30px;
     width: 50px;
     border-radius: 10px;
@@ -14,8 +13,7 @@
   }
   th,tr,td{
     text-align: center;
-    /* border-radius: 5px;
-    border: none; */
+    
   }
   th{
     background-color: var(--main-color--) !important;
