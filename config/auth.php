@@ -41,9 +41,8 @@ return [
             'provider' => 'users',
         ],
         'api' => [
-            'driver' => 'jwt',
-            'provider' => 'users',
-            'hash' => false,
+            'driver' => 'jwt', // استخدم مشغل JWT
+            'provider' => 'users', // استخدم مزود المصادقة "users"
         ],
     ],
 
@@ -65,15 +64,15 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\User::class,
-        ],
-
         // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
+        //     'driver' => 'eloquent',
+        //     'model' => App\Models\User::class,
         // ],
+
+        'users' => [
+            'driver' => 'database',
+            'table' => 'users',
+        ],
     ],
 
     /*
