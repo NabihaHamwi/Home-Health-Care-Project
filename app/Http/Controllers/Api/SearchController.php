@@ -25,21 +25,21 @@ class SearchController extends Controller
     public function search(Request $request, ApiHealthcareProviderController $providers)
     {
         $providers = HealthcareProviderResource::collection(
-            HealthcareProvider::when($request->input('service'), function ($query, $services) { // الفلترة حسب الخدمات
-                return $query->whereHas('services', function ($q) use ($services) {
-                    $q->whereIn('id', $services);
+            HealthcareProvider::when($request->input('service'), function ($query, $service) { // الفلترة حسب الخدمات
+                return $query->whereHas('services', function ($q) use ($service) {
+                    $q->where('id', $service);
                 });
             })->when($request->input('gender'), function ($query, $gender) { // حسب الجنس
-                return $query->whereIn('gender', $gender);
+                return $query->where('gender', $gender);
             })->when($request->age, function ($query, $age) { // حسب العمر
                 return $query->where('age', '<=', $age);
             })->when($request->input('physicalStrength'), function ($query, $strength) { // حسب القوة البدنية
-                return $query->whereIn('physical_strength', $strength);
+                return $query->where('physical_strength', $strength);
             })->when($request->experience, function ($query, $experience) { // حسب الخبرة
                 return $query->where('experience', '>=', $experience);
-            })->when($request->input('skill'), function ($query, $skills) { // حسب المهارات
-                return $query->whereHas('skills', function ($q) use ($skills) {
-                    $q->whereIn('id', $skills);
+            })->when($request->input('skill'), function ($query, $skill) { // حسب المهارات
+                return $query->whereHas('skills', function ($q) use ($skill) {
+                    $q->where('id', $skill);
                 });
             })->get()
         );

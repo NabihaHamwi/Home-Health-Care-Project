@@ -46,6 +46,15 @@ class AppointmentResource extends JsonResource
                 // "service_name" => $this->service->service_name
             ];
         }
+        if ($request->route()->named('appointments.update'))
+            return [
+                "appointment_id" => $this->id,
+                "appointment_date" => $this->appointment_date,
+                "appointment_start_at" => $this->appointment_start_time,
+                "appointment_duration" => $this->appointment_duration,
+                "appointment_status" => $this->appointment_status
+            ];
+
         // if ($request->route()->named('appointment.show_reserved_appointment')) {
         //     $patientfile = [
         //         'previous_diseases_surgeries' => $this->patient->previous_diseases_surgeries,
