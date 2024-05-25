@@ -27,41 +27,41 @@ class AuthController extends Controller
     }
     //__________________________________________________________________________________________________________-
 
-    // public function login(Request $request)
-    // {
-    //     // التحقق من صحة بيانات الإدخال
-    //     $validator = Validator::make($request->all(), [
-    //         'email' => 'required|email',
-    //         'password' => 'required|string|min:6',
-    //     ],
-    //     [
-    //         'email.required' => 'البريد الإلكتروني مطلوب.',
-    //         'email.email' => 'يجب أن يكون البريد الإلكتروني عنوانًا صالحًا.',
-    //         'password.required' => 'كلمة المرور مطلوبة.',
-    //         'password.string' => 'يجب أن تكون كلمة المرور نصًا.',
-    //         'password.min' => 'يجب أن تكون كلمة المرور على الأقل 6 أحرف.',
-    //     ]);
-    //     // إذا فشل التحقق من الصحة، يُرجع الأخطاء باستخدام الدالة errorResponse
-    //     if ($validator->fails()) {
-    //         return $this->errorResponse($validator->errors(), 422);
-    //     }
-
-    //     try {
-    //         // محاولة الحصول على الرمز باستخدام بيانات الاعتماد المُصادق عليها
-    //         if (!$token = JWTAuth::attempt($validator->validated())) {
-    //             // إذا فشلت المصادقة، يتم إرجاع رسالة خطأ باستخدام الدالة errorResponse
-    //             return $this->errorResponse('فشلت المصادقة تأكد من الايميل او كلمة السر', 401);
-    //         }  
-
-    //     } catch (JWTException $e) {
-    //         // في حالة وجود خطأ أثناء إنشاء الرمز، يتم إرجاع رسالة خطأ باستخدام الدالة errorResponse
-    //         return $this->errorResponse('حدث خطأ أثناء انشاء ال token', 500);
-    //     }
-
-    //     // إذا تم الحصول على الرمز بنجاح، يتم إرجاعه في استجابة JSON
-    //     return $this->successResponse(compact('token') ,200);
-
-    // }
+    public function login(Request $request)
+    {
+        // التحقق من صحة بيانات الإدخال
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ], [
+            'email.required' => 'البريد الالكتروني مطلوب',
+            'email.email' => 'يجب أن يكون البريد الإلكتروني عنوانًا صالحًا.',
+            'password.required' => 'كلمة السر مطلوبة ادخل كلمة السر الخاصة بك للمتابعة',
+        ]);
+    
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors(), 422);
+        }
+    
+        try {
+            // محاولة الحصول على الرمز باستخدام بيانات الاعتماد المُصادق عليها
+            if (!$token = JWTAuth::attempt($validator->validated())) {
+                // إذا فشلت المصادقة، يتم إرجاع رسالة خطأ
+                return $this->errorResponse('فشلت المصادقة تأكد من الايميل او كلمة السر', 401);
+            }
+    
+            // الحصول على بيانات المستخدم
+            $user = JWTAuth::user();
+    
+        } catch (JWTException $e) {
+            // في حالة وجود خطأ أثناء إنشاء الرمز، يتم إرجاع رسالة خطأ
+            return $this->errorResponse('حدث خطأ أثناء انشاء ال token', 500);
+        }
+    
+        // إذا تم الحصول على الرمز بنجاح، يتم إرجاعه مع بيانات المستخدم في استجابة JSON
+        return $this->successResponse(compact('token', 'user'), 200);
+    }
+    
 
 
 
@@ -190,40 +190,40 @@ class AuthController extends Controller
     //     ]);
 
     //_____________________________________________________________________________________
-    public function login(Request $request)
-    {
-        // التحقق من صحة بيانات الإدخال
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ], [
-            'email.required' => 'البريد الإلكتروني مطلوب.',
-            'email.email' => 'يجب أن يكون البريد الإلكتروني عنوانًا صالحًا.',
-            'password.required' => 'كلمة المرور مطلوبة.',
-            'password.string' => 'يجب أن تكون كلمة المرور نصًا.',
-            'password.min' => 'يجب أن تكون كلمة المرور على الأقل 6 أحرف.',
-        ]);
+    // public function login(Request $request)
+    // {
+    //     // التحقق من صحة بيانات الإدخال
+    //     $validator = Validator::make($request->all(), [
+    //         'email' => 'required|email',
+    //         'password' => 'required|string|min:6',
+    //     ], [
+    //         'email.required' => 'البريد الإلكتروني مطلوب.',
+    //         'email.email' => 'يجب أن يكون البريد الإلكتروني عنوانًا صالحًا.',
+    //         'password.required' => 'كلمة المرور مطلوبة.',
+    //         'password.string' => 'يجب أن تكون كلمة المرور نصًا.',
+    //         'password.min' => 'يجب أن تكون كلمة المرور على الأقل 6 أحرف.',
+    //     ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse($validator->errors(), 422);
-        }
+    //     if ($validator->fails()) {
+    //         return $this->errorResponse($validator->errors(), 422);
+    //     }
 
 
-        $credentials = $request->only('email', 'password');
+    //     $credentials = $request->only('email', 'password');
 
-        try {
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'Unauthorized'], 401);
-            }
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Could not create token'], 500);
-        }
+    //     try {
+    //         if (!$token = JWTAuth::attempt($credentials)) {
+    //             return response()->json(['error' => 'Unauthorized'], 401);
+    //         }
+    //     } catch (JWTException $e) {
+    //         return response()->json(['error' => 'Could not create token'], 500);
+    //     }
 
-        return response()->json([
-            'status' => 'success',
-            'token' => $token
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'token' => $token
+    //     ]);
+    // }
 
     public function register(Request $request)
     {
@@ -262,14 +262,26 @@ class AuthController extends Controller
         ]);
     }
 
-
-
     public function logout()
     {
-        Auth::logout();
+        // استخدام Auth للتحقق من تسجيل دخول المستخدم
+        // Auth::check() تعود بـ true إذا كان المستخدم مسجل الدخول
+        if (Auth::check()) {
+            // تسجيل خروج المستخدم باستخدام Auth::logout()
+            Auth::logout();
+    
+            // إرجاع رسالة نجاح في حالة تسجيل الخروج بنجاح
+            return response()->json([
+                'status' => 'success', // حالة الاستجابة
+                'message' => 'Successfully logged out', // رسالة الاستجابة
+            ]);
+        }
+    
+        // إذا لم يكن المستخدم مسجل الدخول، يتم إرجاع رسالة خطأ
         return response()->json([
-            'status' => 'success',
-            'message' => 'Successfully logged out',
-        ]);
+            'status' => 'error', // حالة الاستجابة تشير إلى وجود خطأ
+            'message' => 'No user was logged in', // رسالة الخطأ
+        ], 401); // كود الحالة HTTP 401 يشير إلى Unauthorized
     }
+    
 }
