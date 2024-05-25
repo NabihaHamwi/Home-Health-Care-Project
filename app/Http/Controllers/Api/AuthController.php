@@ -184,7 +184,7 @@ class AuthController extends Controller
     //_____________________________________________________________________________
 
 
-    
+
     // public function userProfile() {
     //     return response()->json(auth()->user());
     // }
@@ -235,14 +235,28 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        // التحقق من صحة بيانات الإدخال
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|between:2,100',
             'last_name' => 'required|string|between:2,100',
             'email' => 'required|string|email|max:100|unique:users',
             'phone_number' => ['required', 'regex:/^(\\+|00)?\d{1,3}\d{6,10}$/'],
             'password' => 'required|string|min:6',
-        ],);
+        ], [
+            'first_name.required' => 'الاسم الأول مطلوب.',
+            'first_name.between' => 'يجب أن يكون الاسم الأول بين 2 و 100 حرف.',
+            'last_name.required' => 'الاسم الأخير مطلوب.',
+            'last_name.between' => 'يجب أن يكون الاسم الأخير بين 2 و 100 حرف.',
+            'email.required' => 'البريد الإلكتروني مطلوب.',
+            'email.email' => 'يجب أن يكون البريد الإلكتروني صالحًا.',
+            'email.max' => 'يجب ألا يتجاوز البريد الإلكتروني 100 حرف.',
+            'email.unique' => 'البريد الإلكتروني مستخدم بالفعل.',
+            'phone_number.required' => 'رقم الهاتف مطلوب.',
+            'phone_number.regex' => 'تنسيق رقم الهاتف غير صالح.',
+            'password.required' => 'كلمة المرور مطلوبة.',
+            'password.min' => 'يجب أن تكون كلمة المرور على الأقل 6 أحرف.',
+        ]);
+
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 400);
         }
@@ -259,15 +273,13 @@ class AuthController extends Controller
         ]);
 
         $token = Auth::login($user);
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User created successfully',
+        return $this->successResponse([
             'user' => $user,
             'authorisation' => [
                 'token' => $token,
                 'type' => 'bearer',
             ]
-        ]);
+        ], 'تمت عملية انشاء الحساب بنجاح');
     }
 
     public function logout()
@@ -279,16 +291,10 @@ class AuthController extends Controller
             Auth::logout();
 
             // إرجاع رسالة نجاح في حالة تسجيل الخروج بنجاح
-            return response()->json([
-                'status' => 'success', // حالة الاستجابة
-                'message' => 'Successfully logged out', // رسالة الاستجابة
-            ]);
+            return $this->successResponse(null, 'تم تسجيل الخروج بنجاح');
         }
 
         // إذا لم يكن المستخدم مسجل الدخول، يتم إرجاع رسالة خطأ
-        return response()->json([
-            'status' => 'error', // حالة الاستجابة تشير إلى وجود خطأ
-            'message' => 'No user was logged in', // رسالة الخطأ
-        ], 401); // كود الحالة HTTP 401 يشير إلى Unauthorized
+        return $this->errorResponse('لم يتم تسجيل دخول أي مستخدم', 401);
     }
 }

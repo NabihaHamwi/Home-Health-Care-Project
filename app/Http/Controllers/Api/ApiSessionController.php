@@ -108,7 +108,7 @@ class ApiSessionController extends Controller
             $patient_name = Patient::where('id', $patient_id)->firstOrFail()->full_name;
             // إضافة patient_name كخاصية لكائن session
             $session->patient_name = $patient_name;
-            @dd($session);
+          //  @dd($session);
             return $this->successResponse(new SessionResource($session), 'Session details retrieved successfully');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Sessions not found', 404);
@@ -212,8 +212,8 @@ class ApiSessionController extends Controller
         $validator = Validator::make($request->all(), [
             'start_time' => 'required',
             'appointment_id' => 'required',
-            'activities.*.value' => 'required|max:255',
-            'activities.*.time' => 'required'
+          //  'activities.*.value' => 'required|max:255',
+           // 'activities.*.time' => 'required'
         ]);
 
         if ($validator->fails()) {
