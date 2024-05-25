@@ -194,35 +194,37 @@ class AuthController extends Controller
     {
         // التحقق من صحة بيانات الإدخال
         $validator = Validator::make($request->all(), [
-                    'email' => 'required|email',
-                    'password' => 'required|string|min:6',
-                ],);
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ], [
+            'email.required' => 'البريد الإلكتروني مطلوب.',
+            'email.email' => 'يجب أن يكون البريد الإلكتروني عنوانًا صالحًا.',
+            'password.required' => 'كلمة المرور مطلوبة.',
+            'password.string' => 'يجب أن تكون كلمة المرور نصًا.',
+            'password.min' => 'يجب أن تكون كلمة المرور على الأقل 6 أحرف.',
+        ]);
+
         if ($validator->fails()) {
-            return $this->errorResponse($validator->errors(), 400);
+            return $this->errorResponse($validator->errors(), 422);
         }
+
+
         $credentials = $request->only('email', 'password');
 
-        $token = Auth::attempt($credentials);
-        if (!$token) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-
         try {
-            if (! $token = JWTAuth::attempt($credentials)) {
+            if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
-    
+
         return response()->json([
             'status' => 'success',
             'token' => $token
         ]);
     }
+
     public function register(Request $request)
     {
         // التحقق من صحة بيانات الإدخال
@@ -243,9 +245,9 @@ class AuthController extends Controller
             'email' => $request->email,
             'phone_number' => $request->phone_number,
             'password' => $request->password,
-            'role'=> 'user' ,
-            'created_at'=>  now(),
-        
+            'role' => 'user',
+            'created_at' =>  now(),
+
         ]);
 
         $token = Auth::login($user);
@@ -270,5 +272,4 @@ class AuthController extends Controller
             'message' => 'Successfully logged out',
         ]);
     }
-
 }

@@ -73,8 +73,9 @@ return [
         'users' => [
             Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
 
-            'driver' => 'database',
-            'table' => 'users',
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+    
         ],
     ],
 
