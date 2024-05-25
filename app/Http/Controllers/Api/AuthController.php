@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
-
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
 
 use App\Models\User;
 
@@ -38,35 +38,32 @@ class AuthController extends Controller
             'email.email' => 'يجب أن يكون البريد الإلكتروني عنوانًا صالحًا.',
             'password.required' => 'كلمة السر مطلوبة ادخل كلمة السر الخاصة بك للمتابعة',
         ]);
-    
+
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 422);
         }
-    
+
         try {
             // محاولة الحصول على الرمز باستخدام بيانات الاعتماد المُصادق عليها
             if (!$token = JWTAuth::attempt($validator->validated())) {
                 // إذا فشلت المصادقة، يتم إرجاع رسالة خطأ
                 return $this->errorResponse('فشلت المصادقة تأكد من الايميل او كلمة السر', 401);
             }
-    
+
             // الحصول على بيانات المستخدم
             $user = JWTAuth::user();
-    
         } catch (JWTException $e) {
             // في حالة وجود خطأ أثناء إنشاء الرمز، يتم إرجاع رسالة خطأ
             return $this->errorResponse('حدث خطأ أثناء انشاء ال token', 500);
         }
-    
+
         // إذا تم الحصول على الرمز بنجاح، يتم إرجاعه مع بيانات المستخدم في استجابة JSON
-        return $this->successResponse(compact('token', 'user'), 200);
+        return $this->successResponse(compact('user', 'token'), 200);
     }
-    
+
+    //_______________________________________________________________________________________________________________
 
 
-
-
-    //----------------------------------------------
 
     // public function login(Request $request)
     // {
@@ -147,36 +144,47 @@ class AuthController extends Controller
     //     return $this->successResponse(compact('user', 'token'), "تم انشاء المستخدم", 200);
     // }
 
-    //______________________________________________________________________________________
-
-
-    // public function logout()
-    // {
-    //     auth()->logout();
-    //     return response()->json(['message' => 'User successfully signed out']);
-    // }
-
-
     //_____________________________________________________________________________________
 
-    // public function refreshToken() {
-    //     try {
-    //         if (!$token = JWTAuth::getToken()) {
-    //             return $this->errorResponse('token_not_provided', 401);
-    //         }
 
-    //         $newToken = JWTAuth::refresh($token);
 
-    //         return $this->successResponse(['token' => $newToken]);
-    //     } catch (TokenInvalidException $e) {
-    //         return $this->errorResponse('token_invalid', 401);
-    //     } catch (JWTException $e) {
-    //         return $this->errorResponse('could_not_refresh_token', 500);
-    //     }
-    // }
-    // }
+    public function refreshToken()
+    {
+        try {
+            if (!$token = JWTAuth::getToken()) {
+                return $this->errorResponse('token_not_provided', 401);
+            }
+
+            // التحقق من الـ blacklist قبل التحديث
+            if (JWTAuth::getPayload($token)->get('blacklisted')) {
+                // الـ token مبطل والمستخدم مسجل خروج بالفعل
+                return $this->errorResponse('token_blacklisted', 401);
+                //           // تحقق من وجود الـ token وصلاحيته
+                // if (Auth::guest() || !Auth::tokenValid()) {
+                //     // إذا كان الـ token غير موجود أو غير صالح
+                //     return response()->json(['error' => 'Token is invalid or missing'], 401);
+                // }
+
+            }
+
+            $newToken = JWTAuth::refresh($token);
+
+            return $this->successResponse(['token' => $newToken]);
+        } catch (TokenInvalidException $e) {
+            return $this->errorResponse('token_invalid', 401);
+        } catch (TokenBlacklistedException $e) {
+            // الـ token مبطل والمستخدم مسجل خروج بالفعل
+            return $this->errorResponse('token_blacklisted', 401);
+        } catch (JWTException $e) {
+            return $this->errorResponse('could_not_refresh_token', 500);
+        }
+    }
+
+
     //_____________________________________________________________________________
 
+
+    
     // public function userProfile() {
     //     return response()->json(auth()->user());
     // }
@@ -269,19 +277,18 @@ class AuthController extends Controller
         if (Auth::check()) {
             // تسجيل خروج المستخدم باستخدام Auth::logout()
             Auth::logout();
-    
+
             // إرجاع رسالة نجاح في حالة تسجيل الخروج بنجاح
             return response()->json([
                 'status' => 'success', // حالة الاستجابة
                 'message' => 'Successfully logged out', // رسالة الاستجابة
             ]);
         }
-    
+
         // إذا لم يكن المستخدم مسجل الدخول، يتم إرجاع رسالة خطأ
         return response()->json([
             'status' => 'error', // حالة الاستجابة تشير إلى وجود خطأ
             'message' => 'No user was logged in', // رسالة الخطأ
         ], 401); // كود الحالة HTTP 401 يشير إلى Unauthorized
     }
-    
 }
