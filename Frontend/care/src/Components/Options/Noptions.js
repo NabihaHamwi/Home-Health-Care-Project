@@ -1,59 +1,68 @@
+// Noptions.js
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './Noptions.css';
-import { useLocation, Link } from 'react-router-dom';
+import { Card, ListGroup, Image } from 'react-bootstrap';
+import { useSearchParams } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
+import './Noptions.css'; // استيراد ملف الستايل
 
 const Noptions = () => {
+  const [searchParams] = useSearchParams();
   const [providers, setProviders] = useState([]);
-  const location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // استخدم location.search للحصول على المعاملات من الرابط
-    axios.get(`http://127.0.0.1:8000/api/search/result${location.search}`)
+    const queryParams = searchParams.toString();
+    fetch(`http://127.0.0.1:8000/api/search/result?${queryParams}`)
       .then(response => {
-        // تأكد من أن response.data هو مصفوفة
-        if (Array.isArray(response.data)) {
-          // تحديث الحالة بالبيانات المسترجعة
-          setProviders(response.data);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data && data.status === 200 && data.data) {
+          setProviders(data.data);
         } else {
-          // إذا لم تكن مصفوفة، يمكنك تعيين قيمة افتراضية أو إظهار رسالة خطأ
-          console.error('Expected an array of providers, but got:', response.data);
+          throw new Error('No providers found');
         }
       })
       .catch(error => {
-        console.error('There was an error fetching the providers:', error);
-      });
-  }, [location.search]);
-
-  // إضافة دالة لإرسال البيانات إلى الخادم
-  const sendToDatabase = (data) => {
-    axios.get('http://127.0.0.1:8000/api/search/result', data)
-      .then(response => {
-        console.log('Data sent successfully:', response);
+        setError(`Error: ${error.message}`);
       })
-      .catch(error => {
-        console.error('Error sending data:', error);
+      .finally(() => {
+        setLoading(false);
       });
-  };
+  }, [searchParams]);
 
-  // استدعاء sendToDatabase عند الحاجة لإرسال البيانات
-  // على سبيل المثال، يمكن استدعاؤها عند النقر على زر الحجز
+  if (loading) return <div className="loading">جار التحميل...</div>;
+  if (error) return <div className="error">حدث خطأ: {error}</div>;
 
   return (
-    <div className="providers-container">
-      {providers.map(provider => (
-        <div key={provider.id} className="provider-card">
-          <img src={provider.image || 'default-image.png'} alt={provider.name} className="provider-image" />
-          <div className="provider-info">
-            <h3 className="provider-name">{provider.name}</h3>
-            <p className="provider-experience">{provider.experience} سنوات خبرة</p>
-            <Link to={`/booking/${provider.id}`}>
-              <button className="booking-button" onClick={() => sendToDatabase(provider)}>احجز الآن</button>
-            </Link>
-          </div>
-        </div>
-      ))}
-    </div>
+    <ErrorBoundary FallbackComponent={() => <div className="error">حدث خطأ أثناء التحميل</div>}>
+    <h2 className='title all '>مقدمي الرعاية المطابقين للمواصفات</h2>
+      <div className="containers container all">
+      
+        {providers?.length > 0 ? (
+          providers.map(provider => (
+            <Card className="options-card" key={provider.id}>
+              <Card.Header as="h5">{provider.first_name} {provider.last_name}</Card.Header>
+              <ListGroup variant="flush">
+                <ListGroup.Item>
+                  <Image src={provider.image} roundedCircle className="provider-image" />
+                </ListGroup.Item>
+                <ListGroup.Item>العمر: {provider.age}</ListGroup.Item>
+                <ListGroup.Item>الخبرة: {provider.experience} سنوات</ListGroup.Item>
+                <ListGroup.Item>الخدمة: {provider.services.map(service => service.name).join(', ')}</ListGroup.Item>
+                {/* ... وهكذا لبقية الخصائص */}
+              </ListGroup>
+            </Card>
+          ))
+        ) : (
+          <div className="no-providers">لم يتم العثور على مقدمي الرعاية</div>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 };
 

@@ -120,9 +120,9 @@ Route::group(
         // عرض ايام عمل مقدم الرعاية
         Route::get('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
         // تعبئة ايام العمل
-        Route::post('/careprovidersworktimes', [HealthcareProviderWorktimeController::class, 'store'])->name('careprovidersworktimes.store');
+      //  Route::post('/careprovidersworktimes', [HealthcareProviderWorktimeController::class, 'store'])->name('careprovidersworktimes.store');
         // تحديث بيانات ايام العمل
-        Route::put('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'update'])->name('careprovidersworktimes.update');
+        Route::put('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'store_update'])->name('careprovidersworktimes.store_update');
         // حذف ايام العمل وإعادة تعبئتها من جديد
         Route::delete('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'destroy'])->name('careprovidersworktimes.destroy');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -137,14 +137,14 @@ Route::group(
 
 
 Route::group([
-    'middleware' => 'api',
+    'middleware' => 'api' , 'custom.auth',
     'prefix' => 'auth'
 ], function ($router) {
-    Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/refresh', [AuthController::class, 'refresh']);
-    Route::get('/user-profile', [AuthController::class, 'userProfile']);
+    Route::post('/refresh', [AuthController::class, 'refreshToken']);
+  //  Route::get('/user-profile', [AuthController::class, 'userProfile']);
 });
 
 //___________________________________________________________________________
