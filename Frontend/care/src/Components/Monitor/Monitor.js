@@ -10,7 +10,7 @@ const Monitor = () => {
 
   useEffect(() => {
   
-    fetch('http://127.0.0.1:8000/api/sessions/{session}')
+    fetch('http://127.0.0.1:8000/api/sessions/1')
       .then(response => response.json())
       .then(data => {
         setPatientData(data.data.activities);
