@@ -16,31 +16,31 @@ class SessionController extends Controller
 
     public function session_summary($patient_id)
     {
-       
-            $latestAppointment = Appointment::where('patient_id', $patient_id)
-                ->where('caregiver_status', 'حضور')
-                ->latest('id')
-                ->first();
+
+        $latestAppointment = Appointment::where('patient_id', $patient_id)
+            ->where('caregiver_status', 'حضور')
+            ->latest('id')
+            ->first();
 
 
-            if (!$latestAppointment) {
-                return $this->errorResponse('No appointments found for the patient', 404);
-            }
+        if (!$latestAppointment) {
+            return $this->errorResponse('No appointments found for the patient', 404);
+        }
 
-            // ابحث عن آخر جلسة لهذا الموعد
-            dd($latestSession = $latestAppointment->sessions()
-                ->latest('id')
-                ->with(['activities'])
-                ->first());
+        // ابحث عن آخر جلسة لهذا الموعد
+        $latestSession = $latestAppointment->sessions()
+            ->latest('id')
+            ->with(['activities'])
+            ->first();
 
-            if (!$latestSession) {
-                return $this->errorResponse('No sessions found for the latest appointment', 404);
-            }
+        if (!$latestSession) {
+            return $this->errorResponse('No sessions found for the latest appointment', 404);
+        }
 
-            // إرجاع تفاصيل الجلسة والأنشطة المتعلقة بها
-            return $this->successResponse(new SessionResource($latestSession), 'Latest session summary retrieved successfully');
+        // إرجاع تفاصيل الجلسة والأنشطة المتعلقة بها
+        return $this->successResponse(new SessionResource($latestSession), 'Latest session summary retrieved successfully');
     }
-    }
+}
 //     // public function show($session_id)
 //     // {
 //     //    $session = Session::with(['appointment', 'activities'])->find($session_id);
