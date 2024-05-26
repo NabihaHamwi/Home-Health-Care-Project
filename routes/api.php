@@ -195,3 +195,6 @@ Route::get('/reserved-appointments/{provider}/{week}', [AppointmentsController::
 
 //Api for set appointment status
 Route::put('/set_appointment_status/{appointment}', [AppointmentsController::class, 'update'])->name(name:'appointments.update');
+
+//Api for reserve an appointment
+Route::post('/appointments', [AppointmentsController::class, 'store'])->name(name:'appointments.store');

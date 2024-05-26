@@ -5,10 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
+use App\Models\HealthcareProvider;
 use App\Models\HealthcareProviderWorktime;
+use App\Models\Patient;
+use App\Models\Service;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AppointmentsController extends Controller
 {
@@ -232,6 +237,68 @@ class AppointmentsController extends Controller
             return $this->errorResponse('Provider not found', 404);
         } catch (\Illuminate\Database\QueryException $e) {
             return $this->errorResponse('erorr query', 500);
+        }
+    }
+
+    public function store(Request $request)
+    {
+        $providers = HealthcareProvider::all()->pluck('id')->toArray();
+        $patients = Patient::all()->pluck('id')->toArray();
+        $services = Service::all()->pluck('id')->toArray();
+        $validator = Validator::make($request->all(), [
+            'provider_id' => [
+                'required',
+                Rule::in($providers),
+            ],
+            'patient_id' => [
+                'required',
+                Rule::in($patients),
+            ],
+            'service_id' => [
+                'required',
+                Rule::in($services),
+            ],
+            'appointment_date' => [
+                'required',
+                'date',
+                'after_or_equal:today'
+            ],
+            'appointment_start_time' => [
+                'required',
+                'date_format:H:i:s',
+            ],
+            'appointment_duration' => [
+                'required',
+                'date_format:H:i:s',
+            ],
+            'patient_location' => [
+                'required',
+                'string'
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors(), 422);
+        }
+        try {
+            $appointment = Appointment::create([
+                'patient_id'=> $request->patient_id,
+                'healthcare_provider_id' => $request->provider_id,
+                'service_id' => $request->service_id,
+                'appointment_date' => $request->appointment_date,
+                'appointment_start_time' => $request->appointment_start_time,
+                'appointment_duration' => $request->appointment_duration,
+                'patient_location' => $request->patient_location,
+                'appointment_status' => 'الطلب قيدالانتظار',
+                'caregiver_status' => '-'
+            ]);
+            return $this->successResponse($appointment, 'appointment details retrieved successfully');
+            // $testing = "this work right";
+            // return $this->successResponse($testing, 'successful');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Provider not found', 404);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $this->errorResponse($e, 500);
         }
     }
 }
