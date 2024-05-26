@@ -13,14 +13,13 @@ class AppointmentResource extends JsonResource
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
-    {
+    { 
         if ($request->route()->named('appointments.show_pending_appointments'))
             return [
+                "group_id" => $this->group_id,
                 "appointment_id" => $this->id,
                 "patient_name" => $this->patient->full_name,
-                "appointment_date" => $this->appointment_date,
-                "appointment_start_at" => $this->appointment_start_time,
-                "appointment_duration" => $this->appointment_duration
+                "service_name" => $this->service->name
             ];
         if ($request->route()->named('appointments.show_reserved_appointments')) {
             $patientfile = [

@@ -242,36 +242,37 @@ class AppointmentsController extends Controller
 
     public function store(Request $request)
     {
-        $providers = HealthcareProvider::all()->pluck('id')->toArray();
-        $patients = Patient::all()->pluck('id')->toArray();
-        $services = Service::all()->pluck('id')->toArray();
+        $providers = HealthcareProvider::pluck('id')->toArray();
+        $patients = Patient::pluck('id')->toArray();
+        $services = Service::pluck('id')->toArray();
         $validator = Validator::make($request->all(), [
-            'provider_id' => [
+            'appointments' => ['required', 'array'],
+            'appointments.*.provider_id' => [
                 'required',
                 Rule::in($providers),
             ],
-            'patient_id' => [
+            'appointments.*.patient_id' => [
                 'required',
                 Rule::in($patients),
             ],
-            'service_id' => [
+            'appointments.*.service_id' => [
                 'required',
                 Rule::in($services),
             ],
-            'appointment_date' => [
+            'appointments.*.appointment_date' => [
                 'required',
                 'date',
                 'after_or_equal:today'
             ],
-            'appointment_start_time' => [
+            'appointments.*.appointment_start_time' => [
                 'required',
-                'date_format:H:i:s',
+                'date_format:H:i',
             ],
-            'appointment_duration' => [
+            'appointments.*.appointment_duration' => [
                 'required',
-                'date_format:H:i:s',
+                'date_format:H:i',
             ],
-            'patient_location' => [
+            'appointments.*.patient_location' => [
                 'required',
                 'string'
             ],
@@ -281,17 +282,24 @@ class AppointmentsController extends Controller
             return $this->errorResponse($validator->errors(), 422);
         }
         try {
-            $appointment = Appointment::create([
-                'patient_id'=> $request->patient_id,
-                'healthcare_provider_id' => $request->provider_id,
-                'service_id' => $request->service_id,
-                'appointment_date' => $request->appointment_date,
-                'appointment_start_time' => $request->appointment_start_time,
-                'appointment_duration' => $request->appointment_duration,
-                'patient_location' => $request->patient_location,
-                'appointment_status' => 'الطلب قيدالانتظار',
-                'caregiver_status' => '-'
-            ]);
+            if (sizeof($request->appointments) > 1) {
+                $highestGroupId = Appointment::max('group_id');
+                $group_id = $highestGroupId + 1;
+            } else
+                $group_id = null;
+            foreach ($request->appointments as $partrequest)
+                $appointment = Appointment::create([
+                    'group_id' => $group_id,
+                    'patient_id' => $partrequest['patient_id'],
+                    'healthcare_provider_id' => $partrequest['provider_id'],
+                    'service_id' => $partrequest['service_id'],
+                    'appointment_date' => $partrequest['appointment_date'],
+                    'appointment_start_time' => $partrequest['appointment_start_time'],
+                    'appointment_duration' => $partrequest['appointment_duration'],
+                    'patient_location' => $partrequest['patient_location'],
+                    'appointment_status' => 'الطلب قيدالانتظار',
+                    'caregiver_status' => '-'
+                ]);
             return $this->successResponse($appointment, 'appointment details retrieved successfully');
             // $testing = "this work right";
             // return $this->successResponse($testing, 'successful');

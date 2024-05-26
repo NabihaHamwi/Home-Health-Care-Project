@@ -10,6 +10,7 @@ class Appointment extends Model
     use HasFactory;
 
     protected $fillable = [
+        'group_id',
         'patient_id',
         'healthcare_provider_id',
         'service_id',
@@ -26,13 +27,17 @@ class Appointment extends Model
         return $this->belongsTo(Patient::class);
     }
 
+    public function healthcare_provider_id(){ //healthcare_provider_id in healthcare_providers table => names is important
+        return $this -> belongsTo(HealthcareProvider::class);
+    }
+
     public function sessions()
     {
         return $this->hasMany(Session::class);
     }
-    public function services()
+    public function service()
     {
-        return $this->hasMany(Service::class);
+        return $this->belongsTo(Service::class);
     }
 //     public function activities()
 // {
