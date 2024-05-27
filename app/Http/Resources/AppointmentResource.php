@@ -13,7 +13,7 @@ class AppointmentResource extends JsonResource
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
-    { 
+    {
         if ($request->route()->named('appointments.show_pending_appointments'))
             return [
                 "group_id" => $this->group_id,
@@ -21,7 +21,7 @@ class AppointmentResource extends JsonResource
                 "patient_name" => $this->patient->full_name,
                 "service_name" => $this->service->name
             ];
-        if ($request->route()->named('appointments.show_reserved_appointments')||$request->route()->named('appointments.show_pending_appointment')) {
+        if ($request->route()->named('appointments.show_reserved_appointments') || $request->route()->named('appointments.show_pending_appointment')) {
             $patientfile = [
                 'previous_diseases_surgeries' => $this->patient->previous_diseases_surgeries,
                 'chronic_diseases' => $this->patient->chronic_diseases,
@@ -54,6 +54,16 @@ class AppointmentResource extends JsonResource
                 "appointment_status" => $this->appointment_status
             ];
 
+        if ($request->route()->named('appointments.show_my_appointments'))
+            return [
+                "appointment_id" => $this->id,
+                "appointment_date" => $this->appointment_date,
+                "appointment_start_at" => $this->appointment_start_time,
+                "appointment_duration" => $this->appointment_duration,
+                "appointment_status" => $this->appointment_status,
+                "service_name" => $this->service->name,
+                "provider_name"=> $this->healthcare_provider->user->first_name ." ". $this->healthcare_provider->user->last_name,
+            ];
         // if ($request->route()->named('appointment.show_reserved_appointment')) {
         //     $patientfile = [
         //         'previous_diseases_surgeries' => $this->patient->previous_diseases_surgeries,

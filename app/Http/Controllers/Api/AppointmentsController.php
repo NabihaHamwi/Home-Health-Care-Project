@@ -163,11 +163,11 @@ class AppointmentsController extends Controller
         return $this->successResponse($available_times, 'available times retrieved successfully', 200);
     }
 
-    public function show_appointment($appointmentID)
+    public function show_my_appointments($patient_id)
     {
         try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
-            $appointment = Appointment::findOrFail($appointmentID);
-            return $this->successResponse(new AppointmentResource($appointment), 'appointment details retrieved successfully');
+            $appointments = Appointment::where('patient_id', $patient_id)->get();
+            return $this->successResponse(AppointmentResource::collection($appointments), 'appointment for patient retrived successfuly');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Provider not found', 404);
         } catch (\Illuminate\Database\QueryException $e) {

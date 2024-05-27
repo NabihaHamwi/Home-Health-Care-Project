@@ -27,7 +27,7 @@ class Appointment extends Model
         return $this->belongsTo(Patient::class);
     }
 
-    public function healthcare_provider_id(){ //healthcare_provider_id in healthcare_providers table => names is important
+    public function healthcare_provider(){ //healthcare_provider_id in healthcare_providers table => names is important
         return $this -> belongsTo(HealthcareProvider::class);
     }
 

@@ -185,7 +185,7 @@ Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show'
 Route::get('/pending-appointments/{provider}', [AppointmentsController::class, 'show_pending_appointments'])->name(name:'appointments.show_pending_appointments');
 
 //Api for show one of pending appointments details
-Route::get('/pending-appointment/{appointment}/{group?}', [AppointmentsController::class, 'show_pending_appointments_details'])->name(name: 'appointments.show_pending_appointment');
+Route::get('/pending-appointment-details/{appointment}/{group?}', [AppointmentsController::class, 'show_pending_appointments_details'])->name(name: 'appointments.show_pending_appointment');
 
 //Api for show the reserved appointments (for care providers) for a one week
 Route::get('/reserved-appointments/{provider}/{week}', [AppointmentsController::class, 'show_reserved_appointments'])->name(name:'appointments.show_reserved_appointments');
@@ -194,7 +194,10 @@ Route::get('/reserved-appointments/{provider}/{week}', [AppointmentsController::
 // Route::get('/reserved-appointments/{appointment}', [AppointmentsController::class, 'show_appointment'])->name(name: 'appointment.show_reserved_appointment');
 
 //Api for set appointment status
-Route::put('/set_appointment_status/{appointment?}/{group?}', [AppointmentsController::class, 'update'])->name(name:'appointments.update');
+Route::put('/set_appointment_status/{appointment}/{group?}', [AppointmentsController::class, 'update'])->name(name:'appointments.update');
 
 //Api for reserve an appointment
 Route::post('/appointments', [AppointmentsController::class, 'store'])->name(name:'appointments.store');
+
+//Api for show appoitments (my appointments) for patient
+Route::get('/my_appointments/{patient}', [AppointmentsController::class, 'show_my_appointments'])->name(name:'appointments.show_my_appointments');
