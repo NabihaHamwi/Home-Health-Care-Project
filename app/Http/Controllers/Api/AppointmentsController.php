@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
+use function PHPUnit\Framework\isEmpty;
+
 class AppointmentsController extends Controller
 {
     use ApiResponseTrait;
@@ -173,19 +175,6 @@ class AppointmentsController extends Controller
         }
     }
 
-    public function show_reserved_appointment($appointmentID)
-    {
-        try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
-            $appointment = Appointment::findOrFail($appointmentID);
-            return $this->successResponse(new AppointmentResource($appointment), 'appointment details retrieved successfully');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Provider not found', 404);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse('erorr query', 500);
-        }
-    }
-
-
     public function show_reserved_appointments($providerID, $week = 1)
     {
         /// return the date of today and the week we are in
@@ -223,20 +212,44 @@ class AppointmentsController extends Controller
         return $this->successResponse(AppointmentResource::collection($appointments), 'pending appointment retrieved successfully', 200);
     }
 
-    public function update($appointmentID, Request $request)
+    public function show_pending_appointments_details($appointmentID, $groupID = null)
+    {
+        try {
+            if ($groupID == null) {
+                $appointments = Appointment::where('id', $appointmentID)->get();
+            } else
+                $appointments = Appointment::where('group_id', $groupID)->get();
+
+            return $this->successResponse(AppointmentResource::collection($appointments), 'appointment details retrieved successfully');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse($e, 404);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $this->errorResponse($e, 500);
+        }
+    }
+
+    public function update(Request $request, $appointmentID, $groupID = null)
     {
         try {
             $status = $request->status;
-            $appointment = Appointment::findOrFail($appointmentID);
-            if ($status)
-                $appointment->update(['appointment_status' => 'الطلب مقبول']);
+            if ($groupID == null)
+                $appointments = Appointment::where('id', $appointmentID)->get();
             else
-                $appointment->update(['appointment_status' => 'الطلب مرفوض']);
-            return $this->successResponse(new AppointmentResource($appointment), 'appointment details retrieved successfully');
+                $appointments = Appointment::where('group_id', $groupID)->get();
+            foreach ($appointments as $appointment) {
+                if ($status)
+                    $appointment->update(['appointment_status' => 'الطلب مقبول']);
+                else
+                    $appointment->update(['appointment_status' => 'الطلب مرفوض']);
+            }
+            if ($appointments->isEmpty())
+                return $this->errorResponse('cannot found the appointment in db to update the status', 404);
+            else
+                return $this->successResponse(AppointmentResource::collection($appointments), 'appointment details retrieved successfully');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Provider not found', 404);
+            return $this->errorResponse($e, 404);
         } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse('erorr query', 500);
+            return $this->errorResponse($e, 500);
         }
     }
 

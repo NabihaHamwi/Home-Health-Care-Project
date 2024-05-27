@@ -21,7 +21,7 @@ class AppointmentResource extends JsonResource
                 "patient_name" => $this->patient->full_name,
                 "service_name" => $this->service->name
             ];
-        if ($request->route()->named('appointments.show_reserved_appointments')) {
+        if ($request->route()->named('appointments.show_reserved_appointments')||$request->route()->named('appointments.show_pending_appointment')) {
             $patientfile = [
                 'previous_diseases_surgeries' => $this->patient->previous_diseases_surgeries,
                 'chronic_diseases' => $this->patient->chronic_diseases,
@@ -42,7 +42,7 @@ class AppointmentResource extends JsonResource
                 "appointment_date" => $this->appointment_date,
                 "appointment_start_at" => $this->appointment_start_time,
                 "appointment_duration" => $this->appointment_duration,
-                // "service_name" => $this->service->service_name
+                "service_name" => $this->service->name
             ];
         }
         if ($request->route()->named('appointments.update'))
