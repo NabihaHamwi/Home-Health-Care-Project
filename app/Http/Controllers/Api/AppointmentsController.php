@@ -300,7 +300,58 @@ class AppointmentsController extends Controller
                 $group_id = $highestGroupId + 1;
             } else
                 $group_id = null;
-            foreach ($request->appointments as $partrequest)
+            foreach ($request->appointments as $partrequest) {
+                // حساب تاريخ نهاية الموعد للتأكد من القدرة على حجزه
+                $start_of_appointment = new Carbon($partrequest['appointment_start_time']);
+                $start_of_this_appointment = new Carbon($partrequest['appointment_start_time']);
+                $duration = new Carbon($partrequest['appointment_duration']);
+                $hours = $duration->get('hour');
+                $minutes = $duration->get('minute');
+                $end_of_this_appointment = $start_of_appointment->add('hour', $hours);
+                $end_of_this_appointment = $start_of_appointment->add('minute', $minutes);
+                // @dd($end_of_this_appointment);
+
+                // استخراج اسم اليوم الموافق لتاريخ الموعد لمقارنته مع ساعات عمل مقدم الرعاية في ذلك اليوم
+                $date = Carbon::parse($partrequest['appointment_date']);
+                $dayName = $date->locale('ar')->isoFormat('dddd');
+                $worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $partrequest['provider_id'])->where('day_name', $dayName)->get();
+                $valid = 0;
+                foreach ($worktimes as $worktime) {
+                    $start = Carbon::createFromFormat('H:i:s', "$worktime->start_time");
+                    $end = Carbon::createFromFormat('H:i:s', "$worktime->end_time");
+                    if (($start->get('hour') <= $start_of_this_appointment->get('hour')) && ($end->get('hour') >= $end_of_this_appointment->get('hour'))) {
+                        $valid = 1;
+                        break;
+                    }
+                }
+                // @dd($valid);
+                if (!$valid) {
+                    return $this->errorResponse('the appointment time is not valid', 409);
+                }
+
+                // التأكد إذا كان الموعد لا يتعارض مع موعد محجوز مسبقاً
+                $reversed_appointments = Appointment::where('healthcare_provider_id', $partrequest['provider_id'])->where('appointment_date', $partrequest['appointment_date'])->get();
+                // @dd($reversed_appointments);
+                $valid = 0;
+                foreach ($reversed_appointments as $Rappointment) {
+                    $calc_start = Carbon::createFromFormat('H:i:s', "$Rappointment->appointment_start_time");
+                    $start = Carbon::createFromFormat('H:i:s', "$Rappointment->appointment_start_time");
+                    $Rduration = new Carbon($Rappointment->appointment_duration);
+                    $Rhours = $Rduration->get('hour');
+                    $Rminutes = $Rduration->get('minute');
+                    $end = $calc_start->add('hour', $Rhours);
+                    $end = $calc_start->add('minute', $Rminutes);
+                    // @dd($end);
+                    if (($start->get('hour') == $end_of_this_appointment->get('hour') && $start->get('minute') >= $end_of_this_appointment->get('minute'))||($start->get('hour') > $end_of_this_appointment->get('hour')) || ($end->get('hour') <= $start_of_this_appointment->get('hour'))) {
+                        $valid = 1;
+                        break;
+                    }
+                }
+                if (!$valid) {
+                    return $this->errorResponse('the appointment time is alreday reserved', 409);
+                }
+
+                // إذا تم المرور على كل ما سبق ولم نجد أي تعرض مع الداتا بيز تتم عملية طلب الموعد
                 $appointment = Appointment::create([
                     'group_id' => $group_id,
                     'patient_id' => $partrequest['patient_id'],
@@ -313,9 +364,8 @@ class AppointmentsController extends Controller
                     'appointment_status' => 'الطلب قيدالانتظار',
                     'caregiver_status' => '-'
                 ]);
-            return $this->successResponse($appointment, 'appointment details retrieved successfully');
-            // $testing = "this work right";
-            // return $this->successResponse($testing, 'successful');
+            }
+            return $this->successResponse($appointment, 'appointment reserved successfully');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->errorResponse('Provider not found', 404);
         } catch (\Illuminate\Database\QueryException $e) {
