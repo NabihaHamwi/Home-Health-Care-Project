@@ -368,9 +368,9 @@ class AppointmentsController extends Controller
                         $valid = 1;
                         break;
                     }
-                }
-                if (!$valid) {
-                    return $this->errorResponse('the appointment time is alreday reserved', 409);
+                    if (!$valid) {
+                        return $this->errorResponse('the appointment time is alreday reserved', 409);
+                    }
                 }
 
                 // إذا تم المرور على كل ما سبق ولم نجد أي تعرض مع الداتا بيز تتم عملية طلب الموعد
