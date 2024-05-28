@@ -237,9 +237,31 @@ class AppointmentsController extends Controller
             else
                 $appointments = Appointment::where('group_id', $groupID)->get();
             foreach ($appointments as $appointment) {
-                if ($status)
+                if ($status) {
                     $appointment->update(['appointment_status' => 'الطلب مقبول']);
-                else
+                    // $app_id = $appointment->pluck('id');
+                    // @dd($app_id);
+                    // $same_appointments = Appointment::where('healthcare_provider_id', )->where('appointment_date', )->get();
+                    // // @dd($reversed_appointments);
+                    // $valid = 0;
+                    // foreach ($same_appointments as $Rappointment) {
+                    //     $calc_start = Carbon::createFromFormat('H:i:s', "$Rappointment->appointment_start_time");
+                    //     $start = Carbon::createFromFormat('H:i:s', "$Rappointment->appointment_start_time");
+                    //     $Rduration = new Carbon($Rappointment->appointment_duration);
+                    //     $Rhours = $Rduration->get('hour');
+                    //     $Rminutes = $Rduration->get('minute');
+                    //     $end = $calc_start->add('hour', $Rhours);
+                    //     $end = $calc_start->add('minute', $Rminutes);
+                    // @dd($end);
+                    //     if (($start->get('hour') == $end_of_this_appointment->get('hour') && $start->get('minute') >= $end_of_this_appointment->get('minute')) || ($start->get('hour') > $end_of_this_appointment->get('hour')) || ($end->get('hour') <= $start_of_this_appointment->get('hour'))) {
+                    //         $valid = 1;
+                    //         break;
+                    //     }
+                    // }
+                    // if (!$valid) {
+                    //     return $this->errorResponse('the appointment time is alreday reserved', 409);
+                    // }
+                } else
                     $appointment->update(['appointment_status' => 'الطلب مرفوض']);
             }
             if ($appointments->isEmpty())
@@ -342,7 +364,7 @@ class AppointmentsController extends Controller
                     $end = $calc_start->add('hour', $Rhours);
                     $end = $calc_start->add('minute', $Rminutes);
                     // @dd($end);
-                    if (($start->get('hour') == $end_of_this_appointment->get('hour') && $start->get('minute') >= $end_of_this_appointment->get('minute'))||($start->get('hour') > $end_of_this_appointment->get('hour')) || ($end->get('hour') <= $start_of_this_appointment->get('hour'))) {
+                    if (($start->get('hour') == $end_of_this_appointment->get('hour') && $start->get('minute') >= $end_of_this_appointment->get('minute')) || ($start->get('hour') > $end_of_this_appointment->get('hour')) || ($end->get('hour') <= $start_of_this_appointment->get('hour'))) {
                         $valid = 1;
                         break;
                     }
