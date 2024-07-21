@@ -239,8 +239,8 @@ class AppointmentsController extends Controller
             foreach ($appointments as $appointment) {
                 if ($status) {
                     $appointment->update(['appointment_status' => 'الطلب مقبول']);
-                    // $app_id = $appointment->pluck('id');
-                    // @dd($app_id);
+                    $appointment_date = Appointment::where('id', $appointmentID)->value('appointment_date');
+                    // @dd($appointment_date);
                     // $same_appointments = Appointment::where('healthcare_provider_id', )->where('appointment_date', )->get();
                     // // @dd($reversed_appointments);
                     // $valid = 0;
@@ -363,15 +363,22 @@ class AppointmentsController extends Controller
                     $Rminutes = $Rduration->get('minute');
                     $end = $calc_start->add('hour', $Rhours);
                     $end = $calc_start->add('minute', $Rminutes);
-                    // @dd($end);
-                    if (($start->get('hour') == $end_of_this_appointment->get('hour') && $start->get('minute') >= $end_of_this_appointment->get('minute')) || ($start->get('hour') > $end_of_this_appointment->get('hour')) || ($end->get('hour') <= $start_of_this_appointment->get('hour'))) {
+                    // $x = $start->get('hour');
+                    // @dd(($x) > ($end_of_this_appointment->get('hour')));
+                    if (($start->get('hour') === $end_of_this_appointment->get('hour') && $start->get('minute') >= $end_of_this_appointment->get('minute'))
+                        || (($start->get('hour')) > ($end_of_this_appointment->get('hour')))
+                        || ($end->get('hour') <= $start_of_this_appointment->get('hour'))
+                    ) {
                         $valid = 1;
                         break;
                     }
+
+                    if (!$valid) {
+                        return $this->errorResponse('the appointment time is alreday reserved', 409);
+                    }
                 }
-                if (!$valid) {
-                    return $this->errorResponse('the appointment time is alreday reserved', 409);
-                }
+                // @dd($x);
+
 
                 // إذا تم المرور على كل ما سبق ولم نجد أي تعرض مع الداتا بيز تتم عملية طلب الموعد
                 $appointment = Appointment::create([
