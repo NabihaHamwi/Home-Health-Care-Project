@@ -1,21 +1,29 @@
 .table {
-    margin-top: 20px;
-  }
+  margin-top: 20px;
+  direction: rtl
+}
 
-  .button-reject,.button-accept {
-    background-color: rgba(98, 179, 33, 0.932) !important;
-    height: 30px;
-    width: 50px;
-    border-radius: 10px;
-    border: none;
-    color: white;
-    text-align: center !important;
-  }
-  th,tr,td{
-    text-align: center;
-    
-  }
-  th{
-    background-color: var(--main-color--) !important;
-    color: #fff !important;
-  }
+.button-reject,.button-accept {
+  /* margin-left: 50px !important; */
+  background-color: rgba(95, 167, 36, 0.932) !important;
+  height: 30px;
+  width: 50px;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  text-align: center !important;
+}
+
+td{
+  font-size: 19px;
+  font-weight: bold;
+}
+th{
+  background: linear-gradient(45deg,#426a8f ,#6fa8dc ) !important;
+  color: #fff !important;
+  height: 60px;
+  width: auto;
+  /* text-align: center !important; */
+  font-size: 18px;
+  text-align: center;
+}

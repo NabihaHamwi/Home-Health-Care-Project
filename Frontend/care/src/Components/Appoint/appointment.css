@@ -78,6 +78,7 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   transition: box-shadow 0.3s ease-in-out;
+  
 }
 
 .booking-form input:focus,
@@ -99,4 +100,11 @@
 
 .booking-form button:active {
   transform: translateY(2px);
+}
+.slot.available {
+  background-color: lightblue !important;
+}
+.slot.booked {
+  background-color: rgba(236, 89, 44, 0.561) !important;
+  color: white; /* لجعل النص واضحًا على خلفية داكنة */
 }

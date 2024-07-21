@@ -31,7 +31,7 @@ class AppointmentsTableSeeder extends Seeder
         Appointment::create([
             'id' => 2,
             'group_id' => 1,
-            'patient_id' => 1,
+            'patient_id' => 2,
             'healthcare_provider_id' => 1,
             'service_id' => 1,
             'appointment_date' => '2024-05-28',
@@ -45,7 +45,7 @@ class AppointmentsTableSeeder extends Seeder
         ]);
         Appointment::create([
             'id' => 3,
-            'patient_id' => 1,
+            'patient_id' => 3,
             'healthcare_provider_id' => 2,
             'service_id' => 2,
             'appointment_date' => '2024-05-31',
