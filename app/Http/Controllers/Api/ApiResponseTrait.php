@@ -18,10 +18,10 @@ trait ApiResponseTrait
     public function errorResponse($message, $code)
     {
         $errorDetails = [
-            // self::HTTP_BAD_REQUEST => [
-            //     'error_type' => 'Bad Request',
-            //     'solution' => 'تحقق من صيغة الطلب.'
-            // ],
+            self::HTTP_BAD_REQUEST => [
+                'error_type' => 'Bad Request',
+                'solution' => 'تحقق من صيغة الطلب.'
+            ],
             self::HTTP_UNAUTHORIZED => [
                 'error_type' => 'Unauthorized',
                 'solution' => 'التحقق من بيانات المصادقة.'

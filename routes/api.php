@@ -134,15 +134,15 @@ Route::group(
 
 //_____________________________________________________________________
 
-Route::get('/register', [AuthController::class, 'register']);
+//Route::get('/register', [AuthController::class, 'register']);
 
 
 Route::group([], function ($router) {
     Route::get('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/refresh', [AuthController::class, 'refreshToken']);
-  //  Route::get('/user-profile', [AuthController::class, 'userProfile']);
+   // Route::post('/refresh', [AuthController::class, 'refreshToken']);
+    //  Route::get('/user-profile', [AuthController::class, 'userProfile']);
 });
 
 //___________________________________________________________________________

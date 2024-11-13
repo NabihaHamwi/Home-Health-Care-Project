@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -20,8 +21,8 @@ use App\Models\User;
  */
 class AuthController extends Controller
 {
-   // use ApiResponseTrait;
-    
+    use ApiResponseTrait;
+
 
     public function register(Request $request)
     {
@@ -29,7 +30,7 @@ class AuthController extends Controller
             "first_name" => 'required|string|between:2,15',
             "last_name" => 'required|string|between:2,15',
             'email' => 'required|email|max:50|unique:users',
-          //  'gender' => 'required|in:male ,female',
+            //  'gender' => 'required|in:male ,female',
             'password' => 'required|min:6',
             'phone_number' => ['required', 'unique:users', 'regex:/^(\\+|00)?\d{1,3}\d{6,10}$/']
         ]);
@@ -38,12 +39,10 @@ class AuthController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
         //التحقق من طلب المستخدم , قبل ادخال معلومات المستخدم لقاعدة البيانات
-        if($request->has('role'))
-        {
-            $role = $request->role ;
-        }
-        else{
-            $role ="user";
+        if ($request->has('role')) {
+            $role = $request->role;
+        } else {
+            $role = "user";
         }
         $newuser = User::create([
             "email" => $request->email,
@@ -51,11 +50,74 @@ class AuthController extends Controller
             "last_name" => $request->last_name,
             "gender" => $request->gender,
             "phone_number" => $request->phone_number,
-            "password" => hash::make($request->password) ,
+            "password" => hash::make($request->password),
             "role" => $role
         ]);
 
         return Response('تمت عملية انشاء الحساب بنجاح');
     }
+    public function login(Request $request)
+    {
+        // التحقق من صحة المدخلات
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string'
+        ]);
+    
+        // إذا فشلت التحقق من صحة المدخلات، إرجاع رسالة خطأ
+        if ($validator->fails()) {
+            return $this->errorResponse('Invalid credentials', 401);
+        }
+    
+        // البحث عن المستخدم بالبريد الإلكتروني
+        $user = User::where('email', $request->email)->first();
+    
+        // التحقق من أن المستخدم موجود وأن كلمة المرور صحيحة
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return $this->errorResponse('Invalid credentials', 401);
+        }
+    
+        // محاولة المصادقة باستخدام بيانات الاعتماد
+        if (!$token = JWTAuth::attempt($request->only('email', 'password'))) {
+            return $this->errorResponse('Unauthorized', 401);
+        }
+    
+        // الحصول على المستخدم المصادق عليه
+        $user = auth()->user();
+    
+        // إعادة تعيين الجلسة باستخدام رمز JWT
+        JWTAuth::setToken($token);
+        JWTAuth::authenticate($token);
+    
+        // إرجاع استجابة نجاح مع رمز الوصول ومعلومات المستخدم
+        return $this->successResponse([
+            'access_token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'role' => $user->role
+            ],
+        ], 200);
+    }
+    
+    public function logout()
+{
+    // التحقق من تسجيل دخول المستخدم
+    if (auth()->check()) {
+        // تسجيل خروج المستخدم
+        auth()->logout();
+
+        // إرجاع رسالة نجاح في حالة تسجيل الخروج بنجاح
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تسجيل الخروج بنجاح'
+        ], 200);
+    }
+
+    // إرجاع رسالة خطأ في حالة عدم تسجيل أي مستخدم الدخول
+    return response()->json([
+        'success' => false,
+        'message' => 'لم يتم تسجيل دخول أي مستخدم'
+    ], 401);
+}
 
 }
