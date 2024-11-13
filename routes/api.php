@@ -120,7 +120,7 @@ Route::group(
         // عرض ايام عمل مقدم الرعاية
         Route::get('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
         // تعبئة ايام العمل
-      //  Route::post('/careprovidersworktimes', [HealthcareProviderWorktimeController::class, 'store'])->name('careprovidersworktimes.store');
+        //  Route::post('/careprovidersworktimes', [HealthcareProviderWorktimeController::class, 'store'])->name('careprovidersworktimes.store');
         // تحديث بيانات ايام العمل
         Route::put('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'store_update'])->name('careprovidersworktimes.store_update');
         // حذف ايام العمل وإعادة تعبئتها من جديد
@@ -134,13 +134,11 @@ Route::group(
 
 //_____________________________________________________________________
 
+Route::get('/register', [AuthController::class, 'register']);
 
 
-Route::group([
-    'middleware' => 'api' , 'custom.auth',
-    'prefix' => 'auth'
-], function ($router) {
-    Route::post('/register', [AuthController::class, 'register']);
+Route::group([], function ($router) {
+    Route::get('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refreshToken']);
@@ -182,22 +180,22 @@ Route::get('/providers/{provider}', [HealthcareProviderController::class, 'show'
 //Route::get('/available-days/{provider}', [AppointmentsController::class, 'show_available_days'])->name(name: 'appointment.show_available_days');
 
 //Api for show the pending appointments (for care providers) for a one week
-Route::get('/pending-appointments/{provider}', [AppointmentsController::class, 'show_pending_appointments'])->name(name:'appointments.show_pending_appointments');
+Route::get('/pending-appointments/{provider}', [AppointmentsController::class, 'show_pending_appointments'])->name(name: 'appointments.show_pending_appointments');
 
 //Api for show one of pending appointments details
 Route::get('/pending-appointment-details/{appointment}/{group?}', [AppointmentsController::class, 'show_pending_appointments_details'])->name(name: 'appointments.show_pending_appointment');
 
 //Api for show the reserved appointments (for care providers) for a one week
-Route::get('/reserved-appointments/{provider}/{week}', [AppointmentsController::class, 'show_reserved_appointments'])->name(name:'appointments.show_reserved_appointments');
+Route::get('/reserved-appointments/{provider}/{week}', [AppointmentsController::class, 'show_reserved_appointments'])->name(name: 'appointments.show_reserved_appointments');
 
 //Api for show one of reserved appointments
 // Route::get('/reserved-appointments/{appointment}', [AppointmentsController::class, 'show_appointment'])->name(name: 'appointment.show_reserved_appointment');
 
 //Api for set appointment status
-Route::put('/set_appointment_status/{appointment}/{group?}', [AppointmentsController::class, 'update'])->name(name:'appointments.update');
+Route::put('/set_appointment_status/{appointment}/{group?}', [AppointmentsController::class, 'update'])->name(name: 'appointments.update');
 
 //Api for reserve an appointment
-Route::post('/appointments', [AppointmentsController::class, 'store'])->name(name:'appointments.store');
+Route::post('/appointments', [AppointmentsController::class, 'store'])->name(name: 'appointments.store');
 
 //Api for show appoitments (my appointments) for patient
-Route::get('/my_appointments/{patient}', [AppointmentsController::class, 'show_my_appointments'])->name(name:'appointments.show_my_appointments');
+Route::get('/my_appointments/{patient}', [AppointmentsController::class, 'show_my_appointments'])->name(name: 'appointments.show_my_appointments');
