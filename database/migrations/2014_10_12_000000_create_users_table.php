@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('role', ['admin', 'provider', 'user']);
             $table->string('first_name');
             $table->string('last_name');
+            $table->enum('gender' , ['male', 'female'] );
             $table->string('phone_number');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();

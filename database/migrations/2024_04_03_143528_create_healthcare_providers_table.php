@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('healthcare_providers', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->enum('gender' , ['أنثى', 'ذكر'] ); 
+            $table->foreign('user_id')->references('id')->on('users'); 
             $table->integer('age');
             $table->enum('relationship_status' , ['أعزب','متزوج','أرمل','مطلق' ,'-' ]);
             $table->integer('experience');
