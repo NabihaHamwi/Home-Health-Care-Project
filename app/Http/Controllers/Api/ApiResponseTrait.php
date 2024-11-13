@@ -4,6 +4,7 @@ namespace App\http\Controllers\Api;
 
 trait ApiResponseTrait
 {
+    
     const HTTP_BAD_REQUEST = 400;
     const HTTP_UNAUTHORIZED = 401;
     const HTTP_FORBIDDEN = 403;

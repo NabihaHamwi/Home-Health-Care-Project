@@ -60,7 +60,7 @@ class ApiPatientController extends Controller
             [
                 'full_name' => 'required|min:3|max:10',
                 'gender' => 'required|in:أنثى,ذكر',
-                'birth_date' => 'required|date',
+                'birth_date' => 'date',
                 'relationship_status' => 'required|in:أعزب,متزوج,مطلق,أرمل',
                 'address' => 'required|max:255',
                 'phone_number' => ['required', 'regex:/^(00963|\+963)?\d{9}$/'],
