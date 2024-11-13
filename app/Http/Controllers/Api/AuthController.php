@@ -30,7 +30,7 @@ class AuthController extends Controller
             "first_name" => 'required|string|between:2,15',
             "last_name" => 'required|string|between:2,15',
             'email' => 'required|email|max:50|unique:users',
-            //  'gender' => 'required|in:male ,female',
+            'gender' => 'required|in:male ,female',
             'password' => 'required|min:6',
             'phone_number' => ['required', 'unique:users', 'regex:/^(\\+|00)?\d{1,3}\d{6,10}$/']
         ]);
