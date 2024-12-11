@@ -38,12 +38,13 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-        //التحقق من طلب المستخدم , قبل ادخال معلومات المستخدم لقاعدة البيانات
+        
         if ($request->has('role')) {
             $role = $request->role;
         } else {
             $role = "user";
         }
+
         $newuser = User::create([
             "email" => $request->email,
             "first_name" => $request->first_name,
@@ -53,8 +54,7 @@ class AuthController extends Controller
             "password" => hash::make($request->password),
             "role" => $role
         ]);
-
-        return Response('تمت عملية انشاء الحساب بنجاح');
+        return response()->json(['message' => 'تمت عملية انشاء الحساب بنجاح']);
     }
     public function login(Request $request)
     {
@@ -66,7 +66,7 @@ class AuthController extends Controller
 
         // إذا فشلت التحقق من صحة المدخلات، إرجاع رسالة خطأ
         if ($validator->fails()) {
-            return $this->errorResponse('Invalid credentials', 401);
+            return response()->json(['errors' => $validator->errors()], 400);
         }
 
         // البحث عن المستخدم بالبريد الإلكتروني

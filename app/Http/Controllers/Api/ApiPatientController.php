@@ -12,21 +12,28 @@ class ApiPatientController extends Controller
 {
     use ApiResponseTrait;
 
-    public function index()
+    // public function index()
+    // {
+    //     try {
+    //         $patients = Patient::paginate(10);
+    //         if (!$patients) {
+    //             return $this->errorResponse('not found', 404);
+    //         }
+    //         return $this->successResponse(PatientResource::collection($patients), 'Sessions retrieved successfully', 200);
+    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+    //         return $this->errorResponse('Patient not found', 404);
+    //     } catch (\Illuminate\Database\QueryException $e) {
+    //         return $this->errorResponse('Error querying the database', 500);
+    //     }
+    // }
+    //--------------------------------------------------------------------------
+    public function showpatients($userid)
     {
-        try {
-            $patients = Patient::paginate(10);
-            if (!$patients) {
-                return $this->errorResponse('not found', 404);
-            }
-            return $this->successResponse(PatientResource::collection($patients), 'Sessions retrieved successfully', 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Patient not found', 404);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse('Error querying the database', 500);
-        }
+     $patients = Patient::where('user_id', $userid)->get(['id' ,'full_name']);
+     return response()->json([$patients ,
+        'success' => true,
+    ], 200);
     }
-
 
 
     //___________________________________________________________________
