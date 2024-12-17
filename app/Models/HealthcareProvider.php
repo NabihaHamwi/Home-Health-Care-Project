@@ -13,9 +13,9 @@ class HealthcareProvider extends Model
         return $this -> belongsTo(User::class);
     }
 
-    public function skills()
+    public function personaltraits()
     {
-        return $this->belongsToMany(Skill::class);
+        return $this->belongsToMany(PersonalTrait::class);
     }
 
     public function services()
