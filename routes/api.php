@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HealthcareProviderWorktimeController;
 use App\Http\Controllers\Api\HealthcareProviderController;
 use App\Http\Controllers\Api\SkillController;
+use App\Http\Controllers\Api\SubServiceController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
 use App\Models\HealthcareProviderWorktime;
@@ -167,7 +168,7 @@ Route::get('/search', [SearchController::class, 'index'])->name(name: 'search.in
 Route::get('/services', [ServiceController::class, 'index'])->name(name: 'services.index');
 
 //Api for the result of search (care providers)
-Route::get('/search/result', [SearchController::class, 'search'])->name(name: 'search.result');
+Route::get('/search/result', [SearchController::class, 'search1'])->name(name: 'search.result');
 
 //Api for show all providers (just for testing)
 Route::get('/providers', [HealthcareProviderController::class, 'index'])->name(name: 'providers.index');
@@ -199,3 +200,9 @@ Route::post('/appointments', [AppointmentsController::class, 'store'])->name(nam
 
 //Api for show appoitments (my appointments) for patient
 Route::get('/my_appointments/{patient}', [AppointmentsController::class, 'show_my_appointments'])->name(name: 'appointments.show_my_appointments');
+
+//Api for show all Subservices
+Route::get('/subservices', [SubServiceController::class, 'index'])->name(name: 'subservices.index');
+
+//Api for show all Subservices under spesific Service
+Route::get('/subservices/{service}', [SubServiceController::class, 'show'])->name(name: 'subservices.show');
