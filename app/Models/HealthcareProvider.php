@@ -20,7 +20,7 @@ class HealthcareProvider extends Model
 
     public function services()
     {
-        return $this->belongsToMany(Service::class);
+        return $this->belongsToMany(Service::class)->withPivot('subservice_name');
     }
 
     public function appointments()
