@@ -30,7 +30,7 @@ class AuthController extends Controller
             "first_name" => 'required|string|between:2,15',
             "last_name" => 'required|string|between:2,15',
             'email' => 'required|email|max:50|unique:users',
-            'gender' => 'required|in:male ,female',
+            'gender' => 'required|in:male,female',
             'password' => 'required|min:6',
             'phone_number' => ['required', 'unique:users', 'regex:/^(\\+|00)?\d{1,3}\d{6,10}$/']
         ]);
@@ -63,32 +63,32 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|string'
         ]);
-    
+
         // إذا فشلت التحقق من صحة المدخلات، إرجاع رسالة خطأ
         if ($validator->fails()) {
             return $this->errorResponse('Invalid credentials', 401);
         }
-    
+
         // البحث عن المستخدم بالبريد الإلكتروني
         $user = User::where('email', $request->email)->first();
-    
+
         // التحقق من أن المستخدم موجود وأن كلمة المرور صحيحة
         if (!$user || !Hash::check($request->password, $user->password)) {
             return $this->errorResponse('Invalid credentials', 401);
         }
-    
+
         // محاولة المصادقة باستخدام بيانات الاعتماد
         if (!$token = JWTAuth::attempt($request->only('email', 'password'))) {
             return $this->errorResponse('Unauthorized', 401);
         }
-    
+
         // الحصول على المستخدم المصادق عليه
         $user = auth()->user();
-    
+
         // إعادة تعيين الجلسة باستخدام رمز JWT
         JWTAuth::setToken($token);
         JWTAuth::authenticate($token);
-    
+
         // إرجاع استجابة نجاح مع رمز الوصول ومعلومات المستخدم
         return $this->successResponse([
             'access_token' => $token,
@@ -98,26 +98,25 @@ class AuthController extends Controller
             ],
         ], 200);
     }
-    
+
     public function logout()
-{
-    // التحقق من تسجيل دخول المستخدم
-    if (auth()->check()) {
-        // تسجيل خروج المستخدم
-        auth()->logout();
+    {
+        // التحقق من تسجيل دخول المستخدم
+        if (auth()->check()) {
+            // تسجيل خروج المستخدم
+            auth()->logout();
 
-        // إرجاع رسالة نجاح في حالة تسجيل الخروج بنجاح
+            // إرجاع رسالة نجاح في حالة تسجيل الخروج بنجاح
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تسجيل الخروج بنجاح'
+            ], 200);
+        }
+
+        // إرجاع رسالة خطأ في حالة عدم تسجيل أي مستخدم الدخول
         return response()->json([
-            'success' => true,
-            'message' => 'تم تسجيل الخروج بنجاح'
-        ], 200);
+            'success' => false,
+            'message' => 'لم يتم تسجيل دخول أي مستخدم'
+        ], 401);
     }
-
-    // إرجاع رسالة خطأ في حالة عدم تسجيل أي مستخدم الدخول
-    return response()->json([
-        'success' => false,
-        'message' => 'لم يتم تسجيل دخول أي مستخدم'
-    ], 401);
-}
-
 }
