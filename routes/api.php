@@ -89,22 +89,18 @@ use PHPUnit\Framework\Attributes\Group;
 
 
 //عرض معلومات المريض
-// Route::group(
-//     [],
-//     function ($router) {
-
-//         //عرض جميع المرضى (بعض المعلومات) للادمن
-//         Route::get('/patients', [ApiPatientController::class, 'index'])->name('patients.index');
-//         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//         //عرض معلومات السجل الطبي لمريض معين
-//        // Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
-//         //انشاء مريض من قبل المستخدم
-//         Route::post('/patients', [ApiPatientController::class, 'store'])->name('patients.store');
-//         //تحديث المعلومات 
-//         Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
-//         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//     }
-// );
+Route::group(
+    [],
+    function ($router) {  
+        //عرض معلومات السجل الطبي لمريض معين
+       // Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
+        //انشاء مريض من قبل المستخدم
+        Route::post('/addpatient/{userid}', [ApiPatientController::class, 'store'])->name('patients.store');
+        //تحديث المعلومات 
+       // Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    }
+);
 
 
 
@@ -145,7 +141,7 @@ Route::group([], function ($router) {
 
 //___________________________________________________________________________
 
- Route::get('/patients/{userid}' ,[ApiPatientController::class ,'showpatients'])->name('patients.showpatients');
+
 
 
 

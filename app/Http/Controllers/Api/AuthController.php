@@ -74,12 +74,12 @@ class AuthController extends Controller
 
         // التحقق من أن المستخدم موجود وأن كلمة المرور صحيحة
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return $this->errorResponse('Invalid credentials', 401);
+            return response()->json(['errors' => 'Invalid credentials'], 401);
         }
 
         // محاولة المصادقة باستخدام بيانات الاعتماد
         if (!$token = JWTAuth::attempt($request->only('email', 'password'))) {
-            return $this->errorResponse('Unauthorized', 401);
+            return response()->json(['errors' => 'Unauthorized'], 401);
         }
 
         // الحصول على المستخدم المصادق عليه
@@ -90,7 +90,7 @@ class AuthController extends Controller
         JWTAuth::authenticate($token);
 
         // إرجاع استجابة نجاح مع رمز الوصول ومعلومات المستخدم
-        return $this->successResponse([
+        return response()->json([
             'access_token' => $token,
             'user' => [
                 'id' => $user->id,

@@ -11,50 +11,8 @@ use Illuminate\Support\Facades\Validator;
 class ApiPatientController extends Controller
 {
     use ApiResponseTrait;
-
-    // public function index()
-    // {
-    //     try {
-    //         $patients = Patient::paginate(10);
-    //         if (!$patients) {
-    //             return $this->errorResponse('not found', 404);
-    //         }
-    //         return $this->successResponse(PatientResource::collection($patients), 'Sessions retrieved successfully', 200);
-    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-    //         return $this->errorResponse('Patient not found', 404);
-    //     } catch (\Illuminate\Database\QueryException $e) {
-    //         return $this->errorResponse('Error querying the database', 500);
-    //     }
-    // }
-    //--------------------------------------------------------------------------
-    public function showpatients($userid)
-    {
-     $patients = Patient::where('user_id', $userid)->get(['id' ,'full_name']);
-     return response()->json([$patients ,
-        'success' => true,
-    ], 200);
-    }
-
-
-    //___________________________________________________________________
-
-
-
-    public function show($sessionId)
-    {
-        try {
-            $patient = Patient::findOrFail($sessionId);
-            return $this->successResponse(new PatientResource($patient), 'Patient retrieved successfully', 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Patient not found', 404);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse('Error querying the database', 500);
-        }
-    }
-
-    //______________________________________________________________
-
-
+// public $object= new ApiPatientController(); 
+    //add Patient 
     public function store(request $request)
     {
         // فحص إذا كان المريض موجود بالفعل في قاعدة البيانات
@@ -144,31 +102,10 @@ class ApiPatientController extends Controller
             return $this->errorResponse('Patient not found', 404);
         }
     }
-
-
-
     //_________________________________________________________________
-
-
-
-    // public function edit($sessionId)
-    // {
-    //     try {
-    //         $patient = Patient::findOrFail($sessionId);
-    //         return $this->successResponse(new PatientResource($patient), 'Patient retrieved successfully', 200);
-    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-    //         return $this->errorResponse('Patient not found', 404);
-    //     } catch (\Illuminate\Database\QueryException $e) {
-    //         return $this->errorResponse('Error querying the database', 500);
-    //     }
-    // }
-
-
-
-    //_______________________________________________________________
-
-
-
+   
+   
+    //التعديل على معلومات المريض
     public function update(Request $request, $sessionId)
     {
         $validator = Validator::make(
@@ -241,5 +178,16 @@ class ApiPatientController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse('Error occurred while updating the patient', 500);
         }
+    }
+    //______________________________________________________________________
+
+    //عرض مرضى المستخدم
+    public function show($userid)
+    {
+        $patients = Patient::where('user_id', $userid)->get(['id', 'full_name']);
+        return response()->json([
+            $patients,
+            'success' => true,
+        ], 200);
     }
 }
