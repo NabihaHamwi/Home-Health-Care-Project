@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class SkillResource extends JsonResource
+class SubserviceResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,9 +14,10 @@ class SkillResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'id'=> $this-> id,
-            'name'=> $this->skill_name
-        ];
+        if ($request->route()->named('subservices.index') || $request->route()->named('subservices.show'))
+            return [
+                'name' => $this->subservice_name
+            ];
+        return parent::toArray($request);
     }
 }

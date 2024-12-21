@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('healthcare_provider_skill', function (Blueprint $table) {
-            $table->foreignId('healthcare_provider_id')->constrained()->onDelete('cascade');
-            $table->foreignId('skill_id')->constrained()->onDelete('cascade');
+        Schema::create('personal_traits', function (Blueprint $table) {
+            $table->id();
+            $table->string('trait_name');
             $table->timestamps();
         });
     }
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('healthcare_provider_skill');
+        Schema::dropIfExists('personal_traits');
     }
 };
