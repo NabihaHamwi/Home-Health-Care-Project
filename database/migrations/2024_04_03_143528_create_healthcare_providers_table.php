@@ -21,6 +21,15 @@ return new class extends Migration
             $table->binary('personal_image')->nullable();
             $table->enum('physical_strength', ['basic', 'advanced', 'professional']); //القوة البدنية
             $table->float('min_working_hours_per_day'); 
+            $table->boolean('is_available')->default(false);
+            $table->string('location_name')->nullable();
+            $table->float('latitude')->nullable()->check(function ($query) {
+                $query->whereBetween('latitude', [33.47, 33.55]);
+            });
+            $table->float('longitude')->nullable()->check(function ($query) {
+                $query->whereBetween('longitude', [36.24, 36.32]);
+            });
+            
             $table->timestamps();
         });
     }
