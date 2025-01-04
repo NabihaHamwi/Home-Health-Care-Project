@@ -206,3 +206,6 @@ Route::get('/subservices', [SubServiceController::class, 'index'])->name(name: '
 
 //Api for show all Subservices under spesific Service
 Route::get('/subservices/{service}', [SubServiceController::class, 'show'])->name(name: 'subservices.show');
+
+//Api for send selected subservices
+Route::post('/selected_subservices', [SubServiceController::class, 'selectSubservices'])->name(name: 'subservices.selectSubservices');

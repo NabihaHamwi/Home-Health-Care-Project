@@ -58,20 +58,23 @@ class SearchController extends Controller
         return response($response);
     }
 
-    function calculate_similarity($query, $provider)
+    function calculate_similarity($query, $subservices, $provider)
     {
         $score = 0;
-        $strength_weight = 0.3;
-        $specialize_weight = 0.2;
-        $gender_wight = 0.2;
-        $age_weight = 0.1;
-        $experience_weight = 0.1;
-        $skills_weight = 0.1;
+        $skills_weight = 0.4;
+        $gender_weight = 0.3;
+        $experience_weight = 0.15;
+        $strength_weight = 0.1;
+        $age_weight = 0.05;
+
         $strength_levels = ['basic' => 1, 'advanced' => 2, 'professional' => 3];
         $experience_levels = ['basic' => 1, 'advanced' => 2, 'professional' => 3];
 
         if ($query['age'])
             $score += $age_weight * (1 - abs($query['age'] - $provider->age) / 100);
+
+        if ($query['gender'])
+            $score += $gender_weight * ($query['gender'] == $provider->user->gender ? 1 : 0);
 
         if ($query['experience']) {
             if ($provider->experience <= 5)
@@ -86,13 +89,12 @@ class SearchController extends Controller
         if ($query['physical_strength'])
             $score += $strength_weight * (1 - abs($strength_levels[$query['physical_strength']] - $strength_levels[$provider->physical_strength]) / 3);
 
-        if (isset($query['subservices'])) {
-            $skills_1 = $query['subservices'];
-            $skills_2 = $provider->subservices->pluck('id')->toArray();
+        if ($subservices) {
+            $skills_1 = $subservices;
+            $skills_2 = $provider->subservices->pluck('subservice_name')->toArray();
             $intersection = count(array_intersect($skills_1, $skills_2));
             $union = count(array_unique(array_merge($skills_1, $skills_2)));
             $skills_similarity = $intersection / $union;
-            
             $score += $skills_weight * $skills_similarity;
         }
 
@@ -102,12 +104,22 @@ class SearchController extends Controller
 
     function search1(Request $request)
     {
-        $providers = Service::find(1)->healthcareProviders;
+        try {
+            $serviceId = $request->session()->get('selected_service_id');
+            $subservice = $request->session()->get('selected_subservice');
+
+            if (is_null($serviceId) || is_null($subservice))
+                throw new \Exception('null value in session');
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'فشلت العملية', 'error' => $e->getMessage()], 500);
+        }
+        $providers = HealthcareProviderResource::collection(Service::find($serviceId)->healthcareProviders->unique('id'));
         $results = [];
 
         foreach ($providers as $provider) {
-            $similarity = SearchController::calculate_similarity($request, $provider);
-            $results[] = ['provider' => $provider, 'similarity' => $similarity];
+            $similarity = SearchController::calculate_similarity($request, $subservice, $provider);
+            $results[] = ['provider' => $provider, 
+            'similarity' => $similarity];
         }
 
         usort($results, function ($a, $b) {

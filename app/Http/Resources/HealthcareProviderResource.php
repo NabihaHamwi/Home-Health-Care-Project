@@ -16,16 +16,21 @@ class HealthcareProviderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $skills = SkillResource::collection(HealthcareProvider::find($this->id)->skills);
+        // $skills = SkillResource::collection(HealthcareProvider::find($this->id)->skills);
         $services = ServiceResource::collection(HealthcareProvider::find($this->id)->services);
+        $subservices =  SubserviceResource::collection(HealthcareProvider::find($this->id)->subservices);
         if ($request->route()->named('search.result'))
             return [
                 'id' => $this->id,
                 'first_name' => $this->user->first_name,
                 'last_name' => $this->user->last_name,
+                'gender' => $this->user->gender,
                 'age' => $this->age,
                 'experience' => $this->experience,
-                'services' => $services
+                'physical_strength' => $this->physical_strength,
+                'services' => $services,
+                'subservices' => $subservices,
+                'personal_image' => $this->personal_image
             ];
         else if ($request->route()->named('providers.index'))
             return [
@@ -39,7 +44,7 @@ class HealthcareProviderResource extends JsonResource
                 'physical_strength' => $this->physical_strength,
                 'min_working_hours_per_day' => $this->min_working_hours_per_day,
                 'services' => $services,
-                'skills' => $skills
+                // 'skills' => $skills
             ];
         else if ($request->route()->named('providers.show'))
             return [
@@ -52,7 +57,7 @@ class HealthcareProviderResource extends JsonResource
                 'personal_image' => $this->personal_image,
                 'physical_strength' => $this->physical_strength,
                 'services' => $services,
-                'skills' => $skills
+                // 'skills' => $skills
             ];
     }
 }

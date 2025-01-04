@@ -35,6 +35,11 @@ class HealthcareProvider extends Model
         return $this->hasMany(HealthcareProviderWorktime::class);
     }
 
+    public function subservices()
+    {
+        return $this->hasMany(HealthcareProviderService::class);
+    }
+
 
 
     

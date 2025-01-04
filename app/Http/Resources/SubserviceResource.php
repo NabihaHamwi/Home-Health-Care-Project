@@ -14,7 +14,7 @@ class SubserviceResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        if ($request->route()->named('subservices.index') || $request->route()->named('subservices.show'))
+        if ($request->route()->named('subservices.index') || $request->route()->named('subservices.show') || $request->route()->named('search.result'))
             return [
                 'name' => $this->subservice_name
             ];

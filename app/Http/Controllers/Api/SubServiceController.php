@@ -29,8 +29,10 @@ class SubServiceController extends Controller
         return response($response);
     }
 
-    public function show($service_id)
+    public function show(Request $request, $service_id)
     {
+        $request->session()->put('selected_service_id', $service_id);
+
         $subservices = HealthcareProviderService::all()->where('service_id', $service_id)->unique('subservice_name');
         $subservicesCollection = SubserviceResource::collection($subservices);
         if ($subservicesCollection->isEmpty()) {
@@ -47,5 +49,16 @@ class SubServiceController extends Controller
             ];
         }
         return response($response);
+    }
+
+    public function selectSubservices(Request $request)
+    {
+        try {
+            $subservice = $request->input('subservice_ids');
+            $request->session()->put('selected_subservice', $subservice);
+            return response()->json(['message' => 'تمت العملية بنجاح', 'data' => $subservice], $status = 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'فشلت العملية', 'error' => $e->getMessage()], 500);
+        }
     }
 }
