@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\SubServiceController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
 use App\Models\HealthcareProviderWorktime;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\Group;
@@ -30,23 +31,23 @@ use PHPUnit\Framework\Attributes\Group;
 */
 
 // لوحة المتابعة
-Route::group(
-    [],
-    function ($router) {
-        //عرض جميع جلسات المرضى للادمن
-        //   Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
-        //عرض جميع جلسات المريض
-        //    Route::get('/sessions/patientsessoins/{patient}', [ApiSessionController::class, 'patientSessions'])->name('sessions.patientsession');
+// Route::group(
+//     [],
+//     function ($router) {
+//         //عرض جميع جلسات المرضى للادمن
+//         //   Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
+//         //عرض جميع جلسات المريض
+//         //    Route::get('/sessions/patientsessoins/{patient}', [ApiSessionController::class, 'patientSessions'])->name('sessions.patientsession');
 
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
-        // انشاء جلسة
-        Route::get('/sessions/create/{appointment}', [ApiSessionController::class, 'create'])->name('sessions.create');
-        //عرض جلسة للمريض
-        Route::get('/sessions/{session}', [ApiSessionController::class, 'show'])->name('sessions.show');
-        //عرض لوحة المتابعة 
-        Route::get('sessions/panel/{patient_id}', [ApiSessionController::class, 'monitoring_panel'])->name('sessions.panel');
-        //تخزين بيانات جلسة
-        Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
+//         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+//         // انشاء جلسة
+//         Route::get('/sessions/create/{appointment}', [ApiSessionController::class, 'create'])->name('sessions.create');
+//         //عرض جلسة للمريض
+//         Route::get('/sessions/{session}', [ApiSessionController::class, 'show'])->name('sessions.show');
+//         //عرض لوحة المتابعة 
+//         Route::get('sessions/panel/{patient_id}', [ApiSessionController::class, 'monitoring_panel'])->name('sessions.panel');
+//         //تخزين بيانات جلسة
+//         Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         //عرض واجهة التعديل على الجلسة
@@ -55,14 +56,14 @@ Route::group(
 
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //تحديث بيانات الجلسة
-        Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name('sessions.update');
+      //  Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name('sessions.update');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
         //حذف بيانات الجلسة 
         // Route::delete('/sessions/{session}', [ApiSessionController::class, 'destroy'])->name('sessions.destroy');
-    }
-);
+   // }
+//);
 
 
 //___________________________________________________________________
@@ -70,19 +71,19 @@ Route::group(
 
 
 //عرض اسئلة الاستبيان
-Route::group(
-    [],
-    function ($router) {
-        //عرض اسئلة الاستبيان
-        Route::get('/survey', [ApiSurveyController::class, 'index'])->name('survey.index');
-        //اضافة سؤال جديد للاستبيان من قبل الادمن
-        Route::post('/survey/add-question', [ApiSurveyController::class, 'addQuestions'])->name('survey.add');
-        // التعديل على سؤال من قبل الادمن
-        Route::put('/survey/update-question', [ApiSurveyController::class, 'updateQuestions'])->name('survey.update');
-        //حذف سؤال من الاستبيان من قبل الادمن
-        Route::delete('/survey/delete-question',  [ApiSurveyController::class, 'deleteQuestions'])->name('survey.delete');
-    }
-);
+// Route::group(
+//     [],
+//     function ($router) {
+//         //عرض اسئلة الاستبيان
+//         Route::get('/survey', [ApiSurveyController::class, 'index'])->name('survey.index');
+//         //اضافة سؤال جديد للاستبيان من قبل الادمن
+//         Route::post('/survey/add-question', [ApiSurveyController::class, 'addQuestions'])->name('survey.add');
+//         // التعديل على سؤال من قبل الادمن
+//         Route::put('/survey/update-question', [ApiSurveyController::class, 'updateQuestions'])->name('survey.update');
+//         //حذف سؤال من الاستبيان من قبل الادمن
+//         Route::delete('/survey/delete-question',  [ApiSurveyController::class, 'deleteQuestions'])->name('survey.delete');
+//     }
+// );
 
 
 //___________________________________________________________________
@@ -91,21 +92,14 @@ Route::group(
 //عرض معلومات المريض
 Route::group(
     [],
-    function ($router) {
-        //عرض جميع المرضى (بعض المعلومات) للادمن
-        Route::get('/patients', [ApiPatientController::class, 'index'])->name('patients.index');
-        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    function ($router) {  
         //عرض معلومات السجل الطبي لمريض معين
-        Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
-        //انشاء مريض من فبل المستخدم
-        Route::post('/patients', [ApiPatientController::class, 'store'])->name('patients.store');
+       // Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
+        //انشاء مريض من قبل المستخدم
+        Route::post('/addpatient/{userid}', [ApiPatientController::class, 'store'])->name('patients.store');
         //تحديث المعلومات 
-        Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
+       // Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-        //  واجهة عرض معلومات المريض قبل التعديل
-        //  Route::get('/patients/{patient}/edit', [ApiPatientController::class, 'edit'])->name('patients.edit');
-
     }
 );
 
@@ -113,7 +107,7 @@ Route::group(
 
 //___________________________________________________________________
 
-
+//أيام عمل مقدم الرعاية
 Route::group(
     [],
     function ($router) {
@@ -137,7 +131,7 @@ Route::group(
 
 //Route::get('/register', [AuthController::class, 'register']);
 
-
+// المصادقة
 Route::group([], function ($router) {
     Route::get('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -147,6 +141,8 @@ Route::group([], function ($router) {
 });
 
 //___________________________________________________________________________
+
+
 
 
 

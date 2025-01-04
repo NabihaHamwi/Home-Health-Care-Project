@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('healthcare_provider_id')->constrained()->onDelete('cascade');
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
             $table->string('subservice_name');
+            // $table->decimal('price');
             $table->timestamps();
         });
     }
