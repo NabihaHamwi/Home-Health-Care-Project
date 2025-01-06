@@ -126,6 +126,10 @@ class SearchController extends Controller
             return $b['similarity'] <=> $a['similarity'];
         });
 
+        foreach ($results as $result) {
+            $providersres[] = $result['provider'];
+        }
+
         if (empty($results)) {
             $response = [
                 'msg' => 'providers not found',
@@ -136,7 +140,7 @@ class SearchController extends Controller
             $response = [
                 'msg' => 'providers found',
                 'status' => 200,
-                'data' => ["results num: " . sizeof($results), $results]
+                'data' => $providersres
             ];
         }
         return response($response);
