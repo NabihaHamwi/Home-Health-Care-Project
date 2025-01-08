@@ -99,7 +99,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'role' => $user->role
             ],
-        ], 200);
+        ], 200)->cookie('laravel_session', $request->session()->getId(), 120);
     }
 
     public function logout()
