@@ -89,6 +89,9 @@ class AuthController extends Controller
         JWTAuth::setToken($token);
         JWTAuth::authenticate($token);
 
+        $request->session()->put('user_id', $user->id);
+        $request->session()->regenerate();
+
         // إرجاع استجابة نجاح مع رمز الوصول ومعلومات المستخدم
         return response()->json([
             'access_token' => $token,

@@ -8,6 +8,7 @@ use App\Http\Resources\HealthcareProviderResource;
 use App\Models\HealthcareProvider;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class SearchController extends Controller
@@ -108,41 +109,49 @@ class SearchController extends Controller
             $serviceId = $request->session()->get('selected_service_id');
             $subservice = $request->session()->get('selected_subservice');
 
-            if (is_null($serviceId) || is_null($subservice))
+            // التحقق من القيم المخزنة في الجلسة
+            Log::info('Retrieved from session - selected_service_id: ' . $serviceId);
+            Log::info('Retrieved from session - selected_subservice: ' . json_encode($subservice));
+
+            if (is_null($serviceId) || is_null($subservice)) {
+                Log::error('Null value in session - selected_service_id or selected_subservice is null');
                 throw new \Exception('null value in session');
+            }
+            $providers = HealthcareProviderResource::collection(Service::find($serviceId)->healthcareProviders->unique('id'));
+            $results = [];
+
+            foreach ($providers as $provider) {
+                $similarity = SearchController::calculate_similarity($request, $subservice, $provider);
+                $results[] = [
+                    'provider' => $provider,
+                    'similarity' => $similarity
+                ];
+            }
+
+            usort($results, function ($a, $b) {
+                return $b['similarity'] <=> $a['similarity'];
+            });
+
+            foreach ($results as $result) {
+                $providersres[] = $result['provider'];
+            }
+
+            if (empty($results)) {
+                $response = [
+                    'msg' => 'providers not found',
+                    'status' => 404,
+                    'data' => null,
+                ];
+            } else {
+                $response = [
+                    'msg' => 'providers found',
+                    'status' => 200,
+                    'data' => $providersres
+                ];
+            }
+            return response($response);
         } catch (\Exception $e) {
             return response()->json(['message' => 'فشلت العملية', 'error' => $e->getMessage()], 500);
         }
-        $providers = HealthcareProviderResource::collection(Service::find($serviceId)->healthcareProviders->unique('id'));
-        $results = [];
-
-        foreach ($providers as $provider) {
-            $similarity = SearchController::calculate_similarity($request, $subservice, $provider);
-            $results[] = ['provider' => $provider, 
-            'similarity' => $similarity];
-        }
-
-        usort($results, function ($a, $b) {
-            return $b['similarity'] <=> $a['similarity'];
-        });
-
-        foreach ($results as $result) {
-            $providersres[] = $result['provider'];
-        }
-
-        if (empty($results)) {
-            $response = [
-                'msg' => 'providers not found',
-                'status' => 404,
-                'data' => null,
-            ];
-        } else {
-            $response = [
-                'msg' => 'providers found',
-                'status' => 200,
-                'data' => $providersres
-            ];
-        }
-        return response($response);
     }
 }
