@@ -60,6 +60,7 @@ class SubServiceController extends Controller
                 'msg' => 'Subservices Recived Succfully',
                 'status' => 200,
                 'data' => $subservicesCollection,
+                'session_id' => $request->session()->getId()
             ];
         }
         return response($response);
@@ -79,7 +80,7 @@ class SubServiceController extends Controller
             $subservice = $request->input('subservice_ids');
             $request->session()->put('selected_subservice', $subservice);
             Log::info('Storing in session - selected_subservice: ' . json_encode($subservice));
-            return response()->json(['message' => 'تمت العملية بنجاح', 'data' => $subservice], $status = 200);
+            return response()->json(['message' => 'تمت العملية بنجاح', 'data' => $subservice, 'session_id' => $request->session()->getId()], $status = 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'فشلت العملية', 'error' => $e->getMessage()], 500);
         }

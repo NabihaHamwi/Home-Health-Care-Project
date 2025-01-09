@@ -99,6 +99,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'role' => $user->role
             ],
+            'session_id' => $request->session()->getId()
         ], 200)->cookie('laravel_session', $request->session()->getId(), 120);
     }
 

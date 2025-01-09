@@ -105,6 +105,7 @@ class SearchController extends Controller
 
     function search1(Request $request)
     {
+        return ['session_id' => $request->session()->getId()];
         try {
             $serviceId = $request->session()->get('selected_service_id');
             $subservice = $request->session()->get('selected_subservice');
@@ -117,7 +118,7 @@ class SearchController extends Controller
                 Log::error('Null value in session - selected_service_id or selected_subservice is null');
                 throw new \Exception('null value in session');
             }
-            
+
             $providers = HealthcareProviderResource::collection(Service::find($serviceId)->healthcareProviders->unique('id'));
             $results = [];
 
