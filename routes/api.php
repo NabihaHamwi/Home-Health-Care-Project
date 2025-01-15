@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\Api\SubServiceController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
+use App\Models\HealthcareProvider;
 use App\Models\HealthcareProviderWorktime;
 use App\Models\Patient;
 use Illuminate\Http\Request;
@@ -202,3 +203,5 @@ Route::get('/subservices', [SubServiceController::class, 'index'])->name(name: '
 
 //Api for show all Subservices under spesific Service
 Route::get('/subservices/{service}', [SubServiceController::class, 'show'])->name(name: 'subservices.show');
+
+Route::post('/update/{healthcareProvider}' , [HealthcareProviderController::class ,'isAvailableUpdate'])->name(name: 'providers.isAvailableUpdate');

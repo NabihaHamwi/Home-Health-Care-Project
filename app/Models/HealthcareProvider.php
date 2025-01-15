@@ -10,6 +10,8 @@ class HealthcareProvider extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['is_available', 'location_name', 'latitude', 'longitude'];
+
     public function user()
     { //user_id in healthcare_providers table => names is important
         return $this->belongsTo(User::class);
@@ -38,7 +40,7 @@ class HealthcareProvider extends Model
     }
 
 
-    public function emergencies():HasMany
+    public function emergencies(): HasMany
     {
         return $this->hasMany(Emergency::class);
     }
