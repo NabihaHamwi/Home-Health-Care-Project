@@ -89,6 +89,9 @@ class AuthController extends Controller
         JWTAuth::setToken($token);
         JWTAuth::authenticate($token);
 
+        $request->session()->put('user_id', $user->id);
+        $request->session()->regenerate();
+
         // إرجاع استجابة نجاح مع رمز الوصول ومعلومات المستخدم
         return response()->json([
             'access_token' => $token,
@@ -96,7 +99,8 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'role' => $user->role
             ],
-        ], 200);
+            'session_id' => $request->session()->getId()
+        ], 200)->cookie('laravel_session', $request->session()->getId(), 120);
     }
 
     public function logout()

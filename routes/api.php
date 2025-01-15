@@ -49,21 +49,21 @@ use PHPUnit\Framework\Attributes\Group;
 //         Route::get('sessions/panel/{patient_id}', [ApiSessionController::class, 'monitoring_panel'])->name('sessions.panel');
 //         //تخزين بيانات جلسة
 //         Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-        //عرض واجهة التعديل على الجلسة
-        // Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->name('sessions.edit');
-
-
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        //تحديث بيانات الجلسة
-      //  Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name('sessions.update');
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//عرض واجهة التعديل على الجلسة
+// Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->name('sessions.edit');
 
 
-        //حذف بيانات الجلسة 
-        // Route::delete('/sessions/{session}', [ApiSessionController::class, 'destroy'])->name('sessions.destroy');
-   // }
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//تحديث بيانات الجلسة
+//  Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name('sessions.update');
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+//حذف بيانات الجلسة 
+// Route::delete('/sessions/{session}', [ApiSessionController::class, 'destroy'])->name('sessions.destroy');
+// }
 //);
 
 
@@ -93,13 +93,13 @@ use PHPUnit\Framework\Attributes\Group;
 //عرض معلومات المريض
 Route::group(
     [],
-    function ($router) {  
+    function ($router) {
         //عرض معلومات السجل الطبي لمريض معين
-       // Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
+        // Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
         //انشاء مريض من قبل المستخدم
         Route::post('/addpatient/{userid}', [ApiPatientController::class, 'store'])->name('patients.store');
         //تحديث المعلومات 
-       // Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
+        // Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
 );
@@ -137,11 +137,14 @@ Route::group([], function ($router) {
     Route::get('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
-   // Route::post('/refresh', [AuthController::class, 'refreshToken']);
+    // Route::post('/refresh', [AuthController::class, 'refreshToken']);
     //  Route::get('/user-profile', [AuthController::class, 'userProfile']);
 });
 
 //___________________________________________________________________________
+
+//emergencies:
+Route::post('/update/{healthcareProvider}', [HealthcareProviderController::class, 'isAvailableUpdate'])->name(name: 'providers.isAvailableUpdate');
 
 
 
@@ -204,4 +207,5 @@ Route::get('/subservices', [SubServiceController::class, 'index'])->name(name: '
 //Api for show all Subservices under spesific Service
 Route::get('/subservices/{service}', [SubServiceController::class, 'show'])->name(name: 'subservices.show');
 
-Route::post('/update/{healthcareProvider}' , [HealthcareProviderController::class ,'isAvailableUpdate'])->name(name: 'providers.isAvailableUpdate');
+//Api for send selected subservices
+Route::post('/selected_subservices', [SubServiceController::class, 'selectSubservices'])->name(name: 'subservices.selectSubservices');
