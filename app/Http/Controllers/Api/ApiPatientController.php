@@ -25,17 +25,19 @@ class ApiPatientController extends Controller
             [
                 'full_name' => 'required|min:3|max:10',
                 'gender' => 'required|in:أنثى,ذكر',
-                'birth_date' => 'date',
+                'birth_date' => 'date|date_format:d/m/Y',
                 'relationship_status' => 'required|in:أعزب,متزوج,مطلق,أرمل',
                 'address' => 'required|max:255',
                 'phone_number' => ['required', 'regex:/^(00963|\+963)?\d{9}$/'],
                 'weight' => 'required|numeric|min:1|max:130',
                 'height' => 'required|numeric|min:20|max:220',
-                'chronic_diseases' => 'required|min:3|max:500',
-                'allergies' => 'required|string|min:3|max:500',
+                'previous_diseases_surgeries' => 'min:3|max:200',
+                'chronic_diseases' => 'min:3|max:200',
+                'allergies' => 'string|min:3|max:100',
                 'smoker' => 'required',
             ],
             [
+                'national_number.required' => 'يرجى إدخال الرقم الوطني للمريض.',
                 'full_name.required' => 'يرجى إدخال الاسم الكامل.',
                 'full_name.min' => 'هل أنت متأكد من أنك قد أدخلت اسمك بشكل صحيح؟',
                 'full_name.max' => 'هل أنت متأكد من أنك قد أدخلت اسمك بشكل صحيح؟',
@@ -43,6 +45,7 @@ class ApiPatientController extends Controller
                 'gender.in' => 'الرجاء اختيار الجنس من القائمة المحددة.',
                 'birth_date.required' => 'يرجى ملء تاريخ الميلاد.',
                 'birth_date.date' => 'الرجاء التأكد من صحة تاريخ الميلاد المدخل.',
+                'birth_date.date_format' => 'الرجاء التأكد من صحة تاريخ الميلاد',
                 'relationship_status.required' => 'يرجى تحديد الحالة الاجتماعية.',
                 'address.required' => 'يرجى إدخال العنوان.',
                 'address.max' => 'العنوان المدخل طويل جدًا.',
@@ -54,11 +57,9 @@ class ApiPatientController extends Controller
                 'weight.max' => 'الوزن المدخل يتجاوز الحد الأقصى المسموح به.',
                 'height.required' => 'يرجى إدخال الطول.',
                 'height.numeric' => 'الرجاء التأكد من أن الطول المدخل عبارة عن رقم.',
-                'height.min' => 'الطول المدخل أقل من الحد الأدنى المسموح به.',
-                'height.max' => 'الطول المدخل يتجاوز الحد الأقصى المسموح به.',
-                'chronic_diseases.required' => 'يرجى إدخال الأمراض المزمنة إن وجدت.',
+                'height.min' => 'الطول المدخل أقل من الحد الأدنى  .',
+                'height.max' => 'الطول المدخل يتجاوز الحد الأقصى  .',
                 'chronic_diseases.max' => 'الرجاء التأكد من أن المعلومات المدخلة ضمن الحد المسموح.',
-                'allergies.required' => 'يرجى إدخال الحساسية إن وجدت.',
                 'allergies.string' => 'الرجاء التأكد من أن المعلومات المدخلة نصية.',
                 'allergies.min' => 'الحساسية المدخلة أقل من الحد الأدنى المسموح به.',
                 'allergies.max' => 'الحساسية المدخلة تتجاوز الحد الأقصى المسموح به.',
@@ -68,13 +69,16 @@ class ApiPatientController extends Controller
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 422);
         }
+        $birth_date = $request->birth_date;
+        $birth_date = Carbon::createFromFormat('d/m/Y', $request->birth_date)->format('Y-m-d');
         try {
-            // إنشاء مريض جديد
+            //create patient object
             $patient = new Patient;
 
             // تعيين معلومات المريض من الطلب
-            $patient->full_name = $request->full_name;
+            $patient->national_number = $request->national_number;
             $patient->user_id = $request->user_id;
+            $patient->full_name = $request->full_name;
             $patient->gender = $request->gender;
             $patient->birth_date = $request->birth_date;
             $patient->relationship_status = $request->relationship_status;
@@ -84,15 +88,8 @@ class ApiPatientController extends Controller
             $patient->height = $request->height;
             $patient->previous_diseases_surgeries = $request->previous_diseases_surgeries;
             $patient->chronic_diseases = $request->chronic_diseases;
-            $patient->current_medications = $request->current_medications;
             $patient->allergies = $request->allergies;
-            $patient->family_medical_history = $request->family_medical_history;
             $patient->smoker = $request->smoker;
-            $patient->addiction = $request->addiction;
-            $patient->exercise_frequency = $request->exercise_frequency;
-            $patient->diet_description = $request->diet_description;
-            $patient->current_symptoms = $request->current_symptoms;
-            $patient->recent_vaccinations = $request->recent_vaccinations;
             $patient->created_at = now();
 
             $patient->save();
