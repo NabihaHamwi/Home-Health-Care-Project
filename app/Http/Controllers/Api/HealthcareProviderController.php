@@ -85,6 +85,15 @@ class HealthcareProviderController extends Controller
 
     public function isAvailableUpdate(Request $request, HealthcareProvider $healthcareProvider)
     {
+        // $providerId = $healthcareProvider->id;
+        // $cacheKey = 'provider_status_' . $providerId;
+        // $providerData = Cache::get($cacheKey);
+
+        // if (!$providerData) {
+        //     // إذا لم تكن البيانات موجودة في الكاش، نقوم بجلبها من قاعدة البيانات
+        //     $providerData = HealthcareProvider::find($providerId);
+        // }
+        //dd($providerData);
         //تخزين القيمة الأصلية لحالة مقدم الرعاية 
         $originalAvailability = $healthcareProvider->is_available;
         if ($originalAvailability) {
