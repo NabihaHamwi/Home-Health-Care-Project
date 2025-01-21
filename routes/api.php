@@ -11,8 +11,11 @@ use App\Http\Controllers\Api\HealthcareProviderWorktimeController;
 use App\Http\Controllers\Api\HealthcareProviderController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\Api\SubServiceController;
+use App\Http\Controllers\Api\EmergencyController;
+use App\Http\Controllers\Api\PatientAgentController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
+use App\Models\Emergency;
 use App\Models\HealthcareProvider;
 use App\Models\HealthcareProviderWorktime;
 use App\Models\Patient;
@@ -97,10 +100,13 @@ Route::group(
         //عرض معلومات السجل الطبي لمريض معين
         // Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
         //انشاء مريض من قبل المستخدم
-        Route::post('/addpatient/{userid}', [ApiPatientController::class, 'store'])->name('patients.store');
+        Route::post('/addpatient/{userid}', [PatientAgentController::class, 'addPatient'])->name('patients.addPatient');
         //تحديث المعلومات 
         // Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
+        Route::get('get-patients/{userid}' , [PatientAgentController::class , 'getPatients'])->name(name:'patients.getPatients'); 
+
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     }
 );
 
@@ -116,9 +122,10 @@ Route::group(
         // عرض ايام عمل مقدم الرعاية
         Route::get('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
         // تعبئة ايام العمل
+        //تم ايقافه
         //  Route::post('/careprovidersworktimes', [HealthcareProviderWorktimeController::class, 'store'])->name('careprovidersworktimes.store');
         // تحديث بيانات ايام العمل
-        Route::put('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'store_update'])->name('careprovidersworktimes.store_update');
+        Route::post('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'store_update'])->name('careprovidersworktimes.store_update');
         // حذف ايام العمل وإعادة تعبئتها من جديد
         Route::delete('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'destroy'])->name('careprovidersworktimes.destroy');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -145,9 +152,7 @@ Route::group([], function ($router) {
 
 //emergencies:
 Route::post('/update/{healthcareProvider}', [HealthcareProviderController::class, 'isAvailableUpdate'])->name(name: 'providers.isAvailableUpdate');
-
-
-
+Route::get('/search' , [EmergencyController::class , 'calculateDistanceAndTime'])->name(name:'emergencies.search');
 
 
 
