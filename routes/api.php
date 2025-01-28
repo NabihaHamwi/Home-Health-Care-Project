@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ApiSessionController as ApiSessionController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\ApiSurveyController;
 use App\Http\Controllers\Api\ApiPatientController;
 use App\Http\Controllers\Api\AppointmentsController;
-use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\HealthcareProviderWorktimeController;
 use App\Http\Controllers\Api\HealthcareProviderController;
 use App\Http\Controllers\Api\SkillController;
@@ -100,10 +101,10 @@ Route::group(
         //عرض معلومات السجل الطبي لمريض معين
         // Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
         //انشاء مريض من قبل المستخدم
-        Route::post('/addpatient/{userid}', [PatientAgentController::class, 'addPatient'])->name('patients.addPatient');
+        Route::post('/add-patient/{userid}', [PatientAgentController::class, 'addPatient'])->name('patients.addPatient');
         //تحديث المعلومات 
         // Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
-        Route::get('get-patients/{userid}' , [PatientAgentController::class , 'getPatients'])->name(name:'patients.getPatients'); 
+        Route::get('/get-patients/{userid}' , [PatientAgentController::class , 'getPatients'])->name(name:'patients.getPatients'); 
 
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -120,14 +121,14 @@ Route::group(
     function ($router) {
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // عرض ايام عمل مقدم الرعاية
-        Route::get('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
+        Route::get('/careprovider-worktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
         // تعبئة ايام العمل
         //تم ايقافه
         //  Route::post('/careprovidersworktimes', [HealthcareProviderWorktimeController::class, 'store'])->name('careprovidersworktimes.store');
         // تحديث بيانات ايام العمل
-        Route::post('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'store_update'])->name('careprovidersworktimes.store_update');
+        Route::post('/careprovider-worktimes/{careprovider-worktimes}', [HealthcareProviderWorktimeController::class, 'store_update'])->name('careprovidersworktimes.store_update');
         // حذف ايام العمل وإعادة تعبئتها من جديد
-        Route::delete('/careprovidersworktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'destroy'])->name('careprovidersworktimes.destroy');
+        Route::delete('/careprovider-worktimes/{careprovider-worktimes}', [HealthcareProviderWorktimeController::class, 'destroy'])->name('careprovidersworktimes.destroy');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
 );
@@ -137,15 +138,15 @@ Route::group(
 
 //_____________________________________________________________________
 
-//Route::get('/register', [AuthController::class, 'register']);
+//Route::get('/register', [UserController::class, 'register']);
 
 // المصادقة
 Route::group([], function ($router) {
-    Route::get('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/logout', [AuthController::class, 'logout']);
-    // Route::post('/refresh', [AuthController::class, 'refreshToken']);
-    //  Route::get('/user-profile', [AuthController::class, 'userProfile']);
+    Route::get('/register', [UserController::class, 'register']);
+    Route::post('/login', [UserController::class, 'login']);
+    Route::post('/logout', [UserController::class, 'logout']);
+    // Route::post('/refresh', [UserController::class, 'refreshToken']);
+    //  Route::get('/user-profile', [UserController::class, 'userProfile']);
 });
 
 //___________________________________________________________________________
@@ -154,9 +155,12 @@ Route::group([], function ($router) {
 Route::post('/update/{healthcareProvider}', [HealthcareProviderController::class, 'isAvailableUpdate'])->name(name: 'providers.isAvailableUpdate');
 Route::get('/search' , [EmergencyController::class , 'calculateDistanceAndTime'])->name(name:'emergencies.search');
 
+//___________________________________________________________________
 
-
-
+Route::post('/add-provider' , [AdminController::class , 'addProvider'])->name(name:'admin.addProvider');
+Route::get('/patient-supserviced/{healthcareProvider}' , [HealthcareProviderController::class , 'patientSupserviced'])->name(name:'providers.patientSupserviced');
+Route::post('/savePersonalImage' , [AdminController::class , 'savePersonalImage'])->name(name:'admin.savePersonalImage');
+Route::get('/healthcare-provider-get/{healtncareProvider}' ,[HealthcareProviderController::class , 'show'])->name(name:'show.provider');
 
 
 

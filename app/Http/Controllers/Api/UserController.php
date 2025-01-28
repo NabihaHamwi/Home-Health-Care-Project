@@ -19,12 +19,10 @@ use App\Models\User;
  *
  * @return \Illuminate\Http\JsonResponse
  */
-class AuthController extends Controller
+class UserController extends Controller
 {
     use ApiResponseTrait;
-
-
-    public function register(Request $request)
+    public function validateUserData(Request $request)
     {
         $validator = Validator::make($request->all(), [
             "first_name" => 'required|string|between:2,15',
@@ -32,30 +30,52 @@ class AuthController extends Controller
             'email' => 'required|email|max:50|unique:users',
             'gender' => 'required|in:male,female',
             'password' => 'required|min:6',
-            'phone_number' => ['required', 'unique:users', 'regex:/^(\\+|00)?\d{1,3}\d{6,10}$/']
+            'phone_number' => [
+                'required',
+                'unique:users',
+                'unique:users',
+                //'regex:/^\+?[1-9]\d{1,14}$/'
+                'regex:/^(\\+|00)?\d{1,3}\d{6,10}$/'
+            ]
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+            response()->json(['errors' => $validator->errors()], 400)->send();
+            exit;
         }
-        
-        if ($request->has('role')) {
-            $role = $request->role;
-        } else {
-            $role = "user";
-        }
-
-        $newuser = User::create([
-            "email" => $request->email,
-            "first_name" => $request->first_name,
-            "last_name" => $request->last_name,
-            "gender" => $request->gender,
-            "phone_number" => $request->phone_number,
-            "password" => hash::make($request->password),
-            "role" => $role
-        ]);
-        return response()->json(['message' => 'تمت عملية انشاء الحساب بنجاح']);
     }
+
+    public function register(Request $request)
+    {
+        $this->validateUserData($request);
+        try {
+            if ($request->has('role')) {
+                $role = $request->role;
+            } else {
+                $role = "user";
+            }
+
+            $newuser = User::create([
+                "email" => $request->email,
+                "first_name" => $request->first_name,
+                "last_name" => $request->last_name,
+                "gender" => $request->gender,
+                "phone_number" => $request->phone_number,
+                "password" => hash::make($request->password),
+                "role" => $role
+            ]);
+            return response()->json(['message' => 'تمت عملية انشاء الحساب بنجاح', 'data' => $newuser], 201);
+            
+        } catch (\Exception $e) {
+            // إذا حدث خطأ أثناء إنشاء المستخدم، أرسل رسالة خطأ
+            return response()->json([
+                'message' => 'فشل في إنشاء الحساب. حدث خطأ أثناء معالجة الطلب.',
+                'error' => $e->getMessage()
+            ], 500)->send();
+            exit;
+        }
+    }
+    /**********************************************/
     public function login(Request $request)
     {
         // التحقق من صحة المدخلات
@@ -102,7 +122,7 @@ class AuthController extends Controller
             'session_id' => $request->session()->getId()
         ], 200)->cookie('laravel_session', $request->session()->getId(), 120);
     }
-
+    /***********************************************/
     public function logout()
     {
         // التحقق من تسجيل دخول المستخدم
