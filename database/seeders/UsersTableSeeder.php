@@ -34,7 +34,7 @@ class UsersTableSeeder extends Seeder
             'role' => 'provider',
             'first_name' => 'kareem',
             'last_name' => 'provider',
-            'phone_number' => '0933XXXXXX',
+            'phone_number' => '09338XXXXX',
             'email' => 'kareem@gmail.com',
             'email_verified_at' => now(),
             'password' => '1234567',
