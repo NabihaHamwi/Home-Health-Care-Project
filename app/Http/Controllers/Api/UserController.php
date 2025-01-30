@@ -97,8 +97,12 @@ class UserController extends Controller
             return response()->json(['errors' => 'Invalid credentials'], 401);
         }
 
-        // محاولة المصادقة باستخدام بيانات الاعتماد
-        if (!$token = JWTAuth::attempt($request->only('email', 'password'))) {
+        $customClaims = ['user_id' => $user->id];
+
+        // إنشاء رمز JWT مع تضمين الـ payload المخصص
+        $token = JWTAuth::claims($customClaims)->attempt($request->only('email', 'password'));
+        
+        if (!$token) {
             return response()->json(['errors' => 'Unauthorized'], 401);
         }
 
@@ -109,9 +113,6 @@ class UserController extends Controller
         JWTAuth::setToken($token);
         JWTAuth::authenticate($token);
 
-        $request->session()->put('user_id', $user->id);
-        $request->session()->regenerate();
-
         // إرجاع استجابة نجاح مع رمز الوصول ومعلومات المستخدم
         return response()->json([
             'access_token' => $token,
@@ -119,7 +120,6 @@ class UserController extends Controller
                 'id' => $user->id,
                 'role' => $user->role
             ],
-            'session_id' => $request->session()->getId()
         ], 200)->cookie('laravel_session', $request->session()->getId(), 120);
     }
     /***********************************************/

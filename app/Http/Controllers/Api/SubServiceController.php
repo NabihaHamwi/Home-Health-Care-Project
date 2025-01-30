@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\HealthcareProviderService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SubServiceController extends Controller
 {
@@ -37,18 +38,29 @@ class SubServiceController extends Controller
             ['service_id' => $service_id],
             ['service_id' => 'required|integer|exists:services,id']
         );
-    
+
         if ($validator->fails()) {
-            return response()->json(['message' => 'validation errors', 'errors' => $validator->errors()], 400);
+            $response = [
+                'message' => 'validation errors',
+                'status' => 400,
+                'errors' => $validator->errors()
+            ];
+            return response($response);
         }
+
         try {
-            $request->session()->put('selected_service_id', $service_id);
-            // \Log::info('Storing in session - selected_subservice: ' . $service_id);
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $updatedClaims = $payload->toArray();
+            $updatedClaims['service_id'] = $service_id;
+            $newToken = JWTAuth::claims($updatedClaims)->fromUser(auth()->user());
         } catch (\Exception $e) {
-            return response()->json(['message' => 'فشلت العملية', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Token error', 'error' => $e->getMessage()], 500);
         }
+
         $subservices = HealthcareProviderService::all()->where('service_id', $service_id)->unique('subservice_name');
         $subservicesCollection = SubserviceResource::collection($subservices);
+
         if ($subservicesCollection->isEmpty()) {
             $response = [
                 'msg' => 'Subservices not found',
@@ -60,7 +72,7 @@ class SubServiceController extends Controller
                 'msg' => 'Subservices Recived Succfully',
                 'status' => 200,
                 'data' => $subservicesCollection,
-                'session_id' => $request->session()->getId()
+                'token' => $newToken,
             ];
         }
         return response($response);
@@ -72,17 +84,37 @@ class SubServiceController extends Controller
             'subservice_ids' => 'required|array',
             'subservice_ids.*' => 'string|exists:healthcare_provider_service,subservice_name'
         ]);
-    
+
         if ($validator->fails()) {
-            return response()->json(['message' => 'validation errors', 'errors' => $validator->errors()], 400);
+            $response = [
+                'message' => 'validation errors',
+                'status' => 400,
+                'errors' => $validator->errors()
+            ];
+            return response($response);
         }
+
         try {
-            $subservice = $request->input('subservice_ids');
-            $request->session()->put('selected_subservice', $subservice);
-            Log::info('Storing in session - selected_subservice: ' . json_encode($subservice));
-            return response()->json(['message' => 'تمت العملية بنجاح', 'data' => $subservice, 'session_id' => $request->session()->getId()], $status = 200);
+            $subservices = $request->input('subservice_ids');
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $updatedClaims = $payload->toArray();
+            $updatedClaims['selected_subservice'] = $subservices;
+            $newToken = JWTAuth::claims($updatedClaims)->fromUser(auth()->user());
+            $response = [
+                'msg' => 'Subservices sended Succfully',
+                'status' => 200,
+                'data' => $subservices,
+                'token' => $newToken,
+                'jwt_data' => $updatedClaims,
+            ];
         } catch (\Exception $e) {
-            return response()->json(['message' => 'فشلت العملية', 'error' => $e->getMessage()], 500);
+            $response = [
+                'msg' => 'Subservices could not send',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
         }
+        return response($response);
     }
 }

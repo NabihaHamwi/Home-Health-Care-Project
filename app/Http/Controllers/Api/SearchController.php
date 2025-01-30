@@ -10,6 +10,7 @@ use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SearchController extends Controller
 {
@@ -105,25 +106,16 @@ class SearchController extends Controller
 
     function search1(Request $request)
     {
-        return ['session_id' => $request->session()->getId()];
         try {
-            $serviceId = $request->session()->get('selected_service_id');
-            $subservice = $request->session()->get('selected_subservice');
-
-            // التحقق من القيم المخزنة في الجلسة
-            Log::info('Retrieved from session - selected_service_id: ' . $serviceId);
-            Log::info('Retrieved from session - selected_subservice: ' . json_encode($subservice));
-
-            if (is_null($serviceId) || is_null($subservice)) {
-                Log::error('Null value in session - selected_service_id or selected_subservice is null');
-                throw new \Exception('null value in session');
-            }
-
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $serviceId = $payload->get('service_id');
+            $subservices = $payload->get('selected_subservice');
             $providers = HealthcareProviderResource::collection(Service::find($serviceId)->healthcareProviders->unique('id'));
             $results = [];
 
             foreach ($providers as $provider) {
-                $similarity = SearchController::calculate_similarity($request, $subservice, $provider);
+                $similarity = SearchController::calculate_similarity($request, $subservices, $provider);
                 $results[] = [
                     'provider' => $provider,
                     'similarity' => $similarity
