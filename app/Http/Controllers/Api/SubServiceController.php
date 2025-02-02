@@ -85,4 +85,7 @@ class SubServiceController extends Controller
             return response()->json(['message' => 'فشلت العملية', 'error' => $e->getMessage()], 500);
         }
     }
+    public function store(){
+        
+    }
 }

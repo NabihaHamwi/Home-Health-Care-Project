@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\HealthcareProvider;
 use App\Models\User;
 use App\Models\Document;
+use App\Models\Service;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +20,7 @@ class AdminController extends UserController
       'role' => 'required|in:provider,employee',
       'national_number' => 'required|string|unique:healthcare_providers',
       'age' => 'required|integer',
+      'min_working_hours_per_day' => ['required', 'numeric', 'regex:/^\d+(\.\d{1,2})?$/'],
       'relationship_status' => 'required|in:أعزب,متزوج,أرمل,مطلق,-',
       'experience' => 'required|integer',
       'personal_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -47,7 +49,7 @@ class AdminController extends UserController
       // json decode to register function response
       $responseContent  = json_decode($registerResponse->getContent());
 
-      if ($registerResponse->status() == 201) {
+      if ($registerResponse->status() == 200) {
         $this->validateProviderData($request);
         $newuser = $responseContent->data;
         $personal_img_path = null;
@@ -59,17 +61,22 @@ class AdminController extends UserController
           'user_id' => $newuser->id,
           'national_number' => $request->national_number,
           'age' => $request->age,
+          'min_working_hours_per_day' => $request->min_working_hours_per_day,
           'relationship_status' => $request->relationship_status,
           'experience' => $request->experience,
           'personal_image' => $personal_img_path,
           'license_number' => $request->license_number
         ]);
-        DB::commit();
+        $documentImages = 'null';
+        // التحقق من وجود صور المستند
         if ($request->hasFile('document_image')) {
-          $this->saveDocumentImage($request->document_image, $createProvider->id);
+          $this->saveDocumentImage($request->file('document_image'), $createProvider->id);
         }
+        DB::commit();
+
         return response()->json([
-          'data' => $createProvider
+          'data' => $createProvider,
+          'documentImage' => $documentImages
         ]);
       }
     } catch (\Exception $e) {
@@ -89,21 +96,14 @@ class AdminController extends UserController
     }
   }
 
-
   public function saveDocumentImage($imagePath, $providerId)
   {
     $folder = 'DocumentImage';
-    $image = $this->savePersonalImage1($imagePath, $folder);
+    $image = $this->savePersonalImage($imagePath, $folder);
     Document::create([
       'healthcare_provider_id' => $providerId,
       'document_image' => $image,
     ]);
-
     return response()->json(['message' => 'Document image saved successfully', 'path' => $imagePath], 201);
   }
- /*****************************************/
-
-
-
-
 }
