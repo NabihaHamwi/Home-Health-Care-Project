@@ -13,10 +13,12 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-class HealthcareProviderController extends Controller
+class HealthcareProviderController extends UserController
 {
     use ApiResponseTrait;
 
+
+    // get all providers
     public function index()
     {
         // $healthcareproviders = HealthcareProviderResource::collection();
@@ -37,59 +39,21 @@ class HealthcareProviderController extends Controller
         }
         return response($response);
     }
-/********************************************************/
+    /************************************************************************************/
 
-// public function show($provider_id)
-// {
-//     try {
-//         // استرجاع معلومات مقدم الرعاية
-//         $provider = HealthcareProvider::findOrFail($provider_id);
+    public function show($provider_id)
+    {
+        try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
+            $provider = HealthcareProvider::findOrFail($provider_id);
+            return $this->successResponse(new HealthcareProviderResource($provider), 'Provider details retrieved successfully');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('Provider not found', 404);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $this->errorResponse('erorr query', 500);
+        }
+    }
 
-//         // استرجاع مسار الصورة الشخصية
-//         $personal_image_path = $provider->personal_image;
-
-//         // التحقق من وجود الصورة
-//         if ($personal_image_path && Storage::disk('public')->exists($personal_image_path)) {
-//             $image_path = storage_path('app/public/' . $personal_image_path);
-//             $image_content = file_get_contents($image_path);
-//             $image_type = mime_content_type($image_path);
-//         } else {
-//             $image_content = null;
-//             $image_type = null;
-//         }
-
-//         // استرجاع المعلومات واستجابة JSON
-//         $data = [
-//             'user_id' => $provider->user_id,
-//             'national_number' => $provider->national_number,
-//             'age' => $provider->age,
-//             'relationship_status' => $provider->relationship_status,
-//             'experience' => $provider->experience,
-//             'license_number' => $provider->license_number,
-//             'personal_image' => $personal_image_path ? url('storage/' . $personal_image_path) : null,
-//         ];
-
-//         // إذا لم يكن هناك صورة، قم بإرجاع المعلومات فقط
-//         if (!$image_content) {
-//             return response()->json([
-//                 'data' => $data,
-//                 'message' => 'success'
-//             ]);
-//         }
-
-//         // إرجاع المعلومات والصورة
-//         return response()
-//             ->make($image_content, 200)
-//             ->header('Content-Type', $image_type)
-//             ->header('Content-Disposition', 'inline; filename="' . basename($personal_image_path) . '"');
-
-//     } catch (\Exception $e) {
-//         return response()->json([
-//             'message' => 'failed',
-//             'error' => $e->getMessage()
-//         ], 500);
-//     }
-// }
+    /********************************************************************************/
 
     //     public function updateProviderCache($providerId, $isAvailable, $latitude = null, $longitude = null, $locationName = null)
     //     {
@@ -123,9 +87,9 @@ class HealthcareProviderController extends Controller
 
     //         $provideravaliabilty = HealthcareProvider::where('is_available', true)->get();
     //     }
-    /* **************************************************** */
+    /******************************************************************************/
 
-
+    // update careproviders availability
     public function isAvailableUpdate(Request $request, HealthcareProvider $healthcareProvider)
     {
         dd($providerId = $healthcareProvider->id);
@@ -190,4 +154,36 @@ class HealthcareProviderController extends Controller
     //     dd($providerId = $healthcareprovider->provider_id);
     //     dd($getPatient = Appointment::where('provider_id', $providerId)->get('patient_id'));
     // }
+
+    /******************************************************************************/
+
+    //retrieve careproviders(fullname + images)
+    public function getProvider($provider_id)
+    {
+        try {
+            $provider = HealthcareProvider::findOrFail($provider_id);
+            $personal_image_path = $provider->personal_image;
+            //dd($personal_image_path);
+            $getResponse = parent::getUserFullName($provider->user_id);
+            $responseContent = json_decode($getResponse->getContent());
+            // dd($responseContent);
+            if ($getResponse->status() == 200) {
+                $fullName = $responseContent->full_name;
+                $data = [
+                    'full_name' => $fullName,
+                    'personal_image_url' => $personal_image_path ? url('storage/' . $personal_image_path) : null,
+                ];
+                return response()->json($data, 200);
+            } else {
+                return response()->json([
+                    'message' => 'Failed to retrieve user full name'
+                ], $getResponse->status());
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
