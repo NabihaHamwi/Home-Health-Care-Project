@@ -29,12 +29,18 @@ class HealthcareProviderFactory extends Factory
 
         return [
             'user_id' => $userId,
+            'national_number' => $this->faker->regexify('[0-9]{14}'),
             'age' => $age,
             'relationship_status' => $this->faker->randomElement(['أعزب', 'متزوج', 'أرمل', 'مطلق', '-']),
             'experience' => $experience,
             'personal_image' => $this->faker->imageUrl(200, 200, 'people'),
             'physical_strength' => $this->faker->randomElement(['basic', 'advanced', 'professional']),
             'min_working_hours_per_day' => $this->faker->numberBetween(2, 8),
+            'license_number' => $this->faker->unique()->bothify('??#######'), 
+            'is_available' => $this->faker->boolean(),
+            'location_name' => $this->faker->city,
+            'latitude' => $this->faker->latitude(33.47, 33.55),
+            'longitude' =>$this->faker->longitude(36.24, 36.32),
         ];
     }
 }

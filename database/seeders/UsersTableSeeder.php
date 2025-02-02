@@ -27,9 +27,18 @@ class UsersTableSeeder extends Seeder
             'remember_token' => Str::random(10),
         ]);
 
-        User::factory()->count(100)->create(['role'=>'provider']);
-        User::factory()->count(100)->create(['role'=>'user']);
-        
+        User::factory()->count(100)->create(['role' => 'provider']);
+        User::factory()->count(100)->create(['role' => 'user']);
 
+        User::create([
+            'role' => 'provider',
+            'first_name' => 'kareem',
+            'last_name' => 'provider',
+            'phone_number' => '09338XXXXX',
+            'email' => 'kareem@gmail.com',
+            'email_verified_at' => now(),
+            'password' => '1234567',
+            'remember_token' => Str::random(10),
+        ]);
     }
 }
