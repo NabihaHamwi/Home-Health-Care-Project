@@ -146,7 +146,7 @@ class UserController extends Controller
     //retrieve user's full name
     public function getUserFullName($user_id)
     {
-    //     try {
+        try {
             $user = User::findOrFail($user_id);
             //dd($user);
             $full_name = $user->first_name . ' ' . $user->last_name;
@@ -155,13 +155,13 @@ class UserController extends Controller
                 'full_name' => $full_name,
                 'message' => 'scusses'
             ] , 200);
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'message' => 'failed',
-        //         'error' => $e->getMessage()
-        //     ], 500)->send();
-        //     exit;
-        // }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'failed',
+                'error' => $e->getMessage()
+            ], 500)->send();
+            exit;
+        }
     }
     /*************************************************/
 }
