@@ -85,7 +85,7 @@ class SearchController extends Controller
                 $experience = 'advanced';
             else
                 $experience = 'professional';
-            $score += $experience_weight * (1 - abs($strength_levels[$query['experience']] - $experience_levels[$experience]) / 3);
+            $score += $experience_weight * (1 - abs($experience_levels[$query['experience']] - $experience_levels[$experience]) / 3);
         }
 
         if ($query['physical_strength'])
