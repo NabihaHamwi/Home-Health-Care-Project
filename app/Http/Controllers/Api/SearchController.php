@@ -111,6 +111,7 @@ class SearchController extends Controller
             $payload = JWTAuth::setToken($token)->getPayload();
             $serviceId = $payload->get('service_id');
             $subservices = $payload->get('selected_subservice');
+            // *** here ***
             $providers = HealthcareProviderResource::collection(Service::find($serviceId)->healthcareProviders->unique('id'));
             $results = [];
 

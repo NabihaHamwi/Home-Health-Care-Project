@@ -14,9 +14,10 @@ class SubServiceController extends Controller
 {
     public function index()
     {
-        $subservices = HealthcareProviderService::all()->unique('subservice_name');
-        $subservicesCollection = SubserviceResource::collection($subservices);
-        if ($subservicesCollection->isEmpty()) {
+        // $subservices = HealthcareProviderService::all()->unique('subservice_name');
+        // $subservicesCollection = SubserviceResource::collection($subservices);
+        $subservices = SubserviceResource::collection(Subservice::all());
+        if ($subservices->isEmpty()) {
             $response = [
                 'msg' => 'Subservices not found',
                 'status' => 404,
@@ -26,7 +27,7 @@ class SubServiceController extends Controller
             $response = [
                 'msg' => 'Subservices Recived Succfully',
                 'status' => 200,
-                'data' => $subservicesCollection,
+                'data' => $subservices,
             ];
         }
         return response($response);
@@ -58,10 +59,11 @@ class SubServiceController extends Controller
             return response()->json(['message' => 'Token error', 'error' => $e->getMessage()], 500);
         }
 
-        $subservices = HealthcareProviderService::all()->where('service_id', $service_id)->unique('subservice_name');
-        $subservicesCollection = SubserviceResource::collection($subservices);
+        // $subservices = HealthcareProviderService::all()->where('service_id', $service_id)->unique('subservice_name');
+        // $subservicesCollection = SubserviceResource::collection($subservices);
+        $subservices = SubserviceResource::collection(Subservice::all()->where('service_id', $service_id));
 
-        if ($subservicesCollection->isEmpty()) {
+        if ($subservices->isEmpty()) {
             $response = [
                 'msg' => 'Subservices not found',
                 'status' => 404,
@@ -71,7 +73,7 @@ class SubServiceController extends Controller
             $response = [
                 'msg' => 'Subservices Recived Succfully',
                 'status' => 200,
-                'data' => $subservicesCollection,
+                'data' => $subservices,
                 'token' => $newToken,
             ];
         }
@@ -82,7 +84,7 @@ class SubServiceController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'subservice_ids' => 'required|array',
-            'subservice_ids.*' => 'string|exists:healthcare_provider_service,subservice_name'
+            'subservice_ids.*' => 'integer|exists:sub_services,id'
         ]);
 
         if ($validator->fails()) {
@@ -117,7 +119,5 @@ class SubServiceController extends Controller
         }
         return response($response);
     }
-    public function store(){
-        
-    }
+    public function store() {}
 }
