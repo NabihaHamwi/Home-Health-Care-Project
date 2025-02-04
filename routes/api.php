@@ -158,12 +158,15 @@ Route::get('/search' , [EmergencyController::class , 'calculateDistanceAndTime']
 //___________________________________________________________________
 
 Route::post('/add-provider' , [AdminController::class , 'addProvider'])->name(name:'admin.addProvider');
-Route::get('/patient-supserviced/{healthcareProvider}' , [HealthcareProviderController::class , 'patientSupserviced'])->name(name:'providers.patientSupserviced');
-Route::post('/savePersonalImage' , [AdminController::class , 'savePersonalImage'])->name(name:'admin.savePersonalImage');
-Route::get('/healthcare-provider-get/{healtncareProvider}' ,[HealthcareProviderController::class , 'show'])->name(name:'show.provider');
+//Route::get('/patient-supserviced/{healthcareProvider}' , [HealthcareProviderController::class , 'patientSupserviced'])->name(name:'providers.patientSupserviced');
+//Route::post('/savePersonalImage' , [AdminController::class , 'savePersonalImage'])->name(name:'admin.savePersonalImage');
+//Route::get('/healthcare-provider-get/{healtncareProvider}' ,[HealthcareProviderController::class , 'show'])->name(name:'show.provider');
 
-
-
+//__________________________________________________________________
+//get user fullname
+Route::get('/get-fullname/{users}' ,[UserController::class , 'getUserFullName'])->name(name:'users.getUserFullName');
+//get provider fullname + images
+Route::get('/get-provider/{healthcareProvider}' ,[HealthcareProviderController::class , 'getProvider'])->name(name:'provider.getprovider');
 
 
 

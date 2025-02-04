@@ -117,4 +117,7 @@ class SubServiceController extends Controller
         }
         return response($response);
     }
+    public function store(){
+        
+    }
 }
