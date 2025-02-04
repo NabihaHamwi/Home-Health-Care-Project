@@ -17,7 +17,7 @@ class SubserviceResource extends JsonResource
         if ($request->route()->named('subservices.index') || $request->route()->named('subservices.show') || $request->route()->named('search.result'))
             return [
                 'id' => $this->id,
-                'name' => $this->subservice_name,
+                'name' => $this->sub_service_name,
             ];
         return parent::toArray($request);
     }

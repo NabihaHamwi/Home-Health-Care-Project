@@ -24,7 +24,7 @@ class Service extends Model
 
     public function healthcareProviders()
     {
-        return $this->belongsToMany(HealthcareProvider::class)->withPivot('subservice_name');
+        return $this->belongsToMany(HealthcareProvider::class);
     }
 
 

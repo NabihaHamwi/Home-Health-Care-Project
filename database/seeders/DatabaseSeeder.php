@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             ActivitiesTableSeeder::class,
             HealthcareProviderWorktimesTableSeeder::class,
             ActivityFlagTableSeeder::class,
+            SubServiceTableSeeder::class,
+            HealthcareProviderSubServiceTableSeeder::class,
             // TODO: fix: we decied to put personal trait as a record in helthcare provider table
             // PersonalTraitsSeeder::class,
             // HealthcareProviderPersonalTraitTableSeeder::class

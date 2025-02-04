@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SubserviceResource;
+use App\Models\HealthcareProvider;
 use Illuminate\Http\Request;
 use App\Models\HealthcareProviderService;
+use App\Models\SubService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -16,7 +19,7 @@ class SubServiceController extends Controller
     {
         // $subservices = HealthcareProviderService::all()->unique('subservice_name');
         // $subservicesCollection = SubserviceResource::collection($subservices);
-        $subservices = SubserviceResource::collection(Subservice::all());
+        $subservices = SubserviceResource::collection(SubService::all());
         if ($subservices->isEmpty()) {
             $response = [
                 'msg' => 'Subservices not found',
@@ -61,13 +64,13 @@ class SubServiceController extends Controller
 
         // $subservices = HealthcareProviderService::all()->where('service_id', $service_id)->unique('subservice_name');
         // $subservicesCollection = SubserviceResource::collection($subservices);
-        $subservices = SubserviceResource::collection(Subservice::all()->where('service_id', $service_id));
+        $subservices = SubserviceResource::collection(SubService::all()->where('service_id', $service_id));
 
         if ($subservices->isEmpty()) {
             $response = [
                 'msg' => 'Subservices not found',
                 'status' => 404,
-                'data' => null,
+                'data' => SubService::all(),
             ];
         } else {
             $response = [
