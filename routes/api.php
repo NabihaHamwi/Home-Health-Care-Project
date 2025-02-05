@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\HealthcareProviderController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\Api\SubServiceController;
 use App\Http\Controllers\Api\EmergencyController;
+use App\Http\Controllers\Api\HealthcareProviderSubServiceController;
 use App\Http\Controllers\Api\PatientAgentController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
@@ -168,8 +169,8 @@ Route::get('/get-fullname/{users}' ,[UserController::class , 'getUserFullName'])
 //get provider fullname + images
 Route::get('/get-provider/{healthcareProvider}' ,[HealthcareProviderController::class , 'getProvider'])->name(name:'provider.getprovider');
 
-
-
+//add services and subservices to the careprovider
+Route::post('/storesubservice' ,[HealthcareProviderController::class , 'store'])->name(name:'HealthcareProvider.store');
 
 
 

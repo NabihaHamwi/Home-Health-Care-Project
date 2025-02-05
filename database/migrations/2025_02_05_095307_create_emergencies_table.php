@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->foreignId('healthcare_provider_id')->constrained()->onDelete('cascade');
-            $table->unsignedBigInteger('healthcare_provider_service_id');
-            $table->foreign('healthcare_provider_service_id')->references('id')->on('healthcare_provider_service')->onDelete('cascade');
+            // $table->unsignedBigInteger('sub_service_id');
+            // $table->foreign('sub_service_id')->references('id')->on('sub_service')->onDelete('cascade');
             $table->string('problem');
             $table->string('location_name');
             $table->float('latitude')->check(function ($query) {
