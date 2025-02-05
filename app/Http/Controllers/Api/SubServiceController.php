@@ -111,7 +111,6 @@ class SubServiceController extends Controller
                 'status' => 200,
                 'data' => $subservices,
                 'token' => $newToken,
-                'jwt_data' => $updatedClaims,
             ];
         } catch (\Exception $e) {
             $response = [
