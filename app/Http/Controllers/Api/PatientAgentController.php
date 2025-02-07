@@ -8,6 +8,7 @@ use App\Models\Patient;
 use App\Http\Resources\PatientAgentResource;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PatientAgentController extends Controller
 {
@@ -208,4 +209,41 @@ class PatientAgentController extends Controller
     //______________________________________________________________________
 
 
+    public function selectPatient(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'patient_id' => 'required|integer|exists:patients,id',
+        ]);
+
+        if ($validator->fails()) {
+            $response = [
+                'message' => 'validation errors',
+                'status' => 400,
+                'errors' => $validator->errors()
+            ];
+            return response($response);
+        }
+
+        try {
+            $patient_id = $request->input('patient_id');
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $updatedClaims = $payload->toArray();
+            $updatedClaims['patient_id'] = $patient_id;
+            $newToken = JWTAuth::claims($updatedClaims)->fromUser(auth()->user());
+            $response = [
+                'msg' => 'patient sended Succfully',
+                'status' => 200,
+                'data' => "patient_id sended: $patient_id",
+                'token' => $newToken,
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'patient could not send',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response($response);
+    }
 }
