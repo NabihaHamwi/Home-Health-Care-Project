@@ -57,4 +57,12 @@ class User extends Authenticatable implements JWTSubjectContract
     {
         return [];
     }
+    public function healthcareProvider()
+    {
+        return $this->hasOne(HealthcareProvider::class);
+    }
+    public function employee()
+    {
+        return $this->hasOne(Employee::class);
+    }
 }

@@ -18,7 +18,6 @@ return new class extends Migration
              // !!! Note: laila you have to modified this
             // $table->unsignedBigInteger('healthcare_provider_service_id');
             // $table->foreign('healthcare_provider_service_id')->references('id')->on('healthcare_provider_service')->onDelete('cascade');  $table->unsignedBigInteger('healthcare_provider_service_id');
-            $table->foreign('healthcare_provider_service_id')->references('id')->on('healthcare_provider_service')->onDelete('cascade');
             $table->string('problem');
             $table->string('location_name');
             $table->float('latitude')->check(function ($query) {

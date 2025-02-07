@@ -13,10 +13,17 @@ return new class extends Migration
     {
         Schema::create('activities', function (Blueprint $table) {
             $table->id();
+           // $table->foreignId('sub_sevice_id')->constrained()->onDelete();
             $table->string('activity_name');
             $table->timestamps();
-
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('activities');
+    }
 };
