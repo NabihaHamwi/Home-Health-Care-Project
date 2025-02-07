@@ -77,30 +77,29 @@ class UserController extends Controller
     /**********************************************/
     public function login(Request $request)
     {
-        // التحقق من صحة المدخلات
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string'
         ]);
-
-        // إذا فشلت التحقق من صحة المدخلات، إرجاع رسالة خطأ
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-
-        // البحث عن المستخدم بالبريد الإلكتروني
         $user = User::where('email', $request->email)->first();
 
-        // التحقق من أن المستخدم موجود وأن كلمة المرور صحيحة
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['errors' => 'Invalid credentials'], 401);
         }
-
-        $customClaims = ['user_id' => $user->id];
-
+        $customClaims = ['user_id' => $user->id, 'role' => $user->role];
+        if ($user->role == 'provider') {
+            $provider = $user->healthcareProvider;
+            $customClaims['provider_id'] = $provider->id;
+        } else if ($user->role == 'employee') {
+            $employee = $user->employee;
+            $customClaims['employee_id'] = $employee->id;
+        }
         // إنشاء رمز JWT مع تضمين الـ payload المخصص
         $token = JWTAuth::claims($customClaims)->attempt($request->only('email', 'password'));
-        
+
         if (!$token) {
             return response()->json(['errors' => 'Unauthorized'], 401);
         }
@@ -117,7 +116,9 @@ class UserController extends Controller
             'access_token' => $token,
             'user' => [
                 'id' => $user->id,
-                'role' => $user->role
+                'role' => $user->role,
+                'provider_id'=> $provider->id ?? null,
+                'employee_id' =>$employee->id ?? null
             ],
         ], 200)->cookie('laravel_session', $request->session()->getId(), 120);
     }
@@ -154,7 +155,7 @@ class UserController extends Controller
             return response()->json([
                 'full_name' => $full_name,
                 'message' => 'scusses'
-            ] , 200);
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'failed',

@@ -93,7 +93,7 @@ class SearchController extends Controller
 
         if ($subservices) {
             $skills_1 = $subservices;
-            $skills_2 = $provider->subservices->pluck('subservice_name')->toArray();
+            $skills_2 = $provider->subservices->pluck('id')->toArray();
             $intersection = count(array_intersect($skills_1, $skills_2));
             $union = count(array_unique(array_merge($skills_1, $skills_2)));
             $skills_similarity = $intersection / $union;
@@ -111,6 +111,7 @@ class SearchController extends Controller
             $payload = JWTAuth::setToken($token)->getPayload();
             $serviceId = $payload->get('service_id');
             $subservices = $payload->get('selected_subservice');
+            // *** here ***
             $providers = HealthcareProviderResource::collection(Service::find($serviceId)->healthcareProviders->unique('id'));
             $results = [];
 

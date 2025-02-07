@@ -18,7 +18,7 @@ class HealthcareProviderResource extends JsonResource
     {
         // $skills = SkillResource::collection(HealthcareProvider::find($this->id)->skills);
         $services = ServiceResource::collection(HealthcareProvider::find($this->id)->services);
-        $subservices =  SubserviceResource::collection(HealthcareProvider::find($this->id)->subservices);
+        $subservices =  SubserviceResource::collection(HealthcareProvider::find($this->id)->subServices);
         if ($request->route()->named('search.result'))
             return [
                 'id' => $this->id,
