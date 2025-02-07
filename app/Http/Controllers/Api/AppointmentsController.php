@@ -14,6 +14,7 @@ use DateTime;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -175,7 +176,7 @@ class AppointmentsController extends Controller
         }
     }
 
-    public function show_reserved_appointments($providerID, $week = 1)
+    public function show_reserved_appointments(Request $request, $providerID, $week = 1)
     {
         /// return the date of today and the week we are in
         ///day = today
@@ -400,5 +401,43 @@ class AppointmentsController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             return $this->errorResponse($e, 500);
         }
+    }
+
+    public function selectProvider(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'provider_id' => 'required|integer|exists:healthcare_providers,id',
+        ]);
+
+        if ($validator->fails()) {
+            $response = [
+                'message' => 'validation errors',
+                'status' => 400,
+                'errors' => $validator->errors()
+            ];
+            return response($response);
+        }
+
+        try {
+            $provider_id = $request->input('provider_id');
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $updatedClaims = $payload->toArray();
+            $updatedClaims['provider_id'] = $provider_id;
+            $newToken = JWTAuth::claims($updatedClaims)->fromUser(auth()->user());
+            $response = [
+                'msg' => 'provider sended Succfully',
+                'status' => 200,
+                'data' => "provider_id sended: $provider_id",
+                'token' => $newToken,
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'provider could not send',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response($response);
     }
 }

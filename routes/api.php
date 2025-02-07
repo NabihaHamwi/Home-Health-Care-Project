@@ -224,3 +224,6 @@ Route::post('/selected_subservices', [SubServiceController::class, 'selectSubser
 
 //Api for send selected patient profile
 Route::post('/selected_patient', [PatientAgentController::class , 'selectPatient'])->name(name:'patients.selectPatient');
+
+//Api for send selected provider
+Route::post('/selected_provider', [AppointmentsController::class , 'selectProvider'])->name(name:'appointments.selectProvider');
