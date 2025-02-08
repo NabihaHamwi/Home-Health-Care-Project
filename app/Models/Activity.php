@@ -12,6 +12,10 @@ class Activity extends Model
     use HasFactory;
     public function subServices()
     {
-        return $this->BelongsToMany(SubService::class, 'activity_sub_service');
+        return $this->belongsToMany(SubService::class, 'activity_sub_service');
+    }
+    public function activitydetails()
+    {
+        return $this->hasMany(ActivityDetail::class);
     }
 }

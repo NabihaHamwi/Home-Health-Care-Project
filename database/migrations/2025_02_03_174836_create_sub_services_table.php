@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
             $table->string('sub_service_name');
             $table->string('description');
-            $table->boolean('is_multi_activity')->default(false); 
+           // $table->boolean('is_multi_activity')->default(false); 
             $table->decimal('price', 8, 2);
             $table->timestamps();
         });

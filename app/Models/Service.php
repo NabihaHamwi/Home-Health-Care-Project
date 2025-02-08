@@ -9,32 +9,9 @@ class Service extends Model
 {
     use HasFactory;
 
-
-
-    public function sessions()
-    {
-        return $this->hasManyThrough(Session::class, Appointment::class);
-    }
-
-
-
-    //_____________________________________________
-
-
-
     public function healthcareProviders()
     {
         return $this->belongsToMany(HealthcareProvider::class);
     }
 
-
-
-    //_______________________________________________
-
-
-
-    public function activities()
-    {
-        return $this->belongsToMany(Activity::class, 'activity_service');
-    }
 }

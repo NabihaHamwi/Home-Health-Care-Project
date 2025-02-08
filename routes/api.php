@@ -78,28 +78,7 @@ use PHPUnit\Framework\Attributes\Group;
 
 //___________________________________________________________________
 
-
-
-//عرض اسئلة الاستبيان
-// Route::group(
-//     [],
-//     function ($router) {
-//         //عرض اسئلة الاستبيان
-//         Route::get('/survey', [ApiSurveyController::class, 'index'])->name('survey.index');
-//         //اضافة سؤال جديد للاستبيان من قبل الادمن
-//         Route::post('/survey/add-question', [ApiSurveyController::class, 'addQuestions'])->name('survey.add');
-//         // التعديل على سؤال من قبل الادمن
-//         Route::put('/survey/update-question', [ApiSurveyController::class, 'updateQuestions'])->name('survey.update');
-//         //حذف سؤال من الاستبيان من قبل الادمن
-//         Route::delete('/survey/delete-question',  [ApiSurveyController::class, 'deleteQuestions'])->name('survey.delete');
-//     }
-// );
-
-
-//___________________________________________________________________
-
-
-//عرض معلومات المريض
+//apis for patients
 Route::group(
     [],
     function ($router) {
@@ -109,27 +88,22 @@ Route::group(
         Route::post('/add-patient/{userid}', [PatientAgentController::class, 'addPatient'])->name('patients.addPatient');
         //تحديث المعلومات 
         // Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
+        //api for show all patients 
         Route::get('/get-patients/{userid}', [PatientAgentController::class, 'getPatients'])->name(name: 'patients.getPatients');
 
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     }
 );
-
-
-
 //___________________________________________________________________
 
-//أيام عمل مقدم الرعاية
+//apis for careprovider worktimes
 Route::group(
     [],
     function ($router) {
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // عرض ايام عمل مقدم الرعاية
         Route::get('/careprovider-worktimes/{providerid}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
-        // تعبئة ايام العمل
-        //تم ايقافه
-        //  Route::post('/careprovidersworktimes', [HealthcareProviderWorktimeController::class, 'store'])->name('careprovidersworktimes.store');
         // تحديث بيانات ايام العمل
         Route::post('/careprovider-worktimes/{providerid}', [HealthcareProviderWorktimeController::class, 'store_update'])->name('careprovidersworktimes.store_update');
         // حذف ايام العمل وإعادة تعبئتها من جديد
@@ -137,13 +111,9 @@ Route::group(
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
 );
-
-
-
-
 //_____________________________________________________________________
 
-// المصادقة
+// apis for authentication
 Route::group([], function ($router) {
     Route::post('/register', [UserController::class, 'register']);
     Route::post('/login', [UserController::class, 'login']);
@@ -152,21 +122,19 @@ Route::group([], function ($router) {
 
 //___________________________________________________________________________
 
-//emergencies:
+//apis for emergencies feature
 //Route::post('/update/{healthcareProvider}', [HealthcareProviderController::class, 'isAvailableUpdate'])->name(name: 'providers.isAvailableUpdate');
 //Route::get('/search', [EmergencyController::class, 'calculateDistanceAndTime'])->name(name: 'emergencies.search');
 
 //___________________________________________________________________
 
+//api for add a careprovider
 Route::post('/add-provider', [AdminController::class, 'addProvider'])->name(name: 'admin.addProvider');
-//Route::get('/patient-supserviced/{healthcareProvider}' , [HealthcareProviderController::class , 'patientSupserviced'])->name(name:'providers.patientSupserviced');
-//Route::post('/savePersonalImage' , [AdminController::class , 'savePersonalImage'])->name(name:'admin.savePersonalImage');
-//Route::get('/healthcare-provider-get/{healtncareProvider}' ,[HealthcareProviderController::class , 'show'])->name(name:'show.provider');
 
-//__________________________________________________________________
-//get user fullname
+//api for show user fullname
 Route::get('/get-fullname/{users}', [UserController::class, 'getUserFullName'])->name(name: 'users.getUserFullName');
-//get provider fullname + images
+
+//api for show provider fullname + images
 Route::get('/get-provider/{healthcareProvider}', [HealthcareProviderController::class, 'getProvider'])->name(name: 'provider.getprovider');
 
 //add services and subservices to the careprovider
@@ -224,4 +192,4 @@ Route::get('/subservices/{service}', [SubServiceController::class, 'show'])->nam
 Route::post('/selected_subservices', [SubServiceController::class, 'selectSubservices'])->name(name: 'subservices.selectSubservices');
 
 //Api for send selected patient profile
-Route::post('/selected_patient', [PatientAgentController::class , 'selectPatient'])->name(name:'patients.selectPatient');
+Route::post('/selected_patient', [PatientAgentController::class, 'selectPatient'])->name(name: 'patients.selectPatient');

@@ -11,8 +11,8 @@ class HealthcareProviderService extends Model
     use HasFactory;
     protected $table = 'healthcare_provider_service';
 
-    public function emergecies(): HasMany
-    {
-        return $this->hasMany(Emergency::class);
-    }
+    // public function emergecies(): HasMany
+    // {
+    //     return $this->hasMany(Emergency::class);
+    // }
 }

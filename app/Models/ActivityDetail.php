@@ -19,4 +19,10 @@ class ActivityDetail extends Model
         'repetition',
         'every_x_day'
     ];
+    public function activity(){
+        return $this->belongsTo(Activity::class);
+    }
+    public function appointment(){
+        return $this->belongsTo(Appointment::class);
+    }
 }
