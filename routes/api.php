@@ -199,7 +199,7 @@ Route::get('/pending-appointments/{provider}', [AppointmentsController::class, '
 Route::get('/pending-appointment-details/{appointment}/{group?}', [AppointmentsController::class, 'show_pending_appointments_details'])->name(name: 'appointments.show_pending_appointment');
 
 //Api for show the reserved appointments (for care providers) for a one week
-Route::get('/reserved-appointments/{provider}/{week}', [AppointmentsController::class, 'show_reserved_appointments'])->name(name: 'appointments.show_reserved_appointments');
+Route::get('/reserved-appointments/{week}', [AppointmentsController::class, 'show_reserved_appointments'])->name(name: 'appointments.show_reserved_appointments');
 
 //Api for show one of reserved appointments
 // Route::get('/reserved-appointments/{appointment}', [AppointmentsController::class, 'show_appointment'])->name(name: 'appointment.show_reserved_appointment');
