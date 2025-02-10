@@ -15,8 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('activity_name');
             $table->timestamps();
-
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('activities');
+    }
 };

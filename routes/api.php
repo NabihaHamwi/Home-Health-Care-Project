@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ApiSessionController as ApiSessionController;
 use App\Http\Controllers\Api\SearchController;
@@ -13,11 +14,13 @@ use App\Http\Controllers\Api\HealthcareProviderController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\Api\SubServiceController;
 use App\Http\Controllers\Api\EmergencyController;
+use App\Http\Controllers\Api\HealthcareProviderSubServiceController;
 use App\Http\Controllers\Api\PatientAgentController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
 use App\Models\Emergency;
 use App\Models\HealthcareProvider;
+use App\Models\HealthcareProviderSubService;
 use App\Models\HealthcareProviderWorktime;
 use App\Models\Patient;
 use Illuminate\Http\Request;
@@ -55,9 +58,11 @@ use PHPUnit\Framework\Attributes\Group;
 //         Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-//عرض واجهة التعديل على الجلسة
-// Route::get('sessions/{session}/edit', [ApiSessionController::class, 'edit'])->name('sessions.edit');
-
+//عرض جميع أنشطة الموعد 
+//  Route::get('/activities/{groupId}', [HealthcareProviderSubServiceController::class, 'getActivities'])->name('activties.getActivities');
+//  Route::get('/activitiy/{activityId}', [HealthcareProviderSubServiceController::class, 'getDetailsActivity'])->name('activties.getDetailsActivity');
+//Route::post('/storeactivitiy', [HealthcareProviderSubServiceController::class, 'storeActivities'])->name('activties.storeActivities');
+//Route::get('/get-activities{subserviceId}', [ActivityController::class, 'getActivities'])->name(name: 'activities.getActivities');
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //تحديث بيانات الجلسة
@@ -73,28 +78,7 @@ use PHPUnit\Framework\Attributes\Group;
 
 //___________________________________________________________________
 
-
-
-//عرض اسئلة الاستبيان
-// Route::group(
-//     [],
-//     function ($router) {
-//         //عرض اسئلة الاستبيان
-//         Route::get('/survey', [ApiSurveyController::class, 'index'])->name('survey.index');
-//         //اضافة سؤال جديد للاستبيان من قبل الادمن
-//         Route::post('/survey/add-question', [ApiSurveyController::class, 'addQuestions'])->name('survey.add');
-//         // التعديل على سؤال من قبل الادمن
-//         Route::put('/survey/update-question', [ApiSurveyController::class, 'updateQuestions'])->name('survey.update');
-//         //حذف سؤال من الاستبيان من قبل الادمن
-//         Route::delete('/survey/delete-question',  [ApiSurveyController::class, 'deleteQuestions'])->name('survey.delete');
-//     }
-// );
-
-
-//___________________________________________________________________
-
-
-//عرض معلومات المريض
+//apis for patients
 Route::group(
     [],
     function ($router) {
@@ -104,72 +88,57 @@ Route::group(
         Route::post('/add-patient/{userid}', [PatientAgentController::class, 'addPatient'])->name('patients.addPatient');
         //تحديث المعلومات 
         // Route::put('/patients/{patient}', [ApiPatientController::class, 'update'])->name('patients.update');
-        Route::get('/get-patients/{userid}' , [PatientAgentController::class , 'getPatients'])->name(name:'patients.getPatients'); 
+        //api for show all patients 
+        Route::get('/get-patients/{userid}', [PatientAgentController::class, 'getPatients'])->name(name: 'patients.getPatients');
 
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     }
 );
-
-
-
 //___________________________________________________________________
 
-//أيام عمل مقدم الرعاية
+//apis for careprovider worktimes
 Route::group(
     [],
     function ($router) {
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // عرض ايام عمل مقدم الرعاية
-        Route::get('/careprovider-worktimes/{careproviderworktimes}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
-        // تعبئة ايام العمل
-        //تم ايقافه
-        //  Route::post('/careprovidersworktimes', [HealthcareProviderWorktimeController::class, 'store'])->name('careprovidersworktimes.store');
+        Route::get('/careprovider-worktimes/{providerid}', [HealthcareProviderWorktimeController::class, 'show'])->name('careprovidersworktimes.show');
         // تحديث بيانات ايام العمل
-        Route::post('/careprovider-worktimes/{careprovider-worktimes}', [HealthcareProviderWorktimeController::class, 'store_update'])->name('careprovidersworktimes.store_update');
+        Route::post('/careprovider-worktimes/{providerid}', [HealthcareProviderWorktimeController::class, 'store_update'])->name('careprovidersworktimes.store_update');
         // حذف ايام العمل وإعادة تعبئتها من جديد
-        Route::delete('/careprovider-worktimes/{careprovider-worktimes}', [HealthcareProviderWorktimeController::class, 'destroy'])->name('careprovidersworktimes.destroy');
+        Route::delete('/careprovider-worktimes/{providerid}', [HealthcareProviderWorktimeController::class, 'destroy'])->name('careprovidersworktimes.destroy');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
 );
-
-
-
-
 //_____________________________________________________________________
 
-//Route::get('/register', [UserController::class, 'register']);
-
-// المصادقة
+// apis for authentication
 Route::group([], function ($router) {
-    Route::get('/register', [UserController::class, 'register']);
+    Route::post('/register', [UserController::class, 'register']);
     Route::post('/login', [UserController::class, 'login']);
     Route::post('/logout', [UserController::class, 'logout']);
-    // Route::post('/refresh', [UserController::class, 'refreshToken']);
-    //  Route::get('/user-profile', [UserController::class, 'userProfile']);
 });
 
 //___________________________________________________________________________
 
-//emergencies:
-Route::post('/update/{healthcareProvider}', [HealthcareProviderController::class, 'isAvailableUpdate'])->name(name: 'providers.isAvailableUpdate');
-Route::get('/search' , [EmergencyController::class , 'calculateDistanceAndTime'])->name(name:'emergencies.search');
+//apis for emergencies feature
+//Route::post('/update/{healthcareProvider}', [HealthcareProviderController::class, 'isAvailableUpdate'])->name(name: 'providers.isAvailableUpdate');
+//Route::get('/search', [EmergencyController::class, 'calculateDistanceAndTime'])->name(name: 'emergencies.search');
 
 //___________________________________________________________________
 
-Route::post('/add-provider' , [AdminController::class , 'addProvider'])->name(name:'admin.addProvider');
-//Route::get('/patient-supserviced/{healthcareProvider}' , [HealthcareProviderController::class , 'patientSupserviced'])->name(name:'providers.patientSupserviced');
-//Route::post('/savePersonalImage' , [AdminController::class , 'savePersonalImage'])->name(name:'admin.savePersonalImage');
-//Route::get('/healthcare-provider-get/{healtncareProvider}' ,[HealthcareProviderController::class , 'show'])->name(name:'show.provider');
+//api for add a careprovider
+Route::post('/add-provider', [AdminController::class, 'addProvider'])->name(name: 'admin.addProvider');
 
-//__________________________________________________________________
-//get user fullname
-Route::get('/get-fullname/{users}' ,[UserController::class , 'getUserFullName'])->name(name:'users.getUserFullName');
-//get provider fullname + images
-Route::get('/get-provider/{healthcareProvider}' ,[HealthcareProviderController::class , 'getProvider'])->name(name:'provider.getprovider');
+//api for show user fullname
+Route::get('/get-fullname/{users}', [UserController::class, 'getUserFullName'])->name(name: 'users.getUserFullName');
 
+//api for show provider fullname + images
+Route::get('/get-provider/{healthcareProvider}', [HealthcareProviderController::class, 'getProvider'])->name(name: 'provider.getprovider');
 
-
+//add services and subservices to the careprovider
+// Route::post('/storesubservice', [HealthcareProviderController::class, 'store'])->name(name: 'HealthcareProvider.store');
 
 
 

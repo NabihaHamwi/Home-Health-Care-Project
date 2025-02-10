@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('healthcare_providers', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users'); 
+            $table->foreign('user_id')->references('id')->on('users');
             $table->string('national_number')->unique();
             $table->integer('age');
-            $table->enum('relationship_status' , ['أعزب','متزوج','أرمل','مطلق' ,'-' ]);
+            $table->enum('relationship_status', ['أعزب', 'متزوج', 'أرمل', 'مطلق', '-']);
             $table->integer('experience');
             $table->binary('personal_image')->nullable();
             $table->enum('physical_strength', ['basic', 'advanced', 'professional']); //القوة البدنية
-            $table->float('min_working_hours_per_day')->nullable(); 
+            $table->float('min_working_hours_per_day')->nullable();
             $table->string('license_number')->unique();
             $table->boolean('is_available')->default(false);
             $table->string('location_name')->nullable();
@@ -31,7 +31,7 @@ return new class extends Migration
             $table->float('longitude')->nullable()->check(function ($query) {
                 $query->whereBetween('longitude', [36.24, 36.32]);
             });
-            
+
             $table->timestamps();
         });
     }

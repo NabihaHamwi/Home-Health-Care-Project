@@ -33,20 +33,21 @@ class HealthcareProvider extends Model
         return $this->hasMany(Appointment::class);
     }
 
-
     public function worktimes()
     {
         return $this->hasMany(HealthcareProviderWorktime::class);
     }
 
-    public function emergencies(): HasMany
-    {
-        return $this->hasMany(Emergency::class);
-    }
+    // public function emergencies(): HasMany
+    // {
+    //     return $this->hasMany(Emergency::class);
+    // }
+
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class);
     }
+
     public function subServices()
     {
         return $this->belongsToMany(SubService::class, 'healthcare_provider_sub_service');

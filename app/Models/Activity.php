@@ -4,22 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Activity extends Model
 {
     use HasFactory;
-
-    // علاقة many-to-many مع جدول الجلسات (sessions)
-    public function sessions()
+    public function subServices()
     {
-        return $this->belongsToMany(Session::class)
-            ->withPivot('value', 'time');
+        return $this->belongsToMany(SubService::class, 'activity_sub_service');
     }
-    //_________________________________________________
-  
-    public function flags()
+    public function activitydetails()
     {
-        return $this->hasMany(ActivityFlag::class);
+        return $this->hasMany(ActivityDetail::class);
     }
 }

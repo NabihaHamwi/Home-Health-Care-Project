@@ -41,6 +41,10 @@ class Appointment extends Model
     {
         return $this->belongsTo(Service::class);
     }
+    public function activitydetails()
+    {
+        return $this->hasMany(ActivityDetail::class);
+    }
     //     public function activities()
     // {
     //     return $this->hasManyThrough(
@@ -78,10 +82,10 @@ class Appointment extends Model
     {
         $start_time = Carbon::createFromFormat('H:i:s', $this->appointment_start_time);
         //appointmet duration is time
-        $duration = Carbon::createFromFormat('H:i:s' , $this->appointment_duration);
+        $duration = Carbon::createFromFormat('H:i:s', $this->appointment_duration);
         //add duration to appointment_start_time
         $end_time = $start_time->copy()->addHours($duration->hour)->addMinutes($duration->minute)->addSeconds($duration->second);
-       // dd($end_time); 
+        // dd($end_time); 
         return $end_time->format('H:i:s');
     }
     public function calculateAppointmentEndTime1()
@@ -95,7 +99,7 @@ class Appointment extends Model
 
             // إضافة مدة الموعد إلى وقت البداية
             $end_time = $start_time->copy()->addHours($duration->hour)->addMinutes($duration->minute)->addSeconds($duration->second);
-           // dd($end_time);
+            // dd($end_time);
             return $end_time->format('H:i:s');
         } catch (\Exception $e) {
             return 'Invalid time format';

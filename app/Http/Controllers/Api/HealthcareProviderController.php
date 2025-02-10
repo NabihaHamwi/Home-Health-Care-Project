@@ -41,6 +41,7 @@ class HealthcareProviderController extends UserController
     }
     /************************************************************************************/
 
+    //show info about one care provider
     public function show($provider_id)
     {
         try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
@@ -54,6 +55,7 @@ class HealthcareProviderController extends UserController
     }
 
     /********************************************************************************/
+    // update careproviders availability
 
     //     public function updateProviderCache($providerId, $isAvailable, $latitude = null, $longitude = null, $locationName = null)
     //     {
@@ -90,6 +92,7 @@ class HealthcareProviderController extends UserController
     /******************************************************************************/
 
     // update careproviders availability
+
     public function isAvailableUpdate(Request $request, HealthcareProvider $healthcareProvider)
     {
         dd($providerId = $healthcareProvider->id);
@@ -156,7 +159,7 @@ class HealthcareProviderController extends UserController
     // }
 
     /******************************************************************************/
-
+    
     //retrieve careproviders(fullname + images)
     public function getProvider($provider_id)
     {

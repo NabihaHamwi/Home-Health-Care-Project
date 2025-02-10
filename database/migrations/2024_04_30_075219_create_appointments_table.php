@@ -17,14 +17,15 @@ return new class extends Migration
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->foreignId('healthcare_provider_id')->constrained()->onDelete('cascade');
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
-            $table->date('appointment_date'); // تاريخ الموعد
-            $table->time('appointment_start_time'); // وقت بداية الموعد
+            $table->string('day_of_week');
+            $table->date('appointment_date'); 
+            $table->time('appointment_start_time'); 
             $table->time('appointment_duration');
-            $table->string('patient_location'); // موقع المريض
-            $table->enum('appointment_status', ['الطلب مرفوض', 'الطلب مقبول', 'الطلب قيدالانتظار']); // حالة الموعد
-            $table->unsignedTinyInteger('appointment_rating')->nullable(); // تقييم الموعد
-            $table->enum('caregiver_status', ['حضور', 'غياب' , '-']); // حالة مقدم الرعاية
-            $table->text('complaint', 1000)->nullable(); // يسمح بحتى 1000 حرف//    شكاوي المريض  
+            $table->string('patient_location'); 
+            $table->enum('appointment_status', ['الطلب مرفوض', 'الطلب مقبول', 'الطلب قيدالانتظار']); 
+            $table->unsignedTinyInteger('appointment_rating')->nullable(); 
+            $table->enum('caregiver_status', ['حضور', 'غياب' , '-']); 
+            $table->text('complaint', 1000)->nullable();  
             $table->timestamps();
         });
     }

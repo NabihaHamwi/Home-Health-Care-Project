@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('activity_flags', function (Blueprint $table) {
+        Schema::create('activity_sub_service', function (Blueprint $table) {
             $table->id();
             $table->foreignId('activity_id')->constrained()->onDelete('cascade');
-            $table->integer('flag');
+            $table->foreignId('sub_service_id')->constrained()->onDelete('cascade');
+
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('activity_flags');
+        Schema::dropIfExists('activity_sub_service');
     }
 };
