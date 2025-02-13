@@ -214,8 +214,7 @@ class AppointmentsController extends Controller
             $reserved_appointments = Appointment::where('healthcare_provider_id', $provider_id)->where('appointment_status', 'الطلب مقبول')->whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
             if ($reserved_appointments->isEmpty()) {
                 $response = [
-                    /// *** Note fix this response
-                    'msg' => 'all appointments for this care provider is available',
+                    'msg' => 'all appointments for this care provider in this week is available',
                     'status' => 200,
                 ];
             } else
