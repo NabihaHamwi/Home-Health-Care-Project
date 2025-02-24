@@ -234,14 +234,46 @@ class AppointmentsController extends Controller
         return response($response);
     }
 
-    public function show_pending_appointments($providerID)
+    public function show_pending_appointments(Request $request)
     {
-        $appointments = Appointment::where('healthcare_provider_id', $providerID)->where('appointment_status', 'الطلب قيدالانتظار')->get();
-        // التحقق من وجود مواعيد
-        if ($appointments->isEmpty()) {
-            return $this->errorResponse('No pending appointments found for this care provider', 404);
+        // retrieving provider_id from token
+        try {
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $provider_id = $payload->get('provider_id');
+            if (!$provider_id)
+                throw new Exception('care provider is not selected, please choose care provider first');
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'token error: could not retrieve provider_id from token',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+            return response($response);
         }
-        return $this->successResponse(AppointmentResource::collection($appointments), 'pending appointment retrieved successfully', 200);
+
+        try {
+            $appointments = Appointment::where('healthcare_provider_id', $provider_id)->where('appointment_status', 'الطلب قيدالانتظار')->get();
+            if ($appointments->isEmpty()) {
+                $response = [
+                    'msg' => 'No pending appointments for this care provider',
+                    'status' => 200,
+                ];
+            } else
+                $response = [
+                    'msg' => 'appointments retrieved successfully',
+                    'status' => 200,
+                    'data' => AppointmentResource::collection($appointments),
+                    // 'token' => $newToken,
+                ];
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'can not retrieve appointments',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response($response);
     }
 
     public function show_pending_appointments_details($appointmentID, $groupID = null)
