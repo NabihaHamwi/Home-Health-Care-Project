@@ -176,7 +176,7 @@ class AppointmentsController extends Controller
         }
     }
 
-    public function show_reserved_appointments(Request $request, $week = 1)
+    public function show_reserved_appointments(Request $request, $date)
     {
         // retrieving provider_id from token
         try {
@@ -198,23 +198,22 @@ class AppointmentsController extends Controller
             /// return the date of today and the week we are in
             ///day = today
             $day = Carbon::now()->locale('en_US');
-
             ///go to the next dayweek
-            for ($i = 2; $i <= $week; $i++)
-                $day = $day->next();
+            // for ($i = 2; $i <= $week; $i++)
+            //     $day = $day->next();
 
-            /// test for another date but today
-            // $day = new Carbon();
-            // $day->setDate(2024, 5, 4)->locale('en_US');
+            // /// test for another date but today
+            // // $day = new Carbon();
+            // // $day->setDate(2024, 5, 4)->locale('en_US');
 
-            $startOfWeek = $day->startOfWeek()->format('Y-m-d');
-            $endOfWeek = $day->endOfWeek()->format('Y-m-d');
+            // $startOfWeek = $day->startOfWeek()->format('Y-m-d');
+            // $endOfWeek = $day->endOfWeek()->format('Y-m-d');
 
             /// return the reserved days in this week from the appointment table
-            $reserved_appointments = Appointment::where('healthcare_provider_id', $provider_id)->where('appointment_status', 'الطلب مقبول')->whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
+            $reserved_appointments = Appointment::where('healthcare_provider_id', $provider_id)->where('appointment_status', 'الطلب مقبول')->where('appointment_date', $date)->get();
             if ($reserved_appointments->isEmpty()) {
                 $response = [
-                    'msg' => 'all appointments for this care provider in this week is available',
+                    'msg' => 'all appointments for this care provider in this day is available',
                     'status' => 200,
                 ];
             } else
