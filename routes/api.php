@@ -62,7 +62,7 @@ use PHPUnit\Framework\Attributes\Group;
 //عرض جميع أنشطة الموعد 
 //  Route::get('/activities/{groupId}', [HealthcareProviderSubServiceController::class, 'getActivities'])->name('activties.getActivities');
 //  Route::get('/activitiy/{activityId}', [HealthcareProviderSubServiceController::class, 'getDetailsActivity'])->name('activties.getDetailsActivity');
-Route::post('/storeactivitiy', [ActivityDetailController::class, 'storeActivities'])->name('activties.storeActivities');
+Route::post('/store-activitiy-details', [ActivityDetailController::class, 'storeActivityDetails'])->name('activties.storeActivityDetails');
 //Route::get('/get-activities{subserviceId}', [ActivityController::class, 'getActivities'])->name(name: 'activities.getActivities');
 
 
