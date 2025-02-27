@@ -27,6 +27,9 @@ class AdminController extends UserController
       'physical_strength' => 'required|in:basic,advanced,professional',
       'license_number' => 'required|string|unique:healthcare_providers',
       'document_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+      'phone_number' => [            
+        'regex:/^(\\+963|00963)?\d{9}$/' // تحقق بنمط رقمي للأرقام السورية. يبدأ بـ +963 أو 00963 ويليه 9 أرقام.
+      ]
 
     ]);
 

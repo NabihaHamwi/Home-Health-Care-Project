@@ -13,16 +13,18 @@ class ActivityDetail extends Model
         'appointment_id',
         'sub_activity_name',
         'sub_activity_type',
-        'sub_activity_date',
+        'start_date',
+        'end_date',
         'user_comment',
         'sub_activity_time',
         'repetition',
-        'every_x_day'
+        'every_x_day',
+        'repeat_count_per_day'
     ];
-    public function activity(){
-        return $this->belongsTo(Activity::class);
-    }
-    public function appointment(){
-        return $this->belongsTo(Appointment::class);
+
+
+    public function activityAppointments()
+    {
+        return $this->belongsToMany(ActivityAppointment::class, 'activity_details_frequencies', 'activity_detail_id', 'activity_appointment_id');
     }
 }

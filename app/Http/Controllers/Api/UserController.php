@@ -31,12 +31,11 @@ class UserController extends Controller
             'gender' => 'required|in:male,female',
             'password' => 'required|min:6',
             'phone_number' => [
-                'required',
-                'unique:users',
-                'unique:users',
-                //'regex:/^\+?[1-9]\d{1,14}$/'
-                'regex:/^(\\+|00)?\d{1,3}\d{6,10}$/'
+                'required',              
+                'unique:users',          
+                'regex:/^(\\+|00)?\d{1,3}\d{6,10}$/' // تحقق بنمط رقمي، يمكن أن يبدأ بـ '+' أو '00'، يليه من 1 إلى 3 أرقام لمفتاح الدولة، يليه من 6 إلى 10 أرقام للرقم المحلي.
             ]
+
         ]);
 
         if ($validator->fails()) {
@@ -117,8 +116,8 @@ class UserController extends Controller
             'user' => [
                 'id' => $user->id,
                 'role' => $user->role,
-                'provider_id'=> $provider->id ?? null,
-                'employee_id' =>$employee->id ?? null
+                'provider_id' => $provider->id ?? null,
+                'employee_id' => $employee->id ?? null
             ],
         ], 200)->cookie('laravel_session', $request->session()->getId(), 120);
     }
