@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->foreignId('healthcare_provider_id')->constrained()->onDelete('cascade');
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
-            $table->string('day_of_week');
+            $table->string('day_name');//اسماء ايام الاسبوع
             $table->date('appointment_date'); 
             $table->time('appointment_start_time'); 
             $table->time('appointment_duration');

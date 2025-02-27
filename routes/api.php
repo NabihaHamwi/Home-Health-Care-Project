@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\ActivityDetailController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ApiSessionController as ApiSessionController;
 use App\Http\Controllers\Api\SearchController;
@@ -56,24 +57,13 @@ use PHPUnit\Framework\Attributes\Group;
 //         Route::get('sessions/panel/{patient_id}', [ApiSessionController::class, 'monitoring_panel'])->name('sessions.panel');
 //         //تخزين بيانات جلسة
 //         Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 //عرض جميع أنشطة الموعد 
 //  Route::get('/activities/{groupId}', [HealthcareProviderSubServiceController::class, 'getActivities'])->name('activties.getActivities');
 //  Route::get('/activitiy/{activityId}', [HealthcareProviderSubServiceController::class, 'getDetailsActivity'])->name('activties.getDetailsActivity');
-//Route::post('/storeactivitiy', [HealthcareProviderSubServiceController::class, 'storeActivities'])->name('activties.storeActivities');
+Route::post('/store-activitiy-details', [ActivityDetailController::class, 'storeActivityDetails'])->name('activties.storeActivityDetails');
 //Route::get('/get-activities{subserviceId}', [ActivityController::class, 'getActivities'])->name(name: 'activities.getActivities');
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//تحديث بيانات الجلسة
-//  Route::put('sessions/{session}', [ApiSessionController::class, 'update'])->name('sessions.update');
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-//حذف بيانات الجلسة 
-// Route::delete('/sessions/{session}', [ApiSessionController::class, 'destroy'])->name('sessions.destroy');
-// }
-//);
 
 
 //___________________________________________________________________
@@ -132,10 +122,10 @@ Route::group([], function ($router) {
 Route::post('/add-provider', [AdminController::class, 'addProvider'])->name(name: 'admin.addProvider');
 
 //api for show user fullname
-Route::get('/get-fullname/{users}', [UserController::class, 'getUserFullName'])->name(name: 'users.getUserFullName');
+//Route::get('/get-fullname/{users}', [UserController::class, 'getUserFullName'])->name(name: 'users.getUserFullName');
 
 //api for show provider fullname + images
-Route::get('/get-provider/{healthcareProvider}', [HealthcareProviderController::class, 'getProvider'])->name(name: 'provider.getprovider');
+//Route::get('/get-provider/{healthcareProvider}', [HealthcareProviderController::class, 'getProvider'])->name(name: 'provider.getprovider');
 
 //add services and subservices to the careprovider
 // Route::post('/storesubservice', [HealthcareProviderController::class, 'store'])->name(name: 'HealthcareProvider.store');

@@ -160,33 +160,5 @@ class HealthcareProviderController extends UserController
 
     /******************************************************************************/
     
-    //retrieve careproviders(fullname + images)
-    public function getProvider($provider_id)
-    {
-        try {
-            $provider = HealthcareProvider::findOrFail($provider_id);
-            $personal_image_path = $provider->personal_image;
-            //dd($personal_image_path);
-            $getResponse = parent::getUserFullName($provider->user_id);
-            $responseContent = json_decode($getResponse->getContent());
-            // dd($responseContent);
-            if ($getResponse->status() == 200) {
-                $fullName = $responseContent->full_name;
-                $data = [
-                    'full_name' => $fullName,
-                    'personal_image_url' => $personal_image_path ? url('storage/' . $personal_image_path) : null,
-                ];
-                return response()->json($data, 200);
-            } else {
-                return response()->json([
-                    'message' => 'Failed to retrieve user full name'
-                ], $getResponse->status());
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+           
 }
