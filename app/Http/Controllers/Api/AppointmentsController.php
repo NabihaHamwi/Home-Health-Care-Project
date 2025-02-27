@@ -11,11 +11,12 @@ use App\Models\Patient;
 use App\Models\Service;
 use Carbon\Carbon;
 use DateTime;
+use Exception;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
-use function PHPUnit\Framework\isEmpty;
 
 class AppointmentsController extends Controller
 {
@@ -175,41 +176,103 @@ class AppointmentsController extends Controller
         }
     }
 
-    public function show_reserved_appointments($providerID, $week = 1)
+    public function show_reserved_appointments(Request $request, $date)
     {
-        /// return the date of today and the week we are in
-        ///day = today
-        $day = Carbon::now()->locale('en_US');
-
-        ///go to the next dayweek
-        for ($i = 2; $i <= $week; $i++)
-            $day = $day->next();
-
-        /// test for another date but today
-        // $day = new Carbon();
-        // $day->setDate(2024, 5, 4)->locale('en_US');
-
-        $startOfWeek = $day->startOfWeek()->format('Y-m-d');
-        $endOfWeek = $day->endOfWeek()->format('Y-m-d');
-
-        /// return the reserved days in this week from the appointment table
-        $reserved_appointments = Appointment::where('healthcare_provider_id', $providerID)->where('appointment_status', 'الطلب مقبول')->whereBetween('appointment_date', [$startOfWeek, $endOfWeek])->get();
-
-        if ($reserved_appointments->isEmpty()) {
-            return $this->errorResponse('No reserveed appointments for this care provider', 404);
+        // retrieving provider_id from token
+        try {
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $provider_id = $payload->get('provider_id');
+            if (!$provider_id)
+                throw new Exception('care provider is not selected, please choose care provider first');
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'token error: could not retrieve provider_id from token',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+            return response($response);
         }
 
-        return $this->successResponse(AppointmentResource::collection($reserved_appointments), 'reserved appointment retrieved successfully', 200);
+        try {
+            /// return the date of today and the week we are in
+            ///day = today
+            $day = Carbon::now()->locale('en_US');
+            ///go to the next dayweek
+            // for ($i = 2; $i <= $week; $i++)
+            //     $day = $day->next();
+
+            // /// test for another date but today
+            // // $day = new Carbon();
+            // // $day->setDate(2024, 5, 4)->locale('en_US');
+
+            // $startOfWeek = $day->startOfWeek()->format('Y-m-d');
+            // $endOfWeek = $day->endOfWeek()->format('Y-m-d');
+
+            /// return the reserved days in this week from the appointment table
+            $reserved_appointments = Appointment::where('healthcare_provider_id', $provider_id)->where('appointment_status', 'الطلب مقبول')->where('appointment_date', $date)->get();
+            if ($reserved_appointments->isEmpty()) {
+                $response = [
+                    'msg' => 'all appointments for this care provider in this day is available',
+                    'status' => 200,
+                ];
+            } else
+                $response = [
+                    'msg' => 'reserved appointment retrieved successfully',
+                    'status' => 200,
+                    'data' => AppointmentResource::collection($reserved_appointments),
+                    // 'token' => $newToken,
+                ];
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'can not retrieve reserved appointments',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response($response);
     }
 
-    public function show_pending_appointments($providerID)
+    public function show_pending_appointments(Request $request)
     {
-        $appointments = Appointment::where('healthcare_provider_id', $providerID)->where('appointment_status', 'الطلب قيدالانتظار')->get();
-        // التحقق من وجود مواعيد
-        if ($appointments->isEmpty()) {
-            return $this->errorResponse('No pending appointments found for this care provider', 404);
+        // retrieving provider_id from token
+        try {
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $provider_id = $payload->get('provider_id');
+            if (!$provider_id)
+                throw new Exception('care provider is not selected, please choose care provider first');
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'token error: could not retrieve provider_id from token',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+            return response($response);
         }
-        return $this->successResponse(AppointmentResource::collection($appointments), 'pending appointment retrieved successfully', 200);
+
+        try {
+            $appointments = Appointment::where('healthcare_provider_id', $provider_id)->where('appointment_status', 'الطلب قيدالانتظار')->get();
+            if ($appointments->isEmpty()) {
+                $response = [
+                    'msg' => 'No pending appointments for this care provider',
+                    'status' => 200,
+                ];
+            } else
+                $response = [
+                    'msg' => 'appointments retrieved successfully',
+                    'status' => 200,
+                    'data' => AppointmentResource::collection($appointments),
+                    // 'token' => $newToken,
+                ];
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'can not retrieve appointments',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response($response);
     }
 
     public function show_pending_appointments_details($appointmentID, $groupID = null)
@@ -400,5 +463,43 @@ class AppointmentsController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             return $this->errorResponse($e, 500);
         }
+    }
+
+    public function selectProvider(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'provider_id' => 'required|integer|exists:healthcare_providers,id',
+        ]);
+
+        if ($validator->fails()) {
+            $response = [
+                'message' => 'validation errors',
+                'status' => 400,
+                'errors' => $validator->errors()
+            ];
+            return response($response);
+        }
+
+        try {
+            $provider_id = $request->input('provider_id');
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $updatedClaims = $payload->toArray();
+            $updatedClaims['provider_id'] = $provider_id;
+            $newToken = JWTAuth::claims($updatedClaims)->fromUser(auth()->user());
+            $response = [
+                'msg' => 'provider sended Succfully',
+                'status' => 200,
+                'data' => "provider_id sended: $provider_id",
+                'token' => $newToken,
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'provider could not send',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response($response);
     }
 }
