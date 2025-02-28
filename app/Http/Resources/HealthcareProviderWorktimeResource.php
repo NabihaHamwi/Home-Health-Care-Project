@@ -32,6 +32,12 @@ class HealthcareProviderWorktimeResource extends JsonResource
                 'start_time' => $this->start_time,
                 'end_time' => $this->end_time,
             ];
+        }else if ($request->route()->named('careprovidersworktimes.showday')) {
+
+            return [
+                'start_time' => $this->start_time,
+                'end_time' => $this->end_time,
+            ];
         }
     }
 }
