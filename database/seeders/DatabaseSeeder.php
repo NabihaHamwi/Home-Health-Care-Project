@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ServicesTableSeeder::class,
             HealthcareProviderServiceTableSeeder::class,
             PatientsTableSeeder::class,
-            //AppointmentsTableSeeder::class,
+            AppointmentsTableSeeder::class,
             //ActivitiesTableSeeder::class,
             HealthcareProviderWorktimesTableSeeder::class,
             //ActivityFlagTableSeeder::class,

@@ -40,5 +40,16 @@ class UsersTableSeeder extends Seeder
             'password' => '1234567',
             'remember_token' => Str::random(10),
         ]);
+
+        User::create([
+            'role' => 'user',
+            'first_name' => 'Hasan',
+            'last_name' => 'hammoda',
+            'phone_number' => '09330XXXXX',
+            'email' => 'hassan@gmail.com',
+            'email_verified_at' => now(),
+            'password' => '12345678',
+            'remember_token' => Str::random(10),
+        ]);
     }
 }

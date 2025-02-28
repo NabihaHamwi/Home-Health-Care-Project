@@ -8,6 +8,9 @@ use App\Models\HealthcareProviderWorktime;
 use App\Http\Resources\HealthcareProviderWorktimeResource;
 use Illuminate\Support\Facades\Validator;
 use App\Models\HealthcareProvider;
+use Carbon\Carbon;
+use Exception;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class HealthcareProviderWorktimeController extends Controller
 {
@@ -202,5 +205,49 @@ class HealthcareProviderWorktimeController extends Controller
 
         // إرجاع رسالة نجاح بعد حذف البيانات بنجاح
         return $this->successResponse(null, 'تم حذف بيانات أيام العمل بنجاح', 200);
+    }
+
+    public function show_day_worktimes(Request $request, $date)
+    {
+        // retrieving provider_id from token
+        try {
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $provider_id = $payload->get('provider_id');
+            if (!$provider_id)
+                throw new Exception('care provider is not selected, please choose care provider first');
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'token error: could not retrieve provider_id from token',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+            return response($response);
+        }
+
+        try {
+            $carbonDate = Carbon::createFromFormat('Y-m-d', $date);
+            $day = $carbonDate->format('l');
+            /// return the dayworktimes from the worktimes table
+            $day_worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $provider_id)->where('day_name', $day)->get();
+            if ($day_worktimes->isEmpty()) {
+                $response = [
+                    'msg' => 'no worktime available for this care provider today ',
+                    'status' => 200,
+                ];
+            } else
+                $response = [
+                    'msg' => 'worktimes retrieved successfully',
+                    'status' => 200,
+                    'data' => HealthcareProviderWorktimeResource::collection($day_worktimes),
+                ];
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'can not retrieve worktimes',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response($response);
     }
 }
