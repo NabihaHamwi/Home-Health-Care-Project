@@ -105,7 +105,11 @@ class HealthcareProviderWorktimeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'worktimes' => 'required|array',
-            'worktimes.*.day_name' => 'required|string',
+            'worktimes.*.day_name' => [
+                'required',
+                'string',
+                'in:السبت,الأحد,الاثنين,الثلاثاء,الأربعاء,الخميس,الجمعة'
+            ],
             'worktimes.*.start_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
             'worktimes.*.end_time' => 'sometimes|date_format:H:i|required_without:worktimes.*.work_hours',
             'worktimes.*.work_hours' => 'sometimes|numeric|required_without_all:worktimes.*.start_time,worktimes.*.end_time',

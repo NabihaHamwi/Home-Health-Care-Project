@@ -27,7 +27,6 @@ class ActivityDetailController extends Controller
 
     protected function validateRequest(Request $request)
     {
-        // تعيين القيمة الافتراضية لـ repeat_count_per_day إذا لم يدخلها المستخدم
         if (!$request->has('repeat_count_per_day')) {
             $request->merge([
                 'repeat_count_per_day' => 1
@@ -38,11 +37,9 @@ class ActivityDetailController extends Controller
             'sub_activity_name' => 'required|min:4|max:14',
             'sub_activity_type' => 'required|in:activity,measure,medical_appointment,medicine',
             'start_date' => 'required|date',
-            'end_date' => 'date|after:start_date',
-            'user_comment' => 'nullable|min:5|max:60',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'every_x_day' => 'nullable|integer',
             'repeat_count_per_day' => 'required|integer|min:1',
-            'sub_activity_image' => 'nullable|image|mimes:png,jpg,jpeg,gif,svg|max:1024',
             'start_time' => 'nullable|date_format:H:i',
             'every_x_hours' => 'nullable|integer|min:1',
             'repeat_times' => 'nullable|array',
@@ -54,9 +51,9 @@ class ActivityDetailController extends Controller
             $data = $request->all();
 
             // تأكد من أن المستخدم قد أدخل إما every_x_hours أو repeat_times
-            if (empty($data['every_x_hours']) && empty($data['repeat_times'])) {
-                $validator->errors()->add('repeat_parameters', 'You must enter either every_x_hours or repeat_times.');
-            }
+            // if (empty($data['every_x_hours']) && empty($data['repeat_times'])) {
+            //     $validator->errors()->add('repeat_parameters', 'You must enter either every_x_hours or repeat_times.');
+            // }
 
             // منع إدخال every_x_hours و repeat_times معًا
             if (!empty($data['every_x_hours']) && !empty($data['repeat_times'])) {
@@ -76,10 +73,16 @@ class ActivityDetailController extends Controller
             }
         });
 
+        // التحقق من حجم repeat_times
+        $validator->sometimes('repeat_times', 'size:' . $request->input('repeat_count_per_day'), function ($input) {
+            return $input->repeat_count_per_day > 0 && $input->repeat_times;
+        });
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
     }
+
     /**********************************************************/
 
     public function storeActivityDetail($activity_details)
@@ -91,7 +94,6 @@ class ActivityDetailController extends Controller
             'number_of_day' => $activity_details['number_of_day'],
             'end_date' => $activity_details['end_date'],
             'every_x_hours' => $activity_details['every_x_hours'],
-            'user_comment' => $activity_details['user_comment'],
             'every_x_day' => $activity_details['every_x_day'],
             'repeat_count_per_day' => $activity_details['repeat_count_per_day']
         ]);
@@ -99,10 +101,6 @@ class ActivityDetailController extends Controller
         return $activity_detail;
     }
     /*************************************************************** */
-
-
-
-
     public function storeActivityDetails(Request $request)
     {
         // التحقق من صحة البيانات المدخلة أولاً
@@ -110,7 +108,6 @@ class ActivityDetailController extends Controller
         if ($validationResult) {
             return $validationResult;
         }
-
         // بدء المعاملة مع قاعدة البيانات
         DB::beginTransaction();
 
@@ -123,17 +120,12 @@ class ActivityDetailController extends Controller
                 'start_date' => $request->input('start_date'),
                 'number_of_day' => $request->input('number_of_day'),
                 'end_date' => $this->calculateEndDate($request),
-                'user_comment' => $request->input('user_comment'),
                 'every_x_day' => $request->input('every_x_day'),
+                'days_of_week' => $request->input('days_of_week', []),
                 'start_time' => $request->input('start_time'),
                 'repeat_times' => $request->input('repeat_times', []),
                 'every_x_hours' => $request->input('every_x_hours'),
-                'sub_activity_execution_time' => $request->input('sub_activity_execution_time'),
-                'value' => $request->input('value'),
-                'provider_comment' => $request->input('provider_comment'),
                 'repeat_count_per_day' => $request->input('repeat_count_per_day'),
-                'sub_activity_image' => $request->input('sub_activity_image'),
-                'is_caregiver' => $request->input('is_caregiver', false)
             ];
 
             // انشاء النشاط الأساسي
@@ -166,24 +158,7 @@ class ActivityDetailController extends Controller
             ], 500);
         }
     }
-
-
     /*********************************************************/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     protected function addActivityDetailAppointments($activity_detail, $group_id, $activity_details,  $activity_id)
     {
@@ -199,24 +174,27 @@ class ActivityDetailController extends Controller
             return response()->json(['message' => 'No appointments found for the specified criteria.']);
         }
         // dd($appointments);
-        if (isset($activity_details['number_of_day'])) {
-            // $this->processAppointments($appointments, $activity_detail, $group_id, $activity_details);
+        if (isset($activity_details['number_of_day']) && $activity_details['repeat_count_per_day'] >= 2) {
+            //dd($activity_details);
             $this->createDailyRepetitions($appointments, $activity_detail, $group_id, $activity_details);
         } elseif (isset($activity_details['every_x_day'])) {
             // فلترنا المواعيد لكل كل (ج) يوم
-            $filtered_appointments = $this->getAppointmentsByGroupIdAndEveryXDay($appointments, $group_id, $startDate, $endDate, $activity_details['every_x_day']);
+            $filtered_appointments = $this->getAppointmentsByGroupIdAndEveryXDay($appointments, $startDate, $activity_details['every_x_day']);
             // شفنا التواتر على اليوم
             $this->createDailyRepetitions($filtered_appointments, $activity_detail, $group_id, $activity_details);
-        } elseif (isset($activity_details['days_of_week'])) {
-            $appointments = $this->getAppointmentsBySpecificDaysOfWeek($appointments, $activity_detail, $group_id, $activity_details,  $startDate, $endDate, $activity_details['days_of_week']);
-            $this->createDailyRepetitions($appointments, $activity_detail, $group_id, $activity_details);
-        } else {
-            // $this->createDailyAppointments($activity_detail, $group_id, $activity_details, $is_caregiver, $startDate, $endDate);
+        } elseif (!empty($activity_details['days_of_week'])) {
+            dd($activity_details['days_of_week']);
+            $filtered_appointments = $this->getAppointmentsBySpecificDaysOfWeek($appointments, $activity_details['days_of_week']);
+            $this->createDailyRepetitions($filtered_appointments, $activity_detail, $group_id, $activity_details);
+        } elseif (isset($activity_details['number_of_day']) && $activity_details['number_of_day'] === 1 && $activity_details['repeat_count_per_day'] === 1) {
+        // إنشاء نشاط لمرة واحدة إذا كانت قيمة number_of_day تساوي 1 وقيمة repeat_count_per_day تساوي 1
+        foreach ($appointments as $appointment_data) {
+            $this->createAppointment($activity_detail, $activity_details, $appointment_data['activity_appointment_id']);
         }
-    }
+    }}
 
     /*********************************************/
-    protected function getAppointmentsByGroupIdAndEveryXDay($appointments, $group_id, $startDate, $end_date, $every_x_day)
+    protected function getAppointmentsByGroupIdAndEveryXDay($appointments, $startDate, $every_x_day)
     {
         //dd($appointments);
         // مصفوفة لتخزين المواعيد حسب كل X يوم
@@ -240,35 +218,46 @@ class ActivityDetailController extends Controller
         // dd($filtered_appointments);
         return $filtered_appointments;
     }
-
-
-
-    // protected function createAppointment($activity_detail, $activity_details, $appointment, $activity_appointment_id)
-    // {
-    //     ActivityDetailsFrequency::create([
-    //         'activity_detail_id' => $activity_detail->id,
-    //         'activity_appointment_id' => $activity_appointment_id,
-    //         'start_time' => $activity_details['start_time'],
-    //         'sub_activity_execution_time' => $activity_details['is_caregiver'] ? $activity_details['sub_activity_execution_time'] ?? null : null,
-    //         'value' => $activity_details['is_caregiver'] ? $activity_details['value'] ?? null : null,
-    //         'provider_comment' => $activity_details['is_caregiver'] ? $activity_details['provider_comment'] ?? null : null,
-    //         'sub_activity_image' => $activity_details['is_caregiver'] ? $activity_details['sub_activity_image'] ?? null : null,
-    //         'status' => $activity_details['is_caregiver'] ? 'completed' : 'not_completed',
-    //     ]);
-    // }
-    protected function createAppointment($activity_detail, $activity_details, $appointment, $activity_appointment_id)
+    /****************************************/
+    protected function getAppointmentsBySpecificDaysOfWeek($appointments, $days_of_week)
     {
-        ActivityDetailsFrequency::create([
-            'activity_detail_id' => $activity_detail->id,
-            'activity_appointment_id' => $activity_appointment_id,
-            'start_time' => $activity_details['start_time'],
-            'sub_activity_execution_time' => $activity_details['is_caregiver'] ? $activity_details['sub_activity_execution_time'] ?? null : null,
-            'value' => $activity_details['is_caregiver'] ? $activity_details['value'] ?? null : null,
-            'provider_comment' => $activity_details['is_caregiver'] ? $activity_details['provider_comment'] ?? null : null,
-            //'sub_activity_image' => $activity_details['is_caregiver'] ? $activity_details,
-            'status' => $activity_details['is_caregiver'] ? 'completed' : 'not_completed'
-        ]);
+        //  dd($appointments);
+        // مصفوفة لتخزين المواعيد حسب الأيام المحددة
+        $filtered_appointments = [];
+        // dd($$filtered_appointments);
+
+        foreach ($appointments as $appointment_data) {
+            // الوصول إلى بيانات الموعد
+            //dd($appointment_data);
+            $appointment = $appointment_data['appointment'];
+            // dd($appointment);
+
+            // إذا كان اليوم للموعد موجود ضمن مجموعة الأيام المحددة
+            if (in_array($appointment->day_name, $days_of_week)) {
+                // إضافة العنصر إلى المصفوفة المفلترة
+                $filtered_appointments[] = $appointment_data;
+            }
+        }
+        //   dd($filtered_appointments);
+        return $filtered_appointments;
     }
+
+
+    /**********************************/
+    protected function createAppointment($activity_detail, $activity_details, $activity_appointment_id)
+    {
+        try {
+            ActivityDetailsFrequency::create([
+                'activity_detail_id' => $activity_detail->id,
+                'activity_appointment_id' => $activity_appointment_id,
+                'start_time' => $activity_details['start_time'],
+                'status' => 'not_completed'
+            ]);
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to create activity detail: ' . $e->getMessage());
+        }
+    }
+
 
 
     /******************************************/
@@ -289,6 +278,7 @@ class ActivityDetailController extends Controller
         //اذا كان فاضي بتم اسناد اليه قيمة تاريخ البداية
         return $lastAppointmentDate?->toDateString() ?? $request->input('start_date');
     }
+    /***************************************/
     protected function getLastAppointmentDate($group_id)
     {
         $lastAppointment = Appointment::where('group_id', $group_id)
@@ -326,35 +316,39 @@ class ActivityDetailController extends Controller
         // dd($appointments);
         return $appointments;
     }
-    // 
+    /****************************************************/
     protected function createDailyRepetitions($appointments, $activity_detail, $group_id, $activity_details)
     {
         $initial_start_time = $activity_details['start_time'];
-
+        // dd($initial_start_time);
         foreach ($appointments as $appointment_data) {
-            $appointment = $appointment_data['appointment'];
-
+            //$appointment = $appointment_data['appointment'];
+            // dd($appointment_data);
             // معالجة الأوقات المكررة
             if (!empty($activity_details['repeat_times'])) {
-                $this->processRepeatTimes($activity_details['repeat_times'], $appointment_data, $activity_detail, $activity_details, $appointment);
+                $this->processRepeatTimes($appointment_data, $activity_detail, $activity_details);
             }
             // معالجة الفاصل الزمني بالساعات
             else if (!empty($activity_details['every_x_hours'])) {
-                $this->processEveryXHours($activity_details, $appointment_data, $activity_detail, $appointment, $initial_start_time);
+                $this->processEveryXHours($activity_details, $appointment_data, $activity_detail, $initial_start_time);
             }
         }
     }
-    protected function processRepeatTimes($repeat_times, $appointment_data, $activity_detail, $activity_details, $appointment)
+    /***********************************************/
+    protected function processRepeatTimes($appointment_data, $activity_detail, $activity_details)
     {
-        foreach ($repeat_times as $time) {
+        foreach ($activity_details['repeat_times'] as $time) {
             $activity_details['start_time'] = $time;
-
+            //echo  $activity_details['start_time'] . "\n";
             foreach ($appointment_data['activity_appointment_ids'] as $activity_appointment_id) {
-                $this->createAppointment($activity_detail, $activity_details, $appointment, $activity_appointment_id);
+                //echo  $activity_appointment_id . "\n";
+                $this->createAppointment($activity_detail, $activity_details, $activity_appointment_id);
             }
         }
+        //dd($activity_details['start_time']);
     }
-    protected function processEveryXHours($activity_details, $appointment_data, $activity_detail, $appointment, $initial_start_time)
+    /********************************************/
+    protected function processEveryXHours($activity_details, $appointment_data, $activity_detail, $initial_start_time)
     {
         $every_x_hours = $activity_details['every_x_hours'];
 
@@ -362,7 +356,7 @@ class ActivityDetailController extends Controller
             $activity_details['start_time'] = Carbon::parse($initial_start_time)->addHours($i * $every_x_hours)->format('H:i');
 
             foreach ($appointment_data['activity_appointment_ids'] as $activity_appointment_id) {
-                $this->createAppointment($activity_detail, $activity_details, $appointment, $activity_appointment_id);
+                $this->createAppointment($activity_detail, $activity_details, $activity_appointment_id);
             }
         }
     }
