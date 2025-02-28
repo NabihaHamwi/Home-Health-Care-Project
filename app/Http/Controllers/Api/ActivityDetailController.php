@@ -87,18 +87,20 @@ class ActivityDetailController extends Controller
 
     public function storeActivityDetail($activity_details)
     {
-        $activity_detail = ActivityDetail::create([
-            'sub_activity_name' => $activity_details['sub_activity_name'],
-            'sub_activity_type' => $activity_details['sub_activity_type'],
-            'start_date' => $activity_details['start_date'],
-            'number_of_day' => $activity_details['number_of_day'],
-            'end_date' => $activity_details['end_date'],
-            'every_x_hours' => $activity_details['every_x_hours'],
-            'every_x_day' => $activity_details['every_x_day'],
-            'repeat_count_per_day' => $activity_details['repeat_count_per_day']
-        ]);
-
-        return $activity_detail;
+        try {
+            return ActivityDetail::create([
+                'sub_activity_name' => $activity_details['sub_activity_name'],
+                'sub_activity_type' => $activity_details['sub_activity_type'],
+                'start_date' => $activity_details['start_date'],
+                'number_of_day' => $activity_details['number_of_day'],
+                'end_date' => $activity_details['end_date'],
+                'every_x_hours' => $activity_details['every_x_hours'],
+                'every_x_day' => $activity_details['every_x_day'],
+                'repeat_count_per_day' => $activity_details['repeat_count_per_day']
+            ]);
+        } catch (\Exception $e) {
+            throw new \RuntimeException('فشل في إنشاء النشاط الأساسي: ' . $e->getMessage());
+        }
     }
     /*************************************************************** */
     public function storeActivityDetails(Request $request)
@@ -159,39 +161,48 @@ class ActivityDetailController extends Controller
         }
     }
     /*********************************************************/
-
-    protected function addActivityDetailAppointments($activity_detail, $group_id, $activity_details,  $activity_id)
+    protected function addActivityDetailAppointments($activity_detail, $group_id, $activity_details, $activity_id)
     {
-        //تم انشاء كائن زمني من كاربون
-        $startDate = Carbon::parse($activity_details['start_date']);
-        $endDate = Carbon::parse($activity_details['end_date']);
-        //dd($startDate);
-        //dd($endDate);
-        // جلب جميع المواعيد للفترة الزمنية المحددة
-        //ممكن تكون بس اذا مافي انشطة مرتبطة بمواعيد وبالتالي كانه مافي مواعيد من اصله 
-        $appointments = $this->getAppointmentsByActivities($group_id, $activity_id, $startDate, $endDate);
-        if ($appointments->isEmpty()) {
-            return response()->json(['message' => 'No appointments found for the specified criteria.']);
+        try {
+            $startDate = Carbon::parse($activity_details['start_date']);
+            $endDate = Carbon::parse($activity_details['end_date']);
+            //dd($startDate);
+            //dd($endDate);
+            // جلب جميع المواعيد للفترة الزمنية المحددة
+            //ممكن تكون بس اذا مافي انشطة مرتبطة بمواعيد وبالتالي كانه مافي مواعيد من اصله 
+
+            $appointments = $this->getAppointmentsByActivities($group_id, $activity_id, $startDate, $endDate);
+
+            if ($appointments->isEmpty()) {
+                throw new \RuntimeException('No appointments found for the specified criteria.');
+            }
+            // dd(isset($activity_details['number_of_day']));
+            //
+            // dd( $activity_details['number_of_day'] == 1&& $activity_details['repeat_count_per_day'] == 1 );
+            // dd($appointments);
+            // التحقق من الشروط وإلا رمي استثناء
+            if (isset($activity_details['number_of_day']) && $activity_details['repeat_count_per_day'] >= 2) {
+                //dd($activity_details);
+                $this->createDailyRepetitions($appointments, $activity_detail, $group_id, $activity_details);
+            } elseif (isset($activity_details['every_x_day'])) {
+                $filtered_appointments = $this->getAppointmentsByGroupIdAndEveryXDay($appointments, $startDate, $activity_details['every_x_day']);
+                $this->createDailyRepetitions($filtered_appointments, $activity_detail, $group_id, $activity_details);
+            } elseif (!empty($activity_details['days_of_week'])) {
+                $filtered_appointments = $this->getAppointmentsBySpecificDaysOfWeek($appointments, $activity_details['days_of_week']);
+                $this->createDailyRepetitions($filtered_appointments, $activity_detail, $group_id, $activity_details);
+            } elseif (isset($activity_details['number_of_day']) && $activity_details['number_of_day'] == 1 && $activity_details['repeat_count_per_day'] == 1) {
+                foreach ($appointments as $appointment_data) {
+                    foreach ($appointment_data['activity_appointment_ids'] as $activity_appointment_id) {
+                        $this->createAppointment($activity_detail, $activity_details, $activity_appointment_id);
+                    }
+                }
+            } else {
+                throw new \RuntimeException('Invalid activity configuration.');
+            }
+        } catch (\Exception $e) {
+            throw new \RuntimeException('فشل في إنشاء التواتر: ' . $e->getMessage());
         }
-        // dd($appointments);
-        if (isset($activity_details['number_of_day']) && $activity_details['repeat_count_per_day'] >= 2) {
-            //dd($activity_details);
-            $this->createDailyRepetitions($appointments, $activity_detail, $group_id, $activity_details);
-        } elseif (isset($activity_details['every_x_day'])) {
-            // فلترنا المواعيد لكل كل (ج) يوم
-            $filtered_appointments = $this->getAppointmentsByGroupIdAndEveryXDay($appointments, $startDate, $activity_details['every_x_day']);
-            // شفنا التواتر على اليوم
-            $this->createDailyRepetitions($filtered_appointments, $activity_detail, $group_id, $activity_details);
-        } elseif (!empty($activity_details['days_of_week'])) {
-            dd($activity_details['days_of_week']);
-            $filtered_appointments = $this->getAppointmentsBySpecificDaysOfWeek($appointments, $activity_details['days_of_week']);
-            $this->createDailyRepetitions($filtered_appointments, $activity_detail, $group_id, $activity_details);
-        } elseif (isset($activity_details['number_of_day']) && $activity_details['number_of_day'] === 1 && $activity_details['repeat_count_per_day'] === 1) {
-        // إنشاء نشاط لمرة واحدة إذا كانت قيمة number_of_day تساوي 1 وقيمة repeat_count_per_day تساوي 1
-        foreach ($appointments as $appointment_data) {
-            $this->createAppointment($activity_detail, $activity_details, $appointment_data['activity_appointment_id']);
-        }
-    }}
+    }
 
     /*********************************************/
     protected function getAppointmentsByGroupIdAndEveryXDay($appointments, $startDate, $every_x_day)
@@ -254,7 +265,7 @@ class ActivityDetailController extends Controller
                 'status' => 'not_completed'
             ]);
         } catch (\Exception $e) {
-            throw new \Exception('Failed to create activity detail: ' . $e->getMessage());
+            throw new \RuntimeException('فشل في إنشاء تواتر للنشاط: ' . $e->getMessage());
         }
     }
 
