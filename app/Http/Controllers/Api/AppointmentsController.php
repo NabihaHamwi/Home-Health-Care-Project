@@ -164,13 +164,57 @@ class AppointmentsController extends Controller
         return $this->successResponse($available_times, 'available times retrieved successfully', 200);
     }
 
-    public function show_my_appointments($patient_id)
+    public function show_my_appointments(Request $request)
     {
+        // retrieving patient_id from token
+        try {
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $patient_id = $payload->get('patient_id');
+            if (!$patient_id)
+                throw new Exception('patient is not selected, please choose patient first');
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'token error: could not retrieve patient_id from token',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+            return response($response);
+        }
         try { // الدالة (findOrFail) بترمي استثناء ولكن لازم حدا يلتقطه ويعالجه وهي الدالة (catch)
             $appointments = Appointment::where('patient_id', $patient_id)->get();
             return $this->successResponse(AppointmentResource::collection($appointments), 'appointment for patient retrived successfuly');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Provider not found', 404);
+            return $this->errorResponse('appointments not found', 404);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $this->errorResponse('erorr query', 500);
+        }
+    }
+
+    public function show_my_accepted_appointments(Request $request)
+    {
+        // retrieving patient_id from token
+        try {
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $patient_id = $payload->get('patient_id');
+            if (!$patient_id)
+                throw new Exception('patient is not selected, please choose patient first');
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'token error: could not retrieve patient_id from token',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+            return response($response);
+        }
+        try { 
+            $today = now()->locale('en_US');
+            $date = $today->toDateString();
+            $appointments = Appointment::where('patient_id', $patient_id)->where('appointment_status', 'الطلب مقبول')->where('appointment_date', '>=', $date)->get();
+            return $this->successResponse(AppointmentResource::collection($appointments), 'appointment for patient retrived successfuly');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorResponse('appointments not found', 404);
         } catch (\Illuminate\Database\QueryException $e) {
             return $this->errorResponse('erorr query', 500);
         }
@@ -195,20 +239,6 @@ class AppointmentsController extends Controller
         }
 
         try {
-            /// return the date of today and the week we are in
-            ///day = today
-            $day = Carbon::now()->locale('en_US');
-            ///go to the next dayweek
-            // for ($i = 2; $i <= $week; $i++)
-            //     $day = $day->next();
-
-            // /// test for another date but today
-            // // $day = new Carbon();
-            // // $day->setDate(2024, 5, 4)->locale('en_US');
-
-            // $startOfWeek = $day->startOfWeek()->format('Y-m-d');
-            // $endOfWeek = $day->endOfWeek()->format('Y-m-d');
-
             /// return the reserved days in this week from the appointment table
             $reserved_appointments = Appointment::where('healthcare_provider_id', $provider_id)->where('appointment_status', 'الطلب مقبول')->where('appointment_date', $date)->get();
             if ($reserved_appointments->isEmpty()) {
@@ -302,28 +332,7 @@ class AppointmentsController extends Controller
             foreach ($appointments as $appointment) {
                 if ($status) {
                     $appointment->update(['appointment_status' => 'الطلب مقبول']);
-                    $appointment_date = Appointment::where('id', $appointmentID)->value('appointment_date');
-                    // @dd($appointment_date);
-                    // $same_appointments = Appointment::where('healthcare_provider_id', )->where('appointment_date', )->get();
-                    // // @dd($reversed_appointments);
-                    // $valid = 0;
-                    // foreach ($same_appointments as $Rappointment) {
-                    //     $calc_start = Carbon::createFromFormat('H:i:s', "$Rappointment->appointment_start_time");
-                    //     $start = Carbon::createFromFormat('H:i:s', "$Rappointment->appointment_start_time");
-                    //     $Rduration = new Carbon($Rappointment->appointment_duration);
-                    //     $Rhours = $Rduration->get('hour');
-                    //     $Rminutes = $Rduration->get('minute');
-                    //     $end = $calc_start->add('hour', $Rhours);
-                    //     $end = $calc_start->add('minute', $Rminutes);
-                    // @dd($end);
-                    //     if (($start->get('hour') == $end_of_this_appointment->get('hour') && $start->get('minute') >= $end_of_this_appointment->get('minute')) || ($start->get('hour') > $end_of_this_appointment->get('hour')) || ($end->get('hour') <= $start_of_this_appointment->get('hour'))) {
-                    //         $valid = 1;
-                    //         break;
-                    //     }
-                    // }
-                    // if (!$valid) {
-                    //     return $this->errorResponse('the appointment time is alreday reserved', 409);
-                    // }
+                    // $appointment_date = Appointment::where('id', $appointmentID)->value('appointment_date');
                 } else
                     $appointment->update(['appointment_status' => 'الطلب مرفوض']);
             }

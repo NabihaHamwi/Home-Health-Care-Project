@@ -47,7 +47,7 @@ class AppointmentResource extends JsonResource
                 "appointment_status" => $this->appointment_status
             ];
 
-        if ($request->route()->named('appointments.show_my_appointments'))
+        if ($request->route()->named('appointments.show_my_appointments')||$request->route()->named('appointments.show_my_accepted_appointments'))
             return [
                 "appointment_id" => $this->id,
                 "appointment_date" => $this->appointment_date,
