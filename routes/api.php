@@ -122,10 +122,10 @@ Route::group([], function ($router) {
 Route::post('/add-provider', [AdminController::class, 'addProvider'])->name(name: 'admin.addProvider');
 
 //api for show user fullname
-//Route::get('/get-fullname/{users}', [UserController::class, 'getUserFullName'])->name(name: 'users.getUserFullName');
+Route::get('/get-fullname/{users}', [UserController::class, 'getUserFullName'])->name(name: 'users.getUserFullName');
 
 //api for show provider fullname + images
-//Route::get('/get-provider/{healthcareProvider}', [HealthcareProviderController::class, 'getProvider'])->name(name: 'provider.getprovider');
+Route::get('/get-provider/{healthcareProvider}', [HealthcareProviderController::class, 'getProvider'])->name(name: 'provider.getprovider');
 
 //add services and subservices to the careprovider
 // Route::post('/storesubservice', [HealthcareProviderController::class, 'store'])->name(name: 'HealthcareProvider.store');
