@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\HealthcareProviderSubServiceController;
 use App\Http\Controllers\Api\PatientAgentController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\Api\ActivityAppointmentController;
 use App\Models\Emergency;
 use App\Models\HealthcareProvider;
 use App\Models\HealthcareProviderSubService;
@@ -63,7 +64,9 @@ use PHPUnit\Framework\Attributes\Group;
 //  Route::get('/activities/{groupId}', [HealthcareProviderSubServiceController::class, 'getActivities'])->name('activties.getActivities');
 //  Route::get('/activitiy/{activityId}', [HealthcareProviderSubServiceController::class, 'getDetailsActivity'])->name('activties.getDetailsActivity');
 Route::post('/store-activitiy-details', [ActivityDetailController::class, 'storeActivityDetails'])->name('activties.storeActivityDetails');
-//Route::get('/get-activities{subserviceId}', [ActivityController::class, 'getActivities'])->name(name: 'activities.getActivities');
+Route::get('/get-sub-activities-appointment-activity', [ActivityDetailController::class, 'getDetailedActivitiesByGroupId'])->name(name: 'activitiyDetails.getDetailedActivitiesByGroupId');
+Route::get('/appointment-activities', [ActivityAppointmentController::class, 'getActivitiesAppointmentByGroupId'])->name(name: 'activities.getActivitiesAppointmentByGroupId');
+
 
 
 //___________________________________________________________________
@@ -126,7 +129,6 @@ Route::get('/get-fullname/{users}', [UserController::class, 'getUserFullName'])-
 
 //api for show provider fullname + images
 Route::get('/get-provider/{healthcareProvider}', [HealthcareProviderController::class, 'getProvider'])->name(name: 'provider.getprovider');
-
 //add services and subservices to the careprovider
 // Route::post('/storesubservice', [HealthcareProviderController::class, 'store'])->name(name: 'HealthcareProvider.store');
 

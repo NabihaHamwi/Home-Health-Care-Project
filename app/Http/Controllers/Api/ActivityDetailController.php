@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ActivityDetailController extends Controller
 {
@@ -24,6 +25,8 @@ class ActivityDetailController extends Controller
     //     $this->subActivityFrequencyController = $subActivityFrequencyController;
     // }
 
+
+    /*-------------------------add activity-details has frequencies:------------------------------------------ */
 
     protected function validateRequest(Request $request)
     {
@@ -371,4 +374,56 @@ class ActivityDetailController extends Controller
             }
         }
     }
-}
+    /*------------------------------------------------------------------------------- */
+
+    /*-------------------------  // Retrieve detailed activities:------------------------------------------ */
+
+        public function getDetailedActivitiesByGroupId(Request $request)
+        {
+            // تعليق استخدام الـ JWT مؤقتًا
+            // try {
+            //     $token = $request->bearerToken();
+            //     if (!$token) {
+            //         return response()->json(['message' => 'No token provided'], 400);
+            //     }
+    
+            //     $payload = JWTAuth::setToken($token)->getPayload();
+            //     $group_id = $payload->get('group_id');
+    
+            // } catch (\Exception $e) {
+            //     return response()->json(['message' => 'Token error', 'error' => $e->getMessage()], 500);
+            // }
+    
+            // استخدام قيمة ثابتة لـ group_id للتحقق
+            $group_id = 1;  // استبدل هذه القيمة بالقيمة المناسبة للتحقق
+    
+            // جلب المواعيد المرتبطة بـ group_id
+            $appointments = Appointment::where('group_id', $group_id)->get();
+    
+            // جلب الأنشطة التفصيلية المرتبطة بالمواعيد
+            $detailed_activities = $appointments->flatMap(function ($appointment) {
+                return $appointment->activityDetailsFrequencies->map(function ($frequency) {
+                    return $frequency->activityDetail;
+                });
+            })->unique('id');
+
+            // تصفية الأنشطة التفصيلية لإرجاع المعلومات المطلوبة فقط
+            $filtered_detailed_activities = $detailed_activities->map(function ($activity_detail) {
+                return [
+                    'id' => $activity_detail->id,
+                    'sub_activity_name' => $activity_detail->sub_activity_name,
+                    'sub_activity_type' => $activity_detail->sub_activity_type,
+                    'start_date' => $activity_detail->start_date,
+                    'number_of_day' => $activity_detail->number_of_day,
+                    'end_date' => $activity_detail->end_date,
+                    'every_x_hours' => $activity_detail->every_x_hours,
+                    'user_comment' => $activity_detail->user_comment,
+                    'every_x_day' => $activity_detail->every_x_day,
+                    'repeat_count_per_day' => $activity_detail->repeat_count_per_day,
+                ];
+            });
+    
+            // إرجاع الأنشطة التفصيلية في استجابة JSON
+            return response()->json($filtered_detailed_activities);
+        }
+    }
