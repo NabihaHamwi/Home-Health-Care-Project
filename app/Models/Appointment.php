@@ -43,13 +43,18 @@ class Appointment extends Model
         return $this->belongsTo(Service::class);
     }
 
+    public function sub_service()
+    {
+        return $this->belongsToMany(SubService::class);
+    }
+
     // public function activitydetails()
     // {
     //     return $this->belongsToMany(ActivityDetail::class ,'activity_detail_appointment');
     // }
     public function activities()
     {
-        return $this->belongsToMany(Activity::class, 'appointment_activity')->withPivot('id');
+        return $this->belongsToMany(Activity::class, 'activity_appointment')->withPivot('id');
     }
 
     public function calculateAppointmentEndTime()

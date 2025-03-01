@@ -63,7 +63,7 @@ use PHPUnit\Framework\Attributes\Group;
 //  Route::get('/activities/{groupId}', [HealthcareProviderSubServiceController::class, 'getActivities'])->name('activties.getActivities');
 //  Route::get('/activitiy/{activityId}', [HealthcareProviderSubServiceController::class, 'getDetailsActivity'])->name('activties.getDetailsActivity');
 Route::post('/store-activitiy-details', [ActivityDetailController::class, 'storeActivityDetails'])->name('activties.storeActivityDetails');
-//Route::get('/get-activities{subserviceId}', [ActivityController::class, 'getActivities'])->name(name: 'activities.getActivities');
+//Route::get('/get-activities/{subserviceId}', [ActivityController::class, 'getActivities'])->name(name: 'activities.getActivities');
 
 
 //___________________________________________________________________
@@ -192,3 +192,6 @@ Route::get('/worktimes/{date}', [HealthcareProviderWorktimeController::class, 's
 
 //Api for show appoitments (accepted appointments) for patient
 Route::get('/my_accepted_appointments', [AppointmentsController::class, 'show_my_accepted_appointments'])->name(name: 'appointments.show_my_accepted_appointments');
+
+//Api for show available days in month 
+Route::get('/availabel_days_in_month/{month}', [HealthcareProviderWorktimeController::class, 'availabel_days_in_month'])->name(name: 'careprovidersworktimes.availabel_days_in_month');

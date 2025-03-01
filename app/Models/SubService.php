@@ -20,4 +20,8 @@ class SubService extends Model
     {
         return $this->belongsToMany(Activity::class, 'activities_sub_service');
     }
+    public function appointments()
+    {
+        return $this->belongsToMany(Appointment::class);
+    }
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
+use App\Models\ActivityAppointment;
 use App\Models\Appointment;
+use App\Models\AppointmentSubService;
 use App\Models\HealthcareProvider;
 use App\Models\HealthcareProviderWorktime;
 use App\Models\Patient;
@@ -208,7 +210,7 @@ class AppointmentsController extends Controller
             ];
             return response($response);
         }
-        try { 
+        try {
             $today = now()->locale('en_US');
             $date = $today->toDateString();
             $appointments = Appointment::where('patient_id', $patient_id)->where('appointment_status', 'الطلب مقبول')->where('appointment_date', '>=', $date)->get();
@@ -349,22 +351,46 @@ class AppointmentsController extends Controller
 
     public function store(Request $request)
     {
-        $providers = HealthcareProvider::pluck('id')->toArray();
-        $patients = Patient::pluck('id')->toArray();
-        $services = Service::pluck('id')->toArray();
+        // retrieving patient_id & provider_id from token
+        // try {
+        //     $token = $request->bearerToken();
+        //     $payload = JWTAuth::setToken($token)->getPayload();
+        //     $patient_id = $payload->get('patient_id');
+        //     if (!$patient_id)
+        //         throw new Exception('patient is not selected, please choose patient first');
+        //     $provider_id = $payload->get('provider_id');
+        //     if (!$provider_id)
+        //         throw new Exception('care provider is not selected, please choose care provider first');
+        // } catch (\Exception $e) {
+        //     $response = [
+        //         'msg' => 'token error: could not retrieve patient_id or provider_id from token',
+        //         'status' => 500,
+        //         'error' => $e->getMessage()
+        //     ];
+        //     return response($response);
+        // }
+        $provider_id = 101;
+        $patient_id =1;
+        $validator = Validator::make(
+            ['provider_id' => $provider_id],
+            ['provider_id' => 'required|integer|exists:healthcarwproviders,id'],
+            ['patient_id' => $patient_id],
+            ['patient_id' => 'required|integer|exists:patients,id']
+        );
+
         $validator = Validator::make($request->all(), [
             'appointments' => ['required', 'array'],
-            'appointments.*.provider_id' => [
-                'required',
-                Rule::in($providers),
-            ],
-            'appointments.*.patient_id' => [
-                'required',
-                Rule::in($patients),
-            ],
             'appointments.*.service_id' => [
                 'required',
-                Rule::in($services),
+                'exists:services,id',
+            ],
+            'appointments.*.subservices_id' => [
+                'required','array',
+                'exists:sub_services,id',
+            ],
+            'appointments.*.activities_id' => [
+                'required','array',
+                'exists:activities,id',
             ],
             'appointments.*.appointment_date' => [
                 'required',
@@ -386,7 +412,12 @@ class AppointmentsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse($validator->errors(), 422);
+            $response = [
+                'message' => 'validation errors',
+                'status' => 400,
+                'errors' => $validator->errors()
+            ];
+            return response($response);
         }
         try {
             if (sizeof($request->appointments) > 1) {
@@ -403,12 +434,11 @@ class AppointmentsController extends Controller
                 $minutes = $duration->get('minute');
                 $end_of_this_appointment = $start_of_appointment->add('hour', $hours);
                 $end_of_this_appointment = $start_of_appointment->add('minute', $minutes);
-                // @dd($end_of_this_appointment);
 
                 // استخراج اسم اليوم الموافق لتاريخ الموعد لمقارنته مع ساعات عمل مقدم الرعاية في ذلك اليوم
                 $date = Carbon::parse($partrequest['appointment_date']);
                 $dayName = $date->locale('ar')->isoFormat('dddd');
-                $worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $partrequest['provider_id'])->where('day_name', $dayName)->get();
+                $worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $provider_id)->where('day_name', $dayName)->get();
                 $valid = 0;
                 foreach ($worktimes as $worktime) {
                     $start = Carbon::createFromFormat('H:i:s', "$worktime->start_time");
@@ -424,7 +454,7 @@ class AppointmentsController extends Controller
                 }
 
                 // التأكد إذا كان الموعد لا يتعارض مع موعد محجوز مسبقاً
-                $reversed_appointments = Appointment::where('healthcare_provider_id', $partrequest['provider_id'])->where('appointment_date', $partrequest['appointment_date'])->get();
+                $reversed_appointments = Appointment::where('healthcare_provider_id', $provider_id)->where('appointment_date', $partrequest['appointment_date'])->get();
                 // @dd($reversed_appointments);
                 $valid = 0;
                 foreach ($reversed_appointments as $Rappointment) {
@@ -450,14 +480,16 @@ class AppointmentsController extends Controller
                     }
                 }
                 // @dd($x);
-
+                $date = Carbon::parse($partrequest['appointment_date']);
+                $dayName = $date->locale('ar')->isoFormat('dddd');
 
                 // إذا تم المرور على كل ما سبق ولم نجد أي تعرض مع الداتا بيز تتم عملية طلب الموعد
                 $appointment = Appointment::create([
                     'group_id' => $group_id,
-                    'patient_id' => $partrequest['patient_id'],
-                    'healthcare_provider_id' => $partrequest['provider_id'],
+                    'patient_id' => $patient_id,
+                    'healthcare_provider_id' => $provider_id,
                     'service_id' => $partrequest['service_id'],
+                    'day_name' => $dayName,
                     'appointment_date' => $partrequest['appointment_date'],
                     'appointment_start_time' => $partrequest['appointment_start_time'],
                     'appointment_duration' => $partrequest['appointment_duration'],
@@ -465,13 +497,33 @@ class AppointmentsController extends Controller
                     'appointment_status' => 'الطلب قيدالانتظار',
                     'caregiver_status' => '-'
                 ]);
+                $subservices = $partrequest['subservices_id'];
+                foreach ($subservices as $subservice) {
+                    AppointmentSubService::create([
+                        'appointment_id' => $appointment->id,
+                        'sub_service_id' => $subservice
+                    ]);
+                }
+                $activities = $partrequest['activities_id'];
+                foreach ($activities as $activity) {
+                    AppointmentSubService::create([
+                        'appointment_id' => $appointment->id,
+                        'activity_id' => $activity
+                    ]);
+                }
             }
-            return $this->successResponse($appointment, 'appointment reserved successfully');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorResponse('Provider not found', 404);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->errorResponse($e, 500);
+            $response = [
+                'msg' => 'appointments sended Succesfully',
+                'status' => 200,
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'appointments could not stored',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
         }
+        return response($response);
     }
 
     public function selectProvider(Request $request)

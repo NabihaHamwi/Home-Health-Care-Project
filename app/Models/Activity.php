@@ -22,7 +22,7 @@ class Activity extends Model
 
     public function appointments()
     {
-        return $this->belongsToMany(Appointment::class, 'appointment_activity');
+        return $this->belongsToMany(Appointment::class);
     }
 }
 
