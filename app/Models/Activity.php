@@ -14,11 +14,11 @@ class Activity extends Model
     {
         return $this->belongsToMany(SubService::class, 'activity_sub_service');
     }
-    // public function activitydetails()
+  
+    // public function activityAppointments()
     // {
-    //     return $this->hasMany(ActivityDetail::class);
+    //     return $this->hasMany(ActivityAppointment::class);
     // }
-
 
     public function appointments()
     {

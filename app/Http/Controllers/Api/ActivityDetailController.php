@@ -14,6 +14,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ActivityDetailController extends Controller
 {
@@ -24,6 +26,8 @@ class ActivityDetailController extends Controller
     //     $this->subActivityFrequencyController = $subActivityFrequencyController;
     // }
 
+
+    /*-------------------------add activity-details has frequencies:------------------------------------------ */
 
     protected function validateRequest(Request $request)
     {
@@ -371,4 +375,208 @@ class ActivityDetailController extends Controller
             }
         }
     }
-}
+    /*------------------------------------------------------------------------------- */
+
+    /*-------------------------  // Retrieve detailed activities:------------------------------------------ */
+
+    // public function getDetailedActivitiesByGroupId(Request $request)
+    // {
+    //     try {
+    //         // 1. التحقق من التوكن واستخراج group_id
+    //         // $token = JWTAuth::parseToken();
+    //         // $payload = $token->getPayload();
+    //         // $group_id = $payload->get('group_id');
+    //         $group_id = $request->group_id;
+
+    //         // 2. جلب المواعيد مع العلاقات
+    //         $appointments = Appointment::with([
+    //             'activities.activityAppointments.activityDetails' => function ($query) {
+    //                 $query->select('activity_details.*');
+    //             }
+    //         ])->where('group_id', $group_id)->get();
+    //         dd($appointments);
+    //         // 3. التحقق من وجود المواعيد
+    //         if ($appointments->isEmpty()) {
+    //             return response()->json(['message' => 'No appointments found'], 404);
+    //         }
+
+    //         // 4. استخراج التفاصيل
+    //         $activityDetails = $appointments->flatMap(function ($appointment) {
+    //             return $appointment->activities->flatMap(function ($activity) {
+    //                 return $activity->activityAppointments->flatMap(function ($activityAppointment) {
+    //                     return $activityAppointment->activityDetails->unique('id');
+    //                 });
+    //             });
+    //         })->unique('id');
+
+    //         // 5. تنسيق النتيجة
+    //         $filteredDetails = $activityDetails->map(function ($detail) {
+    //             return [
+    //                 'id' => $detail->id,
+    //                 'sub_activity_name' => $detail->sub_activity_name,
+    //                 'sub_activity_type' => $detail->sub_activity_type,
+    //                 'start_date' => $detail->start_date,
+    //                 'end_date' => $detail->end_date
+    //             ];
+    //         });
+
+    //         return response()->json($filteredDetails);
+    //     } catch (JWTException $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Invalid or missing token'
+    //         ], 401);
+    //     }
+    // }
+
+    public function getDetailedActivities(Request $request)
+    {
+        // الحصول على group_id (يمكن استخدام الطريقة التي تفضلها)
+        $group_id = $request->group_id;
+    
+        // استعلام واحد مع العلاقات والتصفية
+        $activityDetails = ActivityDetail::whereHas('activityDetailsFrequencies.activityAppointment.appointment', function($query) use ($group_id) {
+                $query->where('group_id', $group_id);
+            })
+            ->with(['activityDetailsFrequencies' => function($query) {
+                $query->with('activityAppointment.appointment');
+            }])
+            ->get();
+    
+        // إذا لم توجد نتائج
+        if ($activityDetails->isEmpty()) {
+            return response()->json(['message' => 'No activities found'], 404);
+        }
+    
+        // تنسيق النتيجة
+        $filteredDetails = $activityDetails->map(function ($detail) {
+            return [
+                'id' => $detail->id,
+                'sub_activity_name' => $detail->sub_activity_name,
+                'sub_activity_type' => $detail->sub_activity_type,
+                'start_date' => $detail->start_date,
+                'end_date' => $detail->end_date,
+                'frequencies' => $detail->activityDetailsFrequencies->map(function ($frequency) {
+                    return [
+                        'start_time' => $frequency->start_time,
+                        'status' => $frequency->status,
+                        'appointment_date' => $frequency->activityAppointment->appointment->appointment_date
+                    ];
+                })
+            ];
+        });
+    
+        return response()->json($filteredDetails);
+    }
+ /*------------------------------------------------------------------------------- */
+
+    /*-------------------------  // ارجاع تواريخ المواعيد:------------------------------------------ */
+
+
+    // Retrieve appointment dates by group_id
+    public function getAppointmentDates(Request $request)
+    {
+       
+        if (!$request->has('group_id')) {
+            return response()->json(['message' => 'group_id parameter is required'], 400);
+        }
+
+        $group_id = $request->input('group_id');
+
+        
+        if (!is_numeric($group_id)) {
+            return response()->json(['message' => 'Invalid group_id format'], 400);
+        }
+
+        $appointments = Appointment::where('group_id', $group_id)
+            ->get(['appointment_date']);
+
+        if ($appointments->isEmpty()) {
+            return response()->json(['message' => 'No appointments found'], 404);
+        }
+
+        return response()->json($appointments);
+    }
+
+ /*------------------------------------------------------------------------------- */
+
+    /*-------------------------  // تخزين نشاط لمرة واحدو وليوم واحد  :------------------------------------------ */
+
+    public function createSingleDayActivity(Request $request)
+    {
+        DB::beginTransaction();
+        
+        try {
+            // 1. استخدام دالة التحقق الموجودة
+            $validationResult = $this->validateRequest($request);
+            if ($validationResult) {
+                return $validationResult;
+            }
+    
+            // 2. إعداد بيانات إضافية
+            $request->merge([
+                'group_id' => $request->input('group_id'),
+                'start_date' => Carbon::today(),
+                'end_date' => Carbon::today(),
+                'repeat_count_per_day' => 1,
+                'number_of_day' => 1
+            ]);
+    
+            // 3. إنشاء النشاط الأساسي باستخدام الدالة الأصلية
+            $activityDetail = $this->storeActivityDetail($request->all());
+    
+            // 4. معالجة الصورة بشكل منفصل
+            $imagePath = $request->file('sub_activity_image')->store(
+                'activity_images', 
+                'public'
+            );
+            $activityDetail->update(['sub_activity_image' => $imagePath]);
+    
+            // 5. استخدام الدالة الأصلية لإدارة التكرارات
+            $this->addActivityDetailAppointments(
+                $activityDetail,
+                $request->input('group_id'),
+                $request->all(),
+                $request->input('activity_id')
+            );
+    
+            DB::commit();
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'تم الإنشاء بنجاح',
+                'data' => [
+                    'activity_detail' => $activityDetail,
+                    'image_url' => asset("storage/$imagePath")
+                ]
+            ], 201);
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'حدث خطأ أثناء الإنشاء',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+    

@@ -10,7 +10,7 @@ class ActivityDetailsFrequency extends Model
     use HasFactory;
     protected $table = 'activity_details_frequencies';
     protected  $fillable = [
-        'activity_detail_id', 
+        'activity_detail_id',
         'activity_appointment_id',
         'start_time',
         'every_x_hours',
@@ -22,13 +22,19 @@ class ActivityDetailsFrequency extends Model
     ];
 
 
-    public function activityDetail()
-    {
-        return $this->belongsTo(ActivityDetail::class, 'activity_detail_id', 'id');
-    }
+    // public function activityDetail()
+    // {
+    //     return $this->belongsTo(ActivityDetail::class, 'activity_detail_id', 'id');
+    // }
 
+  
     public function activityAppointment()
     {
-        return $this->belongsTo(ActivityAppointment::class, 'activity_appointment_id', 'id');
+        return $this->belongsTo(ActivityAppointment::class);
+    }
+
+    public function activityDetail()
+    {
+        return $this->belongsTo(ActivityDetail::class);
     }
 }

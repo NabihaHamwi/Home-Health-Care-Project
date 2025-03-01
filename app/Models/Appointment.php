@@ -32,10 +32,9 @@ class Appointment extends Model
     { //healthcare_provider_id in healthcare_providers table => names is important
         return $this->belongsTo(HealthcareProvider::class);
     }
-
-    public function sessions()
+    public function activityAppointments()
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(ActivityAppointment::class);
     }
 
     public function service()
