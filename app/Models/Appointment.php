@@ -49,7 +49,7 @@ class Appointment extends Model
     // }
     public function activities()
     {
-        return $this->belongsToMany(Activity::class, 'activity_appointment')->withPivot('id');
+        return $this->belongsToMany(Activity::class, 'appointment_activity')->withPivot('id');
     }
 
     public function calculateAppointmentEndTime()
