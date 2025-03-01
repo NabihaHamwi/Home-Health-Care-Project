@@ -10,23 +10,23 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class ActivityAppointmentController extends Controller
 {
     // Retrieve appointment activities:
-    public function getActivitiesAppointmentByGroupId(Request $request)
+    public function getActivitiesAppointment(Request $request)
     {
-        try {
+       // try {
             // جلب التوكن من الطلب
-            $token = $request->bearerToken();
+           // $token = $request->bearerToken();
+          //  dd($token);
+            // if (!$token) {
+            //     return response()->json(['message' => 'No token provided'], 400);
+            // }
            // dd($token);
-            if (!$token) {
-                return response()->json(['message' => 'No token provided'], 400);
-            }
-           // dd($token);
-            // التحقق من صحة التوكن واستخراج البيانات
-            $payload = JWTAuth::setToken($token)->getPayload();
-            $group_id = $payload->get('group_id');
-
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Token error', 'error' => $e->getMessage()], 500);
-        }
+            //التحقق من صحة التوكن واستخراج البيانات
+            // $payload = JWTAuth::setToken($token)->getPayload();
+            // $group_id = $payload->get('group_id');
+            $group_id = $request->group_id;
+        // } catch (\Exception $e) {
+        //     return response()->json(['message' => 'Token error', 'error' => $e->getMessage()], 500);
+        // }
 
         // جلب المواعيد المرتبطة بـ group_id
         $appointments = Appointment::where('group_id', $group_id)->get();
@@ -53,11 +53,13 @@ class ActivityAppointmentController extends Controller
                 'activity_name' => $activity->activity_name
             ];
         });
+        //dd($filtered_activities);
+        return response()->json($filtered_activities);
 
-        // إنشاء الـ JWT بالأنشطة
-        $newToken = JWTAuth::customClaims(['activities' => $filtered_activities])->tokenById($payload->get('sub'));
+        // // إنشاء الـ JWT بالأنشطة
+        // $newToken = JWTAuth::customClaims(['activities' => $filtered_activities])->tokenById($payload->get('sub'));
 
-        // إرجاع الـ JWT
-        return response()->json(['token' => $newToken]);
+        // // إرجاع الـ JWT
+        // return response()->json(['token' => $newToken]);
     }
 }

@@ -22,7 +22,10 @@ class ActivityDetail extends Model
         'repeat_count_per_day'
     ];
 
-
+    public function activityDetailsFrequencies()
+    {
+        return $this->hasMany(ActivityDetailsFrequency::class);
+    }
     public function activityAppointments()
     {
         return $this->belongsToMany(ActivityAppointment::class, 'activity_details_frequencies', 'activity_detail_id', 'activity_appointment_id');

@@ -15,13 +15,18 @@ class ActivityAppointment extends Pivot
         return $this->belongsTo(Activity::class);
     }
 
-    public function appointment()
-    {
-        return $this->belongsTo(Appointment::class);
-    }
+   public function appointment()
+{
+    return $this->belongsTo(Appointment::class);
+}
   
     public function activityDetails()
     {
         return $this->belongsToMany(ActivityDetail::class, 'activity_details_frequencies', 'activity_appointment_id', 'activity_detail_id');
+    }
+
+    public function activityDetailsFrequencies()
+    {
+        return $this->hasMany(ActivityDetailsFrequency::class);
     }
 }

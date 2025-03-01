@@ -64,10 +64,10 @@ use PHPUnit\Framework\Attributes\Group;
 //  Route::get('/activities/{groupId}', [HealthcareProviderSubServiceController::class, 'getActivities'])->name('activties.getActivities');
 //  Route::get('/activitiy/{activityId}', [HealthcareProviderSubServiceController::class, 'getDetailsActivity'])->name('activties.getDetailsActivity');
 Route::post('/store-activitiy-details', [ActivityDetailController::class, 'storeActivityDetails'])->name('activties.storeActivityDetails');
-Route::get('/get-sub-activities-appointment-activity', [ActivityDetailController::class, 'getDetailedActivitiesByGroupId'])->name(name: 'activitiyDetails.getDetailedActivitiesByGroupId');
-Route::get('/appointment-activities', [ActivityAppointmentController::class, 'getActivitiesAppointmentByGroupId'])->name(name: 'activities.getActivitiesAppointmentByGroupId');
-
-
+Route::get('/get-sub-activities-appointment-activity', [ActivityDetailController::class, 'getDetailedActivities'])->name(name: 'activitiyDetails.getDetailedActivities');
+Route::get('/appointment-activities', [ActivityAppointmentController::class, 'getActivitiesAppointment'])->name(name: 'activities.getActivitiesAppointment');
+Route::get('/get-appointment-dates', [ActivityDetailController::class, 'getAppointmentDates'])->name(name: 'activitiyDetails.getAppointmentDates');
+// Route::post('/activities/single-day', [ActivityDetailController::class, 'createSingleDayActivity']);
 
 //___________________________________________________________________
 
@@ -184,10 +184,10 @@ Route::get('/subservices/{service}', [SubServiceController::class, 'show'])->nam
 Route::post('/selected_subservices', [SubServiceController::class, 'selectSubservices'])->name(name: 'subservices.selectSubservices');
 
 //Api for send selected patient profile
-Route::post('/selected_patient', [PatientAgentController::class , 'selectPatient'])->name(name:'patients.selectPatient');
+Route::post('/selected_patient', [PatientAgentController::class, 'selectPatient'])->name(name: 'patients.selectPatient');
 
 //Api for send selected provider
-Route::post('/selected_provider', [AppointmentsController::class , 'selectProvider'])->name(name:'appointments.selectProvider');
+Route::post('/selected_provider', [AppointmentsController::class, 'selectProvider'])->name(name: 'appointments.selectProvider');
 
 //Api for show day work times
 Route::get('/worktimes/{date}', [HealthcareProviderWorktimeController::class, 'show_day_worktimes'])->name(name: 'careprovidersworktimes.showday');
