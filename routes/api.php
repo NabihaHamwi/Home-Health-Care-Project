@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\PatientAgentController;
 use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\Api\ActivityAppointmentController;
+use App\Http\Controllers\Api\ActivitySubServiceController;
 use App\Models\Emergency;
 use App\Models\HealthcareProvider;
 use App\Models\HealthcareProviderSubService;
@@ -197,3 +198,6 @@ Route::get('/my_accepted_appointments', [AppointmentsController::class, 'show_my
 
 //Api for show available days in month 
 Route::get('/availabel_days_in_month/{month}', [HealthcareProviderWorktimeController::class, 'availabel_days_in_month'])->name(name: 'careprovidersworktimes.availabel_days_in_month');
+
+//Apr for show activities for care provider
+Route::get('/provider_activity', [ActivitySubServiceController::class, 'Show_provider_activities'])->name(name: 'activitysubservice.provider_activities');
