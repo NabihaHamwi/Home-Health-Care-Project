@@ -47,15 +47,16 @@ class AppointmentResource extends JsonResource
                 "appointment_status" => $this->appointment_status
             ];
 
-        if ($request->route()->named('appointments.show_my_appointments')||$request->route()->named('appointments.show_my_accepted_appointments'))
+        if ($request->route()->named('appointments.show_my_appointments') || $request->route()->named('appointments.show_my_accepted_appointments'))
             return [
                 "appointment_id" => $this->id,
+                "group_id" => $this->group_id,
                 "appointment_date" => $this->appointment_date,
                 "appointment_start_at" => $this->appointment_start_time,
                 "appointment_duration" => $this->appointment_duration,
                 "appointment_status" => $this->appointment_status,
                 "service_name" => $this->service->name,
-                "provider_name"=> $this->healthcare_provider->user->first_name ." ". $this->healthcare_provider->user->last_name,
+                "provider_name" => $this->healthcare_provider->user->first_name . " " . $this->healthcare_provider->user->last_name,
             ];
         // if ($request->route()->named('appointment.show_reserved_appointment')) {
         //     $patientfile = [
