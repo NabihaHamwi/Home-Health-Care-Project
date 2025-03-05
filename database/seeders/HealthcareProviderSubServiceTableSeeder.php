@@ -13,6 +13,10 @@ class HealthcareProviderSubServiceTableSeeder extends Seeder
      */
     public function run(): void
     {
+        HealthcareProviderSubService::create([
+            'healthcare_provider_id' => 101,
+            'sub_service_id' => 10,
+        ]);
         HealthcareProviderSubService::factory(100)->create();
     }
 }
