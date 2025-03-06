@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\HealthcareProviderWorktime;
 use App\Http\Resources\HealthcareProviderWorktimeResource;
+use App\Models\Appointment;
 use Illuminate\Support\Facades\Validator;
 use App\Models\HealthcareProvider;
 use Carbon\Carbon;
@@ -122,14 +123,14 @@ class HealthcareProviderWorktimeController extends Controller
             'worktimes.*.end_time.required_without' => 'يجب تحديد أوقات العمل.',
             'worktimes.*.work_hours.required_without_all' =>  'يجب تحديد أوقات العمل.',
         ]);
-    
+
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 422);
         }
-    
+
         $existingWorktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $healthcareProviderId)->get()->keyBy('day_name');
         $processedDays = [];
-    
+
         foreach ($request->worktimes as $worktimeData) {
             if (isset($worktimeData['work_hours']) && $worktimeData['work_hours'] == 24) {
                 $worktimeData['start_time'] = '00:00';
@@ -145,7 +146,7 @@ class HealthcareProviderWorktimeController extends Controller
             } else {
                 return $this->errorResponse('يجب إدخال وقت البداية والنهاية أو ساعات العمل.', 422);
             }
-    
+
             if (isset($existingWorktimes[$worktimeData['day_name']])) {
                 if (array_key_exists($worktimeData['day_name'], $processedDays)) {
                     $existingWorktimes[$worktimeData['day_name']]->update([
@@ -171,11 +172,11 @@ class HealthcareProviderWorktimeController extends Controller
                 ]);
             }
         }
-    
+
         return $this->successResponse(null, 'تم تخزين بيانات أيام العمل بنجاح', 200);
     }
-    
-    
+
+
 
     //_____________________________________________________________________________________________
 
@@ -248,6 +249,86 @@ class HealthcareProviderWorktimeController extends Controller
                 'error' => $e->getMessage()
             ];
         }
+        return response($response);
+    }
+
+    public function availabel_days_in_month(Request $request, $month)
+    {
+        // retrieving provider_id from token
+        try {
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $provider_id = $payload->get('provider_id');
+            if (!$provider_id)
+                throw new Exception('care provider is not selected, please choose care provider first');
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'token error: could not retrieve provider_id from token',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+            return response($response);
+        }
+
+        try {
+            // Assuming $month is in the format 'YYYY-MM'
+            $start_date = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $end_date = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+            $available_days = [];
+
+            // Loop through each day of the month
+            for ($date = $start_date; $date <= $end_date; $date->addDay()) {
+                $day = $date->format('l');
+                // Get the worktimes for the care provider on this day
+                $day_worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $provider_id)->where('day_name', $day)->get();
+
+                if ($day_worktimes->isEmpty()) {
+                    continue; // Skip if there are no worktimes for this day
+                }
+
+                $is_day_available = false;
+
+                foreach ($day_worktimes as $worktime) {
+                    $appointments = Appointment::where('healthcare_provider_id', $provider_id)
+                        ->where('appointment_date', $date->format('Y-m-d'))
+                        ->get();
+
+                    // Check if there's any available time slot within the worktime
+                    $worktime_start = Carbon::parse($worktime->start_time);
+                    $worktime_end = Carbon::parse($worktime->end_time);
+
+                    $appointments_end_times = $appointments->map(function ($appointment) {
+                        return Carbon::parse($appointment->end_time);
+                    });
+
+                    $has_free_slot = $appointments_end_times->contains(function ($appointment_end_time) use ($worktime_start, $worktime_end) {
+                        return $worktime_start->between($appointment_end_time, $worktime_end);
+                    });
+
+                    if (!$has_free_slot) {
+                        $is_day_available = true;
+                        break;
+                    }
+                }
+
+                if ($is_day_available) {
+                    $available_days[] = $date->format('Y-m-d');
+                }
+            }
+
+            $response = [
+                'msg' => 'available days retrieved successfully',
+                'status' => 200,
+                'data' => $available_days,
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'can not retrieve available days',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+
         return response($response);
     }
 }
