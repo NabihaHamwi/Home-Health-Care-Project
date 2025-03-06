@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\ApiSurveyController;
 use App\Http\Controllers\Api\ApiPatientController;
+use App\Http\Controllers\Api\SubActivityFrequencyController;
 use App\Http\Controllers\Api\AppointmentsController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\HealthcareProviderWorktimeController;
@@ -39,35 +40,38 @@ use PHPUnit\Framework\Attributes\Group;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-// لوحة المتابعة
-// Route::group(
-//     [],
-//     function ($router) {
-//         //عرض جميع جلسات المرضى للادمن
-//         //   Route::get('/sessions', [ApiSessionController::class, 'index'])->name('sessions.index');
-//         //عرض جميع جلسات المريض
-//         //    Route::get('/sessions/patientsessoins/{patient}', [ApiSessionController::class, 'patientSessions'])->name('sessions.patientsession');
-
-//         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
-//         // انشاء جلسة
-//         Route::get('/sessions/create/{appointment}', [ApiSessionController::class, 'create'])->name('sessions.create');
-//         //عرض جلسة للمريض
-//         Route::get('/sessions/{session}', [ApiSessionController::class, 'show'])->name('sessions.show');
-//         //عرض لوحة المتابعة 
-//         Route::get('sessions/panel/{patient_id}', [ApiSessionController::class, 'monitoring_panel'])->name('sessions.panel');
-//         //تخزين بيانات جلسة
-//         Route::post('/sessions', [ApiSessionController::class, 'store'])->name('sessions.store');
-
-
-//عرض جميع أنشطة الموعد 
-//  Route::get('/activities/{groupId}', [HealthcareProviderSubServiceController::class, 'getActivities'])->name('activties.getActivities');
-//  Route::get('/activitiy/{activityId}', [HealthcareProviderSubServiceController::class, 'getDetailsActivity'])->name('activties.getDetailsActivity');
-Route::post('/store-activitiy-details', [ActivityDetailController::class, 'storeActivityDetails'])->name('activties.storeActivityDetails');
-Route::get('/get-sub-activities-appointment-activity', [ActivityDetailController::class, 'getDetailedActivities'])->name(name: 'activitiyDetails.getDetailedActivities');
-Route::get('/appointment-activities', [ActivityAppointmentController::class, 'getActivitiesAppointment'])->name(name: 'activities.getActivitiesAppointment');
-Route::get('/get-appointment-dates', [ActivityDetailController::class, 'getAppointmentDates'])->name(name: 'activitiyDetails.getAppointmentDates');
-// Route::post('/activities/single-day', [ActivityDetailController::class, 'createSingleDayActivity']);
+//apis for contollpanel:
+Route::group(
+    [],
+    function ($router) {
+        //api for retrive daily-sub-activities(frequences) to today's appointment date (controll panel)
+        Route::get('/daily-sub-activities', [SubActivityFrequencyController::class, 'getDailySubActivities'])->name(name: 'frequencies.getDailySubActivities'); //->middleware('auth:api');
+        //Route::get('/activities/{groupId}', [HealthcareProviderSubServiceController::class, 'getActivities'])->name('activties.getActivities');
+        //api for show 
+        //Route::get('/activitiy/{activityId}', [HealthcareProviderSubServiceController::class, 'getDetailsActivity'])->name('activties.getDetailsActivity');
+        //جاهز للربط
+        // Retrieve  all sub-activities for accepted and unfinished appointment 
+        Route::get('/get-all-sub-activities/appointment', [ActivityDetailController::class, 'getDetailedActivities'])->name(name: 'activitiyDetails.getDetailedActivities');
+        // select appointment by group_id or appoinmtent_id
+        //جاهز للربط
+        Route::post('/select-Appointment', [ApiPatientController::class, 'selectGroupOrAppointment'])->name(name: 'patient.selectAppointment');
+        //show activities under appointment:
+        Route::get('/appointment-activities', [ActivityAppointmentController::class, 'getActivitiesAppointment'])->name(name: 'activities.getActivitiesAppointment');
+        //retrieve the dates of the appointment:
+        //جاهز للربط
+        Route::get('/get-appointment-dates', [ActivityDetailController::class, 'getAppointmentDates'])->name(name: 'activitiyDetails.getAppointmentDates');
+        //apis for store activity details and update(by careporvider on activities controll panel)
+        //create one-time sub-activity:
+        Route::post('/activities/single-day', [ActivityDetailController::class, 'createSingleDayActivity']);
+        //create sub-activity with repetitions:
+        Route::post('/store-sub-activity', [ActivityDetailController::class, 'storeSubActivity'])->name('activties.storeActivityDetails');
+        //change daily sub-activity status:(update Daily progress of sub-activity)
+        Route::Put('/sub-activity/daily-progress/{frequencyId}', [SubActivityFrequencyController::class, 'updaeDailySubActivityStatus'])->name(name: 'frequencies.updaeDailySubActivityStatus');
+        //انه اذا كان النشاط ليس له نشاط جزئي يشكل توماتيكي النشاط الجزئي هو نفسه ولا يسمح للمستخدم بادخال نشاط جزئي
+        //apis for healthcare-provider:
+        Route::get('/acceptable-appointments-provider', [HealthcareProviderController::class, 'acceptable-appointmentsProvider'])->name(name: 'frequencies.getDailySubActivities');
+    }
+);
 
 //___________________________________________________________________
 

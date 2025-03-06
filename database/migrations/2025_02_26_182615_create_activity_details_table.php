@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('sub_activity_name');
             $table->enum('sub_activity_type', ['activity', 'measure', 'medical_appointment', 'medicine']);
-            $table->date('start_date')->nullable();
+           $table->enum('frequencies_type' ,['every_x_day' , 'number_of_day' ,'days_of_week','once_time']);
+         //  $table->enum('day_frequencies_type' ,['every_x_hours' , 'repeat_times']);
+           $table->date('start_date')->nullable();
             $table->unsignedInteger('number_of_day')->nullable();
             $table->date('end_date')->nullable();
             $table->time('every_x_hours')->nullable();

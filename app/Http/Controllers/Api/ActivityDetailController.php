@@ -16,116 +16,81 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use App\Traits\FrequencyValidationTrait;
+   
 
 class ActivityDetailController extends Controller
 {
-    //protected $subActivityFrequencyController;
+    use FrequencyValidationTrait;
 
-    // public function __construct(SubActivityFrequencyController $subActivityFrequencyController)
-    // {
-    //     $this->subActivityFrequencyController = $subActivityFrequencyController;
-    // }
+    /*-------------------------add sub-activity with frequencies:------------------------------------------ */
 
-
-    /*-------------------------add activity-details has frequencies:------------------------------------------ */
-
+    /*-----------------------------validation--------------------------------- */
+    //عملية التحقق:
     protected function validateRequest(Request $request)
     {
         if (!$request->has('repeat_count_per_day')) {
-            $request->merge([
-                'repeat_count_per_day' => 1
-            ]);
+            $request->merge(['repeat_count_per_day' => 1]);
         }
 
+        // 1. حساب end_date أولًا قبل أي تحقق فرعي
         $validator = Validator::make($request->all(), [
             'sub_activity_name' => 'required|min:4|max:14',
             'sub_activity_type' => 'required|in:activity,measure,medical_appointment,medicine',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'every_x_day' => 'nullable|integer',
-            'repeat_count_per_day' => 'required|integer|min:1',
-            'start_time' => 'nullable|date_format:H:i',
-            'every_x_hours' => 'nullable|integer|min:1',
-            'repeat_times' => 'nullable|array',
-            'repeat_times.*' => 'date_format:H:i'
+            'frequencies_time' => 'required|in:every_x_day,number_of_day,day_of_week,once_time',
+            'start_date' => $this->startDateRules($request),
+            'repeat_count_per_day' => 'required|integer|min:1'
         ]);
-
-        // تحقق مخصص
-        $validator->after(function ($validator) use ($request) {
-            $data = $request->all();
-
-            // تأكد من أن المستخدم قد أدخل إما every_x_hours أو repeat_times
-            // if (empty($data['every_x_hours']) && empty($data['repeat_times'])) {
-            //     $validator->errors()->add('repeat_parameters', 'You must enter either every_x_hours or repeat_times.');
-            // }
-
-            // منع إدخال every_x_hours و repeat_times معًا
-            if (!empty($data['every_x_hours']) && !empty($data['repeat_times'])) {
-                $validator->errors()->add('repeat_parameters', 'You cannot use both every_x_hours and repeat_times together.');
-            }
-
-            // إذا كان every_x_hours موجودًا، تأكد من وجود start_time
-            if (!empty($data['every_x_hours']) && empty($data['start_time'])) {
-                $validator->errors()->add('start_time', 'The start_time field is required when using every_x_hours.');
-            }
-
-            // إذا كانت repeat_times موجودة، لا داعي لإدخال start_time
-            if (!empty($data['repeat_times'])) {
-                $validator->sometimes('start_time', 'nullable', function () {
-                    return true;
-                });
-            }
-        });
-
-        // التحقق من حجم repeat_times
-        $validator->sometimes('repeat_times', 'size:' . $request->input('repeat_count_per_day'), function ($input) {
-            return $input->repeat_count_per_day > 0 && $input->repeat_times;
-        });
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-    }
 
-    /**********************************************************/
+        // 2. حساب end_date هنا قبل استدعاء الدوال الفرعية
+        $endDate = $this->calculateEndDate($request, $validator);
+        $request->merge(['end_date' => $endDate]);
 
-    public function storeActivityDetail($activity_details)
-    {
-        try {
-            return ActivityDetail::create([
-                'sub_activity_name' => $activity_details['sub_activity_name'],
-                'sub_activity_type' => $activity_details['sub_activity_type'],
-                'start_date' => $activity_details['start_date'],
-                'number_of_day' => $activity_details['number_of_day'],
-                'end_date' => $activity_details['end_date'],
-                'every_x_hours' => $activity_details['every_x_hours'],
-                'every_x_day' => $activity_details['every_x_day'],
-                'repeat_count_per_day' => $activity_details['repeat_count_per_day']
-            ]);
-        } catch (\Exception $e) {
-            throw new \RuntimeException('فشل في إنشاء النشاط الأساسي: ' . $e->getMessage());
+        // 3. التحقق النهائي من end_date
+        $validator->after(function ($validator) use ($request) {
+            if ($request->has('end_date')) {
+                $this->validateEndDateExists($validator, $request);
+            }
+        });
+
+        // 4. الآن نستدعي التحقق حسب نوع التواتر
+        $result = $this->validateByFrequencyType($validator, $request);
+        if ($result) {
+            return $result;
         }
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        return null;
     }
-    /*************************************************************** */
-    public function storeActivityDetails(Request $request)
+    /*-------------------------الدالة الرئيسية(Api)-------------------------- */
+
+    public function storeSubActivity(Request $request)
     {
-        // التحقق من صحة البيانات المدخلة أولاً
+        // استدعاء لدالة ال validation 
         $validationResult = $this->validateRequest($request);
         if ($validationResult) {
             return $validationResult;
         }
-        // بدء المعاملة مع قاعدة البيانات
         DB::beginTransaction();
-
         try {
+
             $group_id = $request->input('group_id');
+            // dd($group_id);
             $activity_id = $request->input('activity_id');
+            // dd($activity_id);
             $activity_details = [
                 'sub_activity_name' => $request->input('sub_activity_name'),
                 'sub_activity_type' => $request->input('sub_activity_type'),
                 'start_date' => $request->input('start_date'),
                 'number_of_day' => $request->input('number_of_day'),
-                'end_date' => $this->calculateEndDate($request),
+                'end_date' => $request->end_date,
                 'every_x_day' => $request->input('every_x_day'),
                 'days_of_week' => $request->input('days_of_week', []),
                 'start_time' => $request->input('start_time'),
@@ -136,15 +101,19 @@ class ActivityDetailController extends Controller
 
             // انشاء النشاط الأساسي
             $activity_detail = $this->storeActivityDetail($activity_details);
-            // dd($activity_detail);
+            //  dd($activity_detail);
 
-            // انشاء تواتر النشاط (المواعيد المرتبطة)
-            $this->addActivityDetailAppointments(
+            $appointmentResult = $this->addActivityDetailAppointments(
                 $activity_detail,
-                $group_id,
+                $request->group_id,
                 $activity_details,
-                $activity_id
+                $request->activity_id
             );
+
+            if ($appointmentResult && $appointmentResult->getStatusCode() !== 201) {
+                DB::rollBack();
+                return $appointmentResult;
+            }
             // dd($activity_detail);
 
             // تأكيد المعاملة إذا نجحت جميع العمليات
@@ -164,32 +133,62 @@ class ActivityDetailController extends Controller
             ], 500);
         }
     }
-    /*********************************************************/
+    /*---------------------- create_sub_activity:-----------------*/
+
+    public function storeActivityDetail($activity_details)
+    {
+        try {
+            return ActivityDetail::create([
+                'sub_activity_name' => $activity_details['sub_activity_name'],
+                'sub_activity_type' => $activity_details['sub_activity_type'],
+                'start_date' => $activity_details['start_date'],
+                'number_of_day' => $activity_details['number_of_day'],
+                'end_date' => $activity_details['end_date'],
+                'every_x_hours' => $activity_details['every_x_hours'],
+                'every_x_day' => $activity_details['every_x_day'],
+                'repeat_count_per_day' => $activity_details['repeat_count_per_day']
+            ]);
+        } catch (\Exception $e) {
+            throw new \RuntimeException('فشل في إنشاء النشاط الأساسي: ' . $e->getMessage());
+        }
+    }
+    /*---------------------- create_sub_activity:-----------------*/
     protected function addActivityDetailAppointments($activity_detail, $group_id, $activity_details, $activity_id)
     {
         try {
             $startDate = Carbon::parse($activity_details['start_date']);
             $endDate = Carbon::parse($activity_details['end_date']);
-            //dd($startDate);
-            //dd($endDate);
+            // dd($startDate);
+            // dd($endDate);
             // جلب جميع المواعيد للفترة الزمنية المحددة
             //ممكن تكون بس اذا مافي انشطة مرتبطة بمواعيد وبالتالي كانه مافي مواعيد من اصله 
 
             $appointments = $this->getAppointmentsByActivities($group_id, $activity_id, $startDate, $endDate);
-
+            // dd($appointments);
             if ($appointments->isEmpty()) {
-                throw new \RuntimeException('No appointments found for the specified criteria.');
+                return response()->json([
+                    'message' => 'لا توجد مواعيد في الفترة المحددة'
+                ], 404); // رمز حالة 404 للغير موجود
             }
+
             // dd(isset($activity_details['number_of_day']));
             //
             // dd( $activity_details['number_of_day'] == 1&& $activity_details['repeat_count_per_day'] == 1 );
             // dd($appointments);
             // التحقق من الشروط وإلا رمي استثناء
             if (isset($activity_details['number_of_day']) && $activity_details['repeat_count_per_day'] >= 2) {
-                //dd($activity_details);
+                // dd($activity_details);
+                if ($activity_details['repeat_count_per_day'] == 1) {
+                }
                 $this->createDailyRepetitions($appointments, $activity_detail, $group_id, $activity_details);
             } elseif (isset($activity_details['every_x_day'])) {
+                // if (empty($activity_details['every_x_day'])) {
+                //     return response()->json([
+                //         'message' => 'حقل every_x_day مطلوب'
+                //     ], 422);
+                // }
                 $filtered_appointments = $this->getAppointmentsByGroupIdAndEveryXDay($appointments, $startDate, $activity_details['every_x_day']);
+                //    dd($filtered_appointments);
                 $this->createDailyRepetitions($filtered_appointments, $activity_detail, $group_id, $activity_details);
             } elseif (!empty($activity_details['days_of_week'])) {
                 $filtered_appointments = $this->getAppointmentsBySpecificDaysOfWeek($appointments, $activity_details['days_of_week']);
@@ -201,13 +200,38 @@ class ActivityDetailController extends Controller
                     }
                 }
             } else {
-                throw new \RuntimeException('Invalid activity configuration.');
+                return response()->json([
+                    'message' => 'تكوين النشاط غير صحيح'
+                ], 400); // رمز حالة 400 لطلب خاطئ
             }
         } catch (\Exception $e) {
-            throw new \RuntimeException('فشل في إنشاء التواتر: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'فشل في إنشاء التواتر',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
+    /*----------------------------انشاء تواتر على اليوم--------------------*/
+    protected function createDailyRepetitions($appointments, $activity_detail, $group_id, $activity_details)
+    {
+        $initial_start_time = $activity_details['start_time'];
+        // dd($initial_start_time);
+        foreach ($appointments as $appointment_data) {
+            $appointment = $appointment_data['appointment'];
+            //  dd($appointment_data);
+            // dd($appointment);
+            // معالجة الأوقات المكررة
+            if (!empty($activity_details['repeat_times'])) {
+                $this->processRepeatTimes($appointment_data, $activity_detail, $activity_details);
+            }
+            // معالجة الفاصل الزمني بالساعات
+            else if (!empty($activity_details['every_x_hours'])) {
+                $this->processEveryXHours($activity_details, $appointment_data, $activity_detail, $initial_start_time);
+            }
+        }
+    }
+    /***********************************************/
     /*********************************************/
     protected function getAppointmentsByGroupIdAndEveryXDay($appointments, $startDate, $every_x_day)
     {
@@ -265,6 +289,8 @@ class ActivityDetailController extends Controller
             ActivityDetailsFrequency::create([
                 'activity_detail_id' => $activity_detail->id,
                 'activity_appointment_id' => $activity_appointment_id,
+                'day_name' => '',
+                'sub_activity_date' => '',
                 'start_time' => $activity_details['start_time'],
                 'status' => 'not_completed'
             ]);
@@ -276,24 +302,7 @@ class ActivityDetailController extends Controller
 
 
     /******************************************/
-    protected function calculateEndDate(Request $request)
-    {
-        if ($request->filled('end_date')) {
-            return $request->input('end_date');
-        }
 
-        if ($request->filled('number_of_day')) {
-            return Carbon::parse($request->input('start_date'))
-                ->addDays($request->input('number_of_day') - 1) // ناقص 1 لاحتساب اليوم الأول
-                ->toDateString();
-        }
-
-        $lastAppointmentDate = $this->getLastAppointmentDate($request->input('group_id'));
-        //من المستحيل تاريخ الانتهاء يكون فاضي  
-        //اذا كان فاضي بتم اسناد اليه قيمة تاريخ البداية
-        return $lastAppointmentDate?->toDateString() ?? $request->input('start_date');
-    }
-    /***************************************/
     protected function getLastAppointmentDate($group_id)
     {
         $lastAppointment = Appointment::where('group_id', $group_id)
@@ -303,52 +312,28 @@ class ActivityDetailController extends Controller
         return $lastAppointment ? Carbon::parse($lastAppointment->appointment_date) : null;
     }
     /********************************************/
-
     public function getAppointmentsByActivities($group_id, $activity_id, $start_date, $end_date)
     {
-        $appointments = Appointment::where('group_id', $group_id)
-            ->where('appointment_date', '>=', $start_date)
+        return Appointment::where('group_id', $group_id)
+            ->whereBetween('appointment_date', [$start_date, $end_date])
             ->whereHas('activities', function ($query) use ($activity_id) {
                 $query->where('activities.id', $activity_id);
-            })
-            ->when($end_date, function ($query) use ($end_date) {
-                return $query->where('appointment_date', '<=', $end_date);
             })
             ->with(['activities' => function ($query) use ($activity_id) {
                 $query->where('activity_id', $activity_id)
                     ->select('activities.id')
                     ->withPivot('id');
             }])
-            ->orderBy('appointment_date')
             ->get()
             ->map(function ($appointment) {
-
                 return [
                     'appointment' => $appointment->makeHidden('activities'),
                     'activity_appointment_ids' => $appointment->activities->pluck('pivot.id')
                 ];
             });
-        // dd($appointments);
-        return $appointments;
     }
     /****************************************************/
-    protected function createDailyRepetitions($appointments, $activity_detail, $group_id, $activity_details)
-    {
-        $initial_start_time = $activity_details['start_time'];
-        // dd($initial_start_time);
-        foreach ($appointments as $appointment_data) {
-            //$appointment = $appointment_data['appointment'];
-            // dd($appointment_data);
-            // معالجة الأوقات المكررة
-            if (!empty($activity_details['repeat_times'])) {
-                $this->processRepeatTimes($appointment_data, $activity_detail, $activity_details);
-            }
-            // معالجة الفاصل الزمني بالساعات
-            else if (!empty($activity_details['every_x_hours'])) {
-                $this->processEveryXHours($activity_details, $appointment_data, $activity_detail, $initial_start_time);
-            }
-        }
-    }
+
     /***********************************************/
     protected function processRepeatTimes($appointment_data, $activity_detail, $activity_details)
     {
@@ -371,148 +356,199 @@ class ActivityDetailController extends Controller
             $activity_details['start_time'] = Carbon::parse($initial_start_time)->addHours($i * $every_x_hours)->format('H:i');
 
             foreach ($appointment_data['activity_appointment_ids'] as $activity_appointment_id) {
+                //echo  $activity_appointment_id . "\n";
                 $this->createAppointment($activity_detail, $activity_details, $activity_appointment_id);
             }
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /*------------------------------------------------------------------------------- */
 
-    /*-------------------------  // Retrieve detailed activities:------------------------------------------ */
-
-    // public function getDetailedActivitiesByGroupId(Request $request)
-    // {
-    //     try {
-    //         // 1. التحقق من التوكن واستخراج group_id
-    //         // $token = JWTAuth::parseToken();
-    //         // $payload = $token->getPayload();
-    //         // $group_id = $payload->get('group_id');
-    //         $group_id = $request->group_id;
-
-    //         // 2. جلب المواعيد مع العلاقات
-    //         $appointments = Appointment::with([
-    //             'activities.activityAppointments.activityDetails' => function ($query) {
-    //                 $query->select('activity_details.*');
-    //             }
-    //         ])->where('group_id', $group_id)->get();
-    //         dd($appointments);
-    //         // 3. التحقق من وجود المواعيد
-    //         if ($appointments->isEmpty()) {
-    //             return response()->json(['message' => 'No appointments found'], 404);
-    //         }
-
-    //         // 4. استخراج التفاصيل
-    //         $activityDetails = $appointments->flatMap(function ($appointment) {
-    //             return $appointment->activities->flatMap(function ($activity) {
-    //                 return $activity->activityAppointments->flatMap(function ($activityAppointment) {
-    //                     return $activityAppointment->activityDetails->unique('id');
-    //                 });
-    //             });
-    //         })->unique('id');
-
-    //         // 5. تنسيق النتيجة
-    //         $filteredDetails = $activityDetails->map(function ($detail) {
-    //             return [
-    //                 'id' => $detail->id,
-    //                 'sub_activity_name' => $detail->sub_activity_name,
-    //                 'sub_activity_type' => $detail->sub_activity_type,
-    //                 'start_date' => $detail->start_date,
-    //                 'end_date' => $detail->end_date
-    //             ];
-    //         });
-
-    //         return response()->json($filteredDetails);
-    //     } catch (JWTException $e) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Invalid or missing token'
-    //         ], 401);
-    //     }
-    // }
+    /*-------------------------  // Retrieve sub-activities:------------------------------------------ */
 
     public function getDetailedActivities(Request $request)
     {
-        // الحصول على group_id (يمكن استخدام الطريقة التي تفضلها)
-        $group_id = $request->group_id;
+        try {
+            // استخراج التوكن من الطلب
+            $token = $request->bearerToken();
+            if (!$token) {
+                return response()->json(['error' => 'يجب إرسال التوكن'], 401);
+            }
     
-        // استعلام واحد مع العلاقات والتصفية
-        $activityDetails = ActivityDetail::whereHas('activityDetailsFrequencies.activityAppointment.appointment', function($query) use ($group_id) {
-                $query->where('group_id', $group_id);
-            })
-            ->with(['activityDetailsFrequencies' => function($query) {
-                $query->with('activityAppointment.appointment');
-            }])
+            // فك تشفير التوكن للحصول على الـ claims
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $claims = $payload->toArray();
+    
+            // التحقق من وجود group_id أو appointment_ids في التوكن
+            if (empty($claims['group_id']) && empty($claims['appointment_ids'])) {
+                return response()->json(['error' => 'التوكن لا يحتوي على بيانات كافية'], 400);
+            }
+    
+            $resolved_group_id = null;
+            $appointment_ids = [];
+    
+            // تحديد group_id من التوكن
+            if (!empty($claims['group_id'])) {
+                $resolved_group_id = $claims['group_id'];
+                $appointment_ids = $claims['appointment_ids'] ?? [];
+            } else {
+                // استخدام أول appointment_id في التوكن لاستخراج group_id
+                $appointment_id = $claims['appointment_ids'][0] ?? null;
+                if (!$appointment_id) {
+                    return response()->json(['error' => 'لا توجد مواعيد في التوكن'], 400);
+                }
+    
+                $appointment = Appointment::find($appointment_id);
+                if (!$appointment) {
+                    return response()->json(['error' => 'الموعد غير موجود'], 404);
+                }
+    
+                $resolved_group_id = $appointment->group_id;
+                $appointment_ids = [$appointment_id];
+            }
+    
+            // التحقق من صحة group_id
+            $groupExists = Appointment::where('group_id', $resolved_group_id)->exists();
+            if (!$groupExists) {
+                return response()->json(['error' => 'المجموعة غير موجودة'], 404);
+            }
+    
+            // بناء الاستعلام بناءً على group_id
+            $activityDetails = ActivityDetail::whereHas(
+                'activityDetailsFrequencies.activityAppointment.appointment',
+                function ($query) use ($resolved_group_id) {
+                    $query->where('group_id', $resolved_group_id);
+                }
+            )
+            ->with(['activityDetailsFrequencies.activityAppointment.appointment'])
             ->get();
     
-        // إذا لم توجد نتائج
-        if ($activityDetails->isEmpty()) {
-            return response()->json(['message' => 'No activities found'], 404);
+            // إذا لم توجد نتائج
+            if ($activityDetails->isEmpty()) {
+                return response()->json(['message' => 'لا توجد أنشطة'], 404);
+            }
+    
+            // بناء البيانات المرسلة
+            $responseData = $activityDetails->map(function ($detail) {
+                return [
+                    'id' => $detail->id,
+                    'sub_activity_name' => $detail->sub_activity_name,
+                    'sub_activity_type' => $detail->sub_activity_type,
+                    'start_date' => $detail->start_date,
+                    'end_date' => $detail->end_date,
+                    'frequencies' => $detail->activityDetailsFrequencies->map(function ($freq) {
+                        return [
+                            'start_time' => $freq->start_time,
+                            'status' => $freq->status,
+                            'appointment_date' => $freq->activityAppointment->appointment->appointment_date,
+                        ];
+                    })
+                ];
+            });
+    
+            return response()->json([
+                'data' => $responseData,
+            ]);
+    
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'رمز الوصول غير صالح'], 401);
         }
-    
-        // تنسيق النتيجة
-        $filteredDetails = $activityDetails->map(function ($detail) {
-            return [
-                'id' => $detail->id,
-                'sub_activity_name' => $detail->sub_activity_name,
-                'sub_activity_type' => $detail->sub_activity_type,
-                'start_date' => $detail->start_date,
-                'end_date' => $detail->end_date,
-                'frequencies' => $detail->activityDetailsFrequencies->map(function ($frequency) {
-                    return [
-                        'start_time' => $frequency->start_time,
-                        'status' => $frequency->status,
-                        'appointment_date' => $frequency->activityAppointment->appointment->appointment_date
-                    ];
-                })
-            ];
-        });
-    
-        return response()->json($filteredDetails);
     }
- /*------------------------------------------------------------------------------- */
 
-    /*-------------------------  // ارجاع تواريخ المواعيد:------------------------------------------ */
-
-
-    // Retrieve appointment dates by group_id
+//     /*------------------------------------------------------------------------------- */
     public function getAppointmentDates(Request $request)
     {
-       
-        if (!$request->has('group_id')) {
-            return response()->json(['message' => 'group_id parameter is required'], 400);
+        try {
+            // استخراج التوكن من الطلب
+            $token = $request->bearerToken();
+            if (!$token) {
+                return response()->json(['message' => 'يجب إرسال التوكن'], 401);
+            }
+    
+            // فك تشفير التوكن للحصول على الـ claims
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $claims = $payload->toArray();
+    
+            $group_id = null;
+    
+            // الحالة 1: استخراج group_id مباشرةً من التوكن
+            if (isset($claims['group_id']) && !empty($claims['group_id'])) {
+                $group_id = $claims['group_id'];
+            }
+            // الحالة 2: استخراج group_id من appointment_id الموجود في التوكن
+            else if (isset($claims['appointment_ids']) && !empty($claims['appointment_ids'])) {
+                $appointment_id = $claims['appointment_ids'][0]; // نأخذ أول appointment_id
+                $appointment = Appointment::find($appointment_id);
+                
+                if (!$appointment) {
+                    return response()->json(['message' => 'appointment_id غير صحيح'], 404);
+                }
+                
+                $group_id = $appointment->group_id;
+            }
+            // الحالة 3: لا يوجد بيانات كافية في التوكن
+            else {
+                return response()->json(
+                    ['message' => 'التوكن يجب أن يحتوي إما group_id أو appointment_ids'],
+                    400
+                );
+            }
+    
+            // البحث عن المواعيد باستخدام group_id المستخرج
+            $appointments = Appointment::where('group_id', $group_id)
+                ->whereDate('appointment_date', '>=', Carbon::today())
+                ->get(['id', 'appointment_date']); // إضافة id للتوضيح
+    
+            if ($appointments->isEmpty()) {
+                return response()->json(['message' => 'لا توجد مواعيد مستقبلية'], 404);
+            }
+    
+            return response()->json([
+                'group_id' => $group_id,
+                'appointments' => $appointments
+            ]);
+    
+        } catch (\Exception $e) {
+            return response()->json(
+                ['error' => 'رمز الوصول غير صالح: ' . $e->getMessage()],
+                401
+            );
         }
-
-        $group_id = $request->input('group_id');
-
-        
-        if (!is_numeric($group_id)) {
-            return response()->json(['message' => 'Invalid group_id format'], 400);
-        }
-
-        $appointments = Appointment::where('group_id', $group_id)
-            ->get(['appointment_date']);
-
-        if ($appointments->isEmpty()) {
-            return response()->json(['message' => 'No appointments found'], 404);
-        }
-
-        return response()->json($appointments);
     }
 
- /*------------------------------------------------------------------------------- */
+    /*------------------------------------------------------------------------------- */
 
-    /*-------------------------  // تخزين نشاط لمرة واحدو وليوم واحد  :------------------------------------------ */
+    /*-------------------------  // تخزين نشاط لمرة واحد وليوم واحد  :------------------------------------------ */
 
     public function createSingleDayActivity(Request $request)
     {
         DB::beginTransaction();
-        
+
         try {
             // 1. استخدام دالة التحقق الموجودة
             $validationResult = $this->validateRequest($request);
             if ($validationResult) {
                 return $validationResult;
             }
-    
+
             // 2. إعداد بيانات إضافية
             $request->merge([
                 'group_id' => $request->input('group_id'),
@@ -521,17 +557,17 @@ class ActivityDetailController extends Controller
                 'repeat_count_per_day' => 1,
                 'number_of_day' => 1
             ]);
-    
+
             // 3. إنشاء النشاط الأساسي باستخدام الدالة الأصلية
             $activityDetail = $this->storeActivityDetail($request->all());
-    
+
             // 4. معالجة الصورة بشكل منفصل
             $imagePath = $request->file('sub_activity_image')->store(
-                'activity_images', 
+                'activity_images',
                 'public'
             );
             $activityDetail->update(['sub_activity_image' => $imagePath]);
-    
+
             // 5. استخدام الدالة الأصلية لإدارة التكرارات
             $this->addActivityDetailAppointments(
                 $activityDetail,
@@ -539,9 +575,9 @@ class ActivityDetailController extends Controller
                 $request->all(),
                 $request->input('activity_id')
             );
-    
+
             DB::commit();
-            
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'تم الإنشاء بنجاح',
@@ -550,7 +586,6 @@ class ActivityDetailController extends Controller
                     'image_url' => asset("storage/$imagePath")
                 ]
             ], 201);
-    
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -559,24 +594,5 @@ class ActivityDetailController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    }
-    
+}
