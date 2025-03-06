@@ -12,6 +12,8 @@ class ActivityDetailsFrequency extends Model
     protected  $fillable = [
         'activity_detail_id',
         'activity_appointment_id',
+        'sub_activity_date',
+        'day_name',
         'start_time',
         'every_x_hours',
         'sub_activity_execution_time',

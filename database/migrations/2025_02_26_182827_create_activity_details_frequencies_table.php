@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('activity_detail_id')->constrained('activity_details')->onDelete('cascade');
             $table->foreignId('activity_appointment_id')->constrained('activity_appointment')->onDelete('cascade'); 
-            //$table->string('day_name')->nullable();
+            $table->date('sub_activity_date'); 
+            $table->string('day_name')->nullable();
             $table->time('start_time')->nullable();
             // $table->text('user_comment')->nullable();
             $table->time('sub_activity_execution_time')->nullable();
