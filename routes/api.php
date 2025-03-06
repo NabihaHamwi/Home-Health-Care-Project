@@ -60,7 +60,10 @@ Route::group(
         Route::get('/appointment-activities', [ActivityAppointmentController::class, 'getActivitiesAppointment'])->name(name: 'activities.getActivitiesAppointment');
         //retrieve the dates of the appointment:
         //جاهز للربط
-        Route::get('/get-appointment-dates', [ActivityDetailController::class, 'getAppointmentDates'])->name(name: 'activitiyDetails.getAppointmentDates');
+        Route::get('/get-future-appointment-dates', [ActivityDetailController::class, 'getAppointmentDates'])->name(name: 'activitiyDetails.getAppointmentDates');
+        //retrieve the dates of the appointment:
+        //جاهز للربط
+        Route::get('/get-all-appointment-dates', [ActivityDetailController::class, 'getFutureAppointmentDates'])->name(name: 'activitiyDetails.getAppointmentDates');
         //apis for store activity details and update(by careporvider on activities controll panel)
         //create one-time sub-activity:
         Route::post('/activities/single-day', [ActivityDetailController::class, 'createSingleDayActivity']);

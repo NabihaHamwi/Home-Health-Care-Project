@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Traits\FrequencyValidationTrait;
-   
+
 
 class ActivityDetailController extends Controller
 {
@@ -392,19 +392,19 @@ class ActivityDetailController extends Controller
             if (!$token) {
                 return response()->json(['error' => 'يجب إرسال التوكن'], 401);
             }
-    
+
             // فك تشفير التوكن للحصول على الـ claims
             $payload = JWTAuth::setToken($token)->getPayload();
             $claims = $payload->toArray();
-    
+
             // التحقق من وجود group_id أو appointment_ids في التوكن
             if (empty($claims['group_id']) && empty($claims['appointment_ids'])) {
                 return response()->json(['error' => 'التوكن لا يحتوي على بيانات كافية'], 400);
             }
-    
+
             $resolved_group_id = null;
             $appointment_ids = [];
-    
+
             // تحديد group_id من التوكن
             if (!empty($claims['group_id'])) {
                 $resolved_group_id = $claims['group_id'];
@@ -415,22 +415,22 @@ class ActivityDetailController extends Controller
                 if (!$appointment_id) {
                     return response()->json(['error' => 'لا توجد مواعيد في التوكن'], 400);
                 }
-    
+
                 $appointment = Appointment::find($appointment_id);
                 if (!$appointment) {
                     return response()->json(['error' => 'الموعد غير موجود'], 404);
                 }
-    
+
                 $resolved_group_id = $appointment->group_id;
                 $appointment_ids = [$appointment_id];
             }
-    
+
             // التحقق من صحة group_id
             $groupExists = Appointment::where('group_id', $resolved_group_id)->exists();
             if (!$groupExists) {
                 return response()->json(['error' => 'المجموعة غير موجودة'], 404);
             }
-    
+
             // بناء الاستعلام بناءً على group_id
             $activityDetails = ActivityDetail::whereHas(
                 'activityDetailsFrequencies.activityAppointment.appointment',
@@ -438,14 +438,14 @@ class ActivityDetailController extends Controller
                     $query->where('group_id', $resolved_group_id);
                 }
             )
-            ->with(['activityDetailsFrequencies.activityAppointment.appointment'])
-            ->get();
-    
+                ->with(['activityDetailsFrequencies.activityAppointment.appointment'])
+                ->get();
+
             // إذا لم توجد نتائج
             if ($activityDetails->isEmpty()) {
                 return response()->json(['message' => 'لا توجد أنشطة'], 404);
             }
-    
+
             // بناء البيانات المرسلة
             $responseData = $activityDetails->map(function ($detail) {
                 return [
@@ -463,18 +463,17 @@ class ActivityDetailController extends Controller
                     })
                 ];
             });
-    
+
             return response()->json([
                 'data' => $responseData,
             ]);
-    
         } catch (\Exception $e) {
             return response()->json(['error' => 'رمز الوصول غير صالح'], 401);
         }
     }
 
-//     /*------------------------------------------------------------------------------- */
-    public function getAppointmentDates(Request $request)
+    /*-----------جلب التواريخ المستقبلية للموعد (من أجل تخزين النشاط)------------- */
+    public function getFutureAppointmentDates(Request $request)
     {
         try {
             // استخراج التوكن من الطلب
@@ -482,13 +481,13 @@ class ActivityDetailController extends Controller
             if (!$token) {
                 return response()->json(['message' => 'يجب إرسال التوكن'], 401);
             }
-    
+
             // فك تشفير التوكن للحصول على الـ claims
             $payload = JWTAuth::setToken($token)->getPayload();
             $claims = $payload->toArray();
-    
+
             $group_id = null;
-    
+
             // الحالة 1: استخراج group_id مباشرةً من التوكن
             if (isset($claims['group_id']) && !empty($claims['group_id'])) {
                 $group_id = $claims['group_id'];
@@ -497,11 +496,11 @@ class ActivityDetailController extends Controller
             else if (isset($claims['appointment_ids']) && !empty($claims['appointment_ids'])) {
                 $appointment_id = $claims['appointment_ids'][0]; // نأخذ أول appointment_id
                 $appointment = Appointment::find($appointment_id);
-                
+
                 if (!$appointment) {
                     return response()->json(['message' => 'appointment_id غير صحيح'], 404);
                 }
-                
+
                 $group_id = $appointment->group_id;
             }
             // الحالة 3: لا يوجد بيانات كافية في التوكن
@@ -511,21 +510,20 @@ class ActivityDetailController extends Controller
                     400
                 );
             }
-    
+
             // البحث عن المواعيد باستخدام group_id المستخرج
             $appointments = Appointment::where('group_id', $group_id)
                 ->whereDate('appointment_date', '>=', Carbon::today())
                 ->get(['id', 'appointment_date']); // إضافة id للتوضيح
-    
+
             if ($appointments->isEmpty()) {
                 return response()->json(['message' => 'لا توجد مواعيد مستقبلية'], 404);
             }
-    
+
             return response()->json([
                 'group_id' => $group_id,
                 'appointments' => $appointments
             ]);
-    
         } catch (\Exception $e) {
             return response()->json(
                 ['error' => 'رمز الوصول غير صالح: ' . $e->getMessage()],
@@ -533,7 +531,55 @@ class ActivityDetailController extends Controller
             );
         }
     }
+    /*----------------جلب جميع تواريخ الموعد --------------- */
+    public function getAllAppointmentDates(Request $request)
+    {
+        try {
+            // استخراج التوكن من الطلب
+            $token = $request->bearerToken();
+            if (!$token) {
+                return response()->json(['message' => 'يجب إرسال التوكن'], 401);
+            }
 
+            // فك تشفير التوكن للحصول على الـ claims
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $claims = $payload->toArray();
+
+            $group_id = null;
+
+            // استخراج group_id من التوكن
+            if (isset($claims['group_id'])) {
+                $group_id = $claims['group_id'];
+            } else if (!empty($claims['appointment_ids'])) {
+                $appointment = Appointment::find($claims['appointment_ids'][0]);
+                $group_id = $appointment->group_id ?? null;
+            }
+
+            if (!$group_id) {
+                return response()->json(['message' => 'التوكن غير صالح'], 400);
+            }
+
+            // جلب التواريخ مرتبة تنازلياً مع تجنب التكرار
+            $dates = Appointment::where('group_id', $group_id)
+                ->orderBy('appointment_date', 'desc')
+                ->pluck('appointment_date')
+                ->unique()
+                ->values();
+
+            if ($dates->isEmpty()) {
+                return response()->json(['message' => 'لا توجد تواريخ مواعيد'], 404);
+            }
+
+            return response()->json([
+                'group_id' => $group_id,
+                'appointment_dates' => $dates
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'خطأ في النظام: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     /*------------------------------------------------------------------------------- */
 
     /*-------------------------  // تخزين نشاط لمرة واحد وليوم واحد  :------------------------------------------ */
