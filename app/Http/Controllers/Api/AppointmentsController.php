@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Models\ActivityAppointment;
+use App\Models\ActivitySubService;
 use App\Models\Appointment;
 use App\Models\AppointmentSubService;
 use App\Models\HealthcareProvider;
@@ -352,44 +353,47 @@ class AppointmentsController extends Controller
     public function store(Request $request)
     {
         // retrieving patient_id & provider_id from token
-        // try {
-        //     $token = $request->bearerToken();
-        //     $payload = JWTAuth::setToken($token)->getPayload();
-        //     $patient_id = $payload->get('patient_id');
-        //     if (!$patient_id)
-        //         throw new Exception('patient is not selected, please choose patient first');
-        //     $provider_id = $payload->get('provider_id');
-        //     if (!$provider_id)
-        //         throw new Exception('care provider is not selected, please choose care provider first');
-        // } catch (\Exception $e) {
-        //     $response = [
-        //         'msg' => 'token error: could not retrieve patient_id or provider_id from token',
-        //         'status' => 500,
-        //         'error' => $e->getMessage()
-        //     ];
-        //     return response($response);
-        // }
-        $provider_id = 101;
-        $patient_id =1;
+        try {
+            $token = $request->bearerToken();
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $patient_id = $payload->get('patient_id');
+            if (!$patient_id)
+                throw new Exception('patient is not selected, please choose patient first');
+            $provider_id = $payload->get('provider_id');
+            if (!$provider_id)
+                throw new Exception('care provider is not selected, please choose care provider first');
+            $service_id = $payload->get('service_id');
+            if (!$service_id)
+                throw new Exception('service is not selected, please choose service first');
+            $subservices = $payload->get('$available_subservices');
+            if (!$subservices)
+                throw new Exception('subservices is not selected, please choose subservices first');
+        } catch (\Exception $e) {
+            $response = [
+                'msg' => 'token error: could not retrieve patient_id or provider_id or service or subservices from token',
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+            return response($response);
+        }
+        // $provider_id = 101;
+        // $patient_id =1;
         $validator = Validator::make(
             ['provider_id' => $provider_id],
             ['provider_id' => 'required|integer|exists:healthcarwproviders,id'],
             ['patient_id' => $patient_id],
-            ['patient_id' => 'required|integer|exists:patients,id']
+            ['patient_id' => 'required|integer|exists:patients,id'],
+            ['service_id' => $service_id],
+            ['service_id' => 'required|integer|exists:services,id'],
+            ['subservices' => $subservices],
+            ['subservices' => 'required|array|exists:sub_services,id']
         );
 
         $validator = Validator::make($request->all(), [
             'appointments' => ['required', 'array'],
-            'appointments.*.service_id' => [
-                'required',
-                'exists:services,id',
-            ],
-            'appointments.*.subservices_id' => [
-                'required','array',
-                'exists:sub_services,id',
-            ],
             'appointments.*.activities_id' => [
-                'required','array',
+                'required',
+                'array',
                 'exists:activities,id',
             ],
             'appointments.*.appointment_date' => [
@@ -423,72 +427,70 @@ class AppointmentsController extends Controller
             if (sizeof($request->appointments) > 1) {
                 $highestGroupId = Appointment::max('group_id');
                 $group_id = $highestGroupId + 1;
-            } else
+            } else {
                 $group_id = null;
+            }
+
             foreach ($request->appointments as $partrequest) {
                 // حساب تاريخ نهاية الموعد للتأكد من القدرة على حجزه
                 $start_of_appointment = new Carbon($partrequest['appointment_start_time']);
                 $start_of_this_appointment = new Carbon($partrequest['appointment_start_time']);
                 $duration = new Carbon($partrequest['appointment_duration']);
-                $hours = $duration->get('hour');
-                $minutes = $duration->get('minute');
-                $end_of_this_appointment = $start_of_appointment->add('hour', $hours);
-                $end_of_this_appointment = $start_of_appointment->add('minute', $minutes);
+                $hours = $duration->hour;
+                $minutes = $duration->minute;
+                $end_of_this_appointment = $start_of_appointment->addHours($hours)->addMinutes($minutes);
 
                 // استخراج اسم اليوم الموافق لتاريخ الموعد لمقارنته مع ساعات عمل مقدم الرعاية في ذلك اليوم
                 $date = Carbon::parse($partrequest['appointment_date']);
-                $dayName = $date->locale('ar')->isoFormat('dddd');
-                $worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $provider_id)->where('day_name', $dayName)->get();
-                $valid = 0;
+                $dayName = $date->isoFormat('dddd');
+
+                // التحقق من أن الموعد يقع ضمن أوقات العمل
+                $worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $provider_id)
+                    ->where('day_name', $dayName)
+                    ->get();
+
+                $valid = false;
                 foreach ($worktimes as $worktime) {
-                    $start = Carbon::createFromFormat('H:i:s', "$worktime->start_time");
-                    $end = Carbon::createFromFormat('H:i:s', "$worktime->end_time");
-                    if (($start->get('hour') <= $start_of_this_appointment->get('hour')) && ($end->get('hour') >= $end_of_this_appointment->get('hour'))) {
-                        $valid = 1;
+                    $start = Carbon::createFromFormat('H:i:s', $worktime->start_time);
+                    $end = Carbon::createFromFormat('H:i:s', $worktime->end_time);
+
+                    if ($start->lte($start_of_this_appointment) && $end->gte($end_of_this_appointment)) {
+                        $valid = true;
                         break;
                     }
                 }
-                // @dd($valid);
+
                 if (!$valid) {
                     return $this->errorResponse('the appointment time is not valid', 409);
                 }
 
                 // التأكد إذا كان الموعد لا يتعارض مع موعد محجوز مسبقاً
-                $reversed_appointments = Appointment::where('healthcare_provider_id', $provider_id)->where('appointment_date', $partrequest['appointment_date'])->get();
-                // @dd($reversed_appointments);
-                $valid = 0;
+                $reversed_appointments = Appointment::where('healthcare_provider_id', $provider_id)
+                    ->where('appointment_date', $partrequest['appointment_date'])
+                    ->get();
+
+                $valid = true;
                 foreach ($reversed_appointments as $Rappointment) {
-                    $calc_start = Carbon::createFromFormat('H:i:s', "$Rappointment->appointment_start_time");
-                    $start = Carbon::createFromFormat('H:i:s', "$Rappointment->appointment_start_time");
+                    $Rstart = Carbon::createFromFormat('H:i:s', $Rappointment->appointment_start_time);
                     $Rduration = new Carbon($Rappointment->appointment_duration);
-                    $Rhours = $Rduration->get('hour');
-                    $Rminutes = $Rduration->get('minute');
-                    $end = $calc_start->add('hour', $Rhours);
-                    $end = $calc_start->add('minute', $Rminutes);
-                    // $x = $start->get('hour');
-                    // @dd(($x) > ($end_of_this_appointment->get('hour')));
-                    if (($start->get('hour') === $end_of_this_appointment->get('hour') && $start->get('minute') >= $end_of_this_appointment->get('minute'))
-                        || (($start->get('hour')) > ($end_of_this_appointment->get('hour')))
-                        || ($end->get('hour') <= $start_of_this_appointment->get('hour'))
-                    ) {
-                        $valid = 1;
+                    $Rend = $Rstart->copy()->addHours($Rduration->hour)->addMinutes($Rduration->minute);
+
+                    if (!($Rend->lte($start_of_this_appointment) || $Rstart->gte($end_of_this_appointment))) {
+                        $valid = false;
                         break;
                     }
-
-                    if (!$valid) {
-                        return $this->errorResponse('the appointment time is alreday reserved', 409);
-                    }
                 }
-                // @dd($x);
-                $date = Carbon::parse($partrequest['appointment_date']);
-                $dayName = $date->locale('ar')->isoFormat('dddd');
+
+                if (!$valid) {
+                    return $this->errorResponse('the appointment time is already reserved', 409);
+                }
 
                 // إذا تم المرور على كل ما سبق ولم نجد أي تعرض مع الداتا بيز تتم عملية طلب الموعد
                 $appointment = Appointment::create([
                     'group_id' => $group_id,
                     'patient_id' => $patient_id,
                     'healthcare_provider_id' => $provider_id,
-                    'service_id' => $partrequest['service_id'],
+                    'service_id' => $service_id,
                     'day_name' => $dayName,
                     'appointment_date' => $partrequest['appointment_date'],
                     'appointment_start_time' => $partrequest['appointment_start_time'],
@@ -497,8 +499,8 @@ class AppointmentsController extends Controller
                     'appointment_status' => 'الطلب قيدالانتظار',
                     'caregiver_status' => '-'
                 ]);
-                $subservices = $partrequest['subservices_id'];
-                foreach ($subservices as $subservice) {
+                $appointment_subservices = $subservices;
+                foreach ($appointment_subservices as $subservice) {
                     AppointmentSubService::create([
                         'appointment_id' => $appointment->id,
                         'sub_service_id' => $subservice
@@ -506,7 +508,7 @@ class AppointmentsController extends Controller
                 }
                 $activities = $partrequest['activities_id'];
                 foreach ($activities as $activity) {
-                    AppointmentSubService::create([
+                    ActivityAppointment::create([
                         'appointment_id' => $appointment->id,
                         'activity_id' => $activity
                     ]);
