@@ -22,6 +22,7 @@ use App\Http\Controllers\ServiceController as ControllersServiceController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\Api\ActivityAppointmentController;
 use App\Http\Controllers\Api\ActivitySubServiceController;
+use App\Models\ActivityDetail;
 use App\Models\Emergency;
 use App\Models\HealthcareProvider;
 use App\Models\HealthcareProviderSubService;
@@ -74,6 +75,9 @@ Route::group(
         //انه اذا كان النشاط ليس له نشاط جزئي يشكل توماتيكي النشاط الجزئي هو نفسه ولا يسمح للمستخدم بادخال نشاط جزئي
         //apis for healthcare-provider:
         Route::get('/acceptable-appointments-provider', [HealthcareProviderController::class, 'acceptable-appointmentsProvider'])->name(name: 'frequencies.getDailySubActivities');
+        //اظهار ايام الاسبوع من الموعد 
+        //جاهز للربط
+        Route::get('/get-days-of-week/appointment', [ActivityDetailController::class, 'getAppointmentDay'])->name(name: 'appointments.');
     }
 );
 
@@ -84,7 +88,7 @@ Route::group(
     [],
     function ($router) {
         //عرض معلومات السجل الطبي لمريض معين
-        // Route::get('/patients/{patient}', [ApiPatientController::class, 'show'])->name('patients.show');
+        Route::get('/get-patient', [ApiPatientController::class, 'show'])->name('patients.show');
         //انشاء مريض من قبل المستخدم
         Route::post('/add-patient/{userid}', [PatientAgentController::class, 'addPatient'])->name('patients.addPatient');
         //تحديث المعلومات 

@@ -29,45 +29,40 @@ class ActivityDetailController extends Controller
     //عملية التحقق:
     protected function validateRequest(Request $request)
     {
-        if (!$request->has('repeat_count_per_day')) {
-            $request->merge(['repeat_count_per_day' => 1]);
-        }
-
         // 1. حساب end_date أولًا قبل أي تحقق فرعي
         $validator = Validator::make($request->all(), [
             'sub_activity_name' => 'required|min:4|max:14',
             'sub_activity_type' => 'required|in:activity,measure,medical_appointment,medicine',
             'frequencies_time' => 'required|in:every_x_day,number_of_day,day_of_week,once_time',
             'start_date' => $this->startDateRules($request),
-            'repeat_count_per_day' => 'required|integer|min:1'
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'repeat_count_per_day' => 'nullable|integer|min:1'
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
+        //اذا مافي تكرار بالمرات على اليوم حطا واحد
+        // تعيين القيمة الافتراضية للتكرار
+        $request->mergeIfMissing(['repeat_count_per_day' => 1]);
+        //dd($request->repeat_count_per_day);
 
-        // 2. حساب end_date هنا قبل استدعاء الدوال الفرعية
-        $endDate = $this->calculateEndDate($request, $validator);
-        $request->merge(['end_date' => $endDate]);
-
-        // 3. التحقق النهائي من end_date
-        $validator->after(function ($validator) use ($request) {
-            if ($request->has('end_date')) {
-                $this->validateEndDateExists($validator, $request);
-            }
-        });
-
-        // 4. الآن نستدعي التحقق حسب نوع التواتر
+        // التحقق حسب نوع التواتر أولاً
         $result = $this->validateByFrequencyType($validator, $request);
         if ($result) {
             return $result;
         }
+        //dd($request->end_date);
+        // // حساب end_date بعد التحقق من المدخلات
+        $endDate = $this->calculateEndDate($request, $validator);
+        $request->merge(['end_date' => $endDate]);
+        // dd($request->end_date);
+        // التحقق النهائي من end_date
+        $this->validateEndDateExists($validator, $request);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
-        }
-
-        return null;
+        return $validator->fails()
+            ? response()->json(['errors' => $validator->errors()], 400)
+            : null;
     }
     /*-------------------------الدالة الرئيسية(Api)-------------------------- */
 
@@ -361,6 +356,146 @@ class ActivityDetailController extends Controller
             }
         }
     }
+/*------------------------------------ */
+protected function getAppointmentsByNumberOfDay($validator, Request $request)
+{
+    // حساب تواريخ البداية والنهاية
+    $startDate = Carbon::parse($request->start_date);
+    $endDate = Carbon::parse($request->end_date);
+
+    // احتساب عدد المواعيد المتاحة في الفترة المحددة
+    $numberOfAppointments = $this->getAvailableAppointmentsCount(
+        $request->group_id,
+        $startDate->toDateString(),
+        $endDate->toDateString()
+    );
+
+    // التحقق النهائي من الأخطاء
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 400);
+    }
+
+    // دمج عدد المواعيد المحسوبة في الاستجابة
+    $request->merge(['number_of_day' => $numberOfAppointments]);
+
+    // إرجاع استجابة تحتوي على عدد المواعيد المتاحة
+    return response()->json(['number_of_day' => $numberOfAppointments], 200);
+}
+
+// دالة مساعدة لحساب عدد المواعيد المتاحة
+protected function getAvailableAppointmentsCount($groupId, $startDate, $endDate)
+{
+    return Appointment::where('group_id', $groupId)
+        ->whereDate('appointment_date', '>=', $startDate)
+        ->whereDate('appointment_date', '<=', $endDate)
+        ->count();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -390,7 +525,7 @@ class ActivityDetailController extends Controller
             // استخراج التوكن من الطلب
             $token = $request->bearerToken();
             if (!$token) {
-                return response()->json(['error' => 'يجب إرسال التوكن'], 401);
+                return response()->json(['error' => 'Token is required'], 401);
             }
 
             // فك تشفير التوكن للحصول على الـ claims
@@ -399,7 +534,7 @@ class ActivityDetailController extends Controller
 
             // التحقق من وجود group_id أو appointment_ids في التوكن
             if (empty($claims['group_id']) && empty($claims['appointment_ids'])) {
-                return response()->json(['error' => 'التوكن لا يحتوي على بيانات كافية'], 400);
+                return response()->json(['error' => 'Token is missing required claims'], 400);
             }
 
             $resolved_group_id = null;
@@ -410,15 +545,15 @@ class ActivityDetailController extends Controller
                 $resolved_group_id = $claims['group_id'];
                 $appointment_ids = $claims['appointment_ids'] ?? [];
             } else {
-                // استخدام أول appointment_id في التوكن لاستخراج group_id
+                // استخدام أول appointment_id في التوكن
                 $appointment_id = $claims['appointment_ids'][0] ?? null;
                 if (!$appointment_id) {
-                    return response()->json(['error' => 'لا توجد مواعيد في التوكن'], 400);
+                    return response()->json(['error' => 'No appointments found in token'], 400);
                 }
 
                 $appointment = Appointment::find($appointment_id);
                 if (!$appointment) {
-                    return response()->json(['error' => 'الموعد غير موجود'], 404);
+                    return response()->json(['error' => 'Appointment not found'], 404);
                 }
 
                 $resolved_group_id = $appointment->group_id;
@@ -428,7 +563,7 @@ class ActivityDetailController extends Controller
             // التحقق من صحة group_id
             $groupExists = Appointment::where('group_id', $resolved_group_id)->exists();
             if (!$groupExists) {
-                return response()->json(['error' => 'المجموعة غير موجودة'], 404);
+                return response()->json(['error' => 'Group not found'], 404);
             }
 
             // بناء الاستعلام بناءً على group_id
@@ -443,7 +578,7 @@ class ActivityDetailController extends Controller
 
             // إذا لم توجد نتائج
             if ($activityDetails->isEmpty()) {
-                return response()->json(['message' => 'لا توجد أنشطة'], 404);
+                return response()->json(['message' => 'No activities found'], 404);
             }
 
             // بناء البيانات المرسلة
@@ -468,10 +603,9 @@ class ActivityDetailController extends Controller
                 'data' => $responseData,
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'رمز الوصول غير صالح'], 401);
+            return response()->json(['error' => 'Invalid access token'], 401);
         }
     }
-
     /*-----------جلب التواريخ المستقبلية للموعد (من أجل تخزين النشاط)------------- */
     public function getFutureAppointmentDates(Request $request)
     {
@@ -639,6 +773,76 @@ class ActivityDetailController extends Controller
                 'message' => 'حدث خطأ أثناء الإنشاء',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /*-------------------استرجاع ايام الموعد --------------------- */
+
+
+    public function getAppointmentDay(Request $request)
+    {
+        try {
+            // التحقق من وجود التوكن
+            $token = $request->bearerToken();
+            if (!$token) {
+                return response()->json(['error' => 'Token is required'], 401);
+            }
+
+            // فك تشفير التوكن
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $claims = $payload->toArray();
+
+            $group_id = $claims['group_id'] ?? null;
+            $appointment_ids = $claims['appointment_ids'] ?? [];
+
+            // الحالة 1: إذا كان هناك معرف مجموعة
+            if ($group_id) {
+                $days = Appointment::where('group_id', $group_id)
+                    ->get(['appointment_date'])
+                    ->map(function ($appointment) {
+                        return Carbon::parse($appointment->appointment_date)
+                            ->timezone('Asia/Damascus')
+                            ->locale('ar') // إبقاء الأسماء بالعربية
+                            ->translatedFormat('l');
+                    })
+                    ->unique()
+                    ->values();
+
+                if ($days->isEmpty()) {
+                    return response()->json(['error' => 'No days found for this group'], 404);
+                }
+
+                return response()->json(['days' => $days]);
+            }
+
+            // الحالة 2: إذا كان هناك معرف موعد واحد فقط
+            elseif (count($appointment_ids) === 1) {
+                $appointment = Appointment::find($appointment_ids[0]);
+
+                if (!$appointment) {
+                    return response()->json(['error' => 'Appointment not found'], 404);
+                }
+
+                $day = Carbon::parse($appointment->appointment_date)
+                    ->timezone('Asia/Damascus')
+                    ->locale('ar')
+                    ->translatedFormat('l');
+
+                return response()->json(['day' => $day]);
+            }
+
+            // الحالة 3: بيانات غير كافية
+            else {
+                return response()->json(
+                    ['error' => 'Token must contain either group_id or appointment_ids (single value)'],
+                    400
+                );
+            }
+        } catch (\Exception $e) {
+            return response()->json(
+                ['error' => 'Technical error: ' . $e->getMessage()],
+                500
+            );
         }
     }
 }
