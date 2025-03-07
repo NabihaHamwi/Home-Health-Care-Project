@@ -9,4 +9,8 @@ class AppointmentSubService extends Model
 {
     use HasFactory;
     protected $table = 'appointment_subservice';
+    protected $fillable = [
+        'appointment_id',
+        'sub_service_id'
+    ];
 }

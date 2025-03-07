@@ -10,6 +10,7 @@ use App\Models\Appointment;
 use Illuminate\Support\Facades\Validator;
 use App\Models\HealthcareProvider;
 use Carbon\Carbon;
+use Carbon\CarbonInterval;
 use Exception;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -254,7 +255,7 @@ class HealthcareProviderWorktimeController extends Controller
 
     public function availabel_days_in_month(Request $request, $month)
     {
-        // retrieving provider_id from token
+        // // retrieving provider_id from token
         try {
             $token = $request->bearerToken();
             $payload = JWTAuth::setToken($token)->getPayload();
@@ -275,12 +276,20 @@ class HealthcareProviderWorktimeController extends Controller
             $start_date = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
             $end_date = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
             $available_days = [];
+            $current_date = Carbon::now();
+            // dd(Carbon::now());
 
             // Loop through each day of the month
             for ($date = $start_date; $date <= $end_date; $date->addDay()) {
+                // Skip days before the current date
+                if ($date->lt($current_date) && !$date->isToday()) {
+                    continue;
+                }
+
                 $day = $date->format('l');
                 // Get the worktimes for the care provider on this day
-                $day_worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $provider_id)->where('day_name', $day)->get();
+                $day_worktimes = HealthcareProviderWorktime::where('healthcare_provider_id', $provider_id)
+                    ->where('day_name', $day)->get();
 
                 if ($day_worktimes->isEmpty()) {
                     continue; // Skip if there are no worktimes for this day
@@ -289,23 +298,46 @@ class HealthcareProviderWorktimeController extends Controller
                 $is_day_available = false;
 
                 foreach ($day_worktimes as $worktime) {
-                    $appointments = Appointment::where('healthcare_provider_id', $provider_id)
-                        ->where('appointment_date', $date->format('Y-m-d'))
-                        ->get();
-
-                    // Check if there's any available time slot within the worktime
                     $worktime_start = Carbon::parse($worktime->start_time);
                     $worktime_end = Carbon::parse($worktime->end_time);
 
-                    $appointments_end_times = $appointments->map(function ($appointment) {
-                        return Carbon::parse($appointment->end_time);
-                    });
+                    $appointments = Appointment::where('healthcare_provider_id', $provider_id)
+                        ->where('appointment_date', $date->format('Y-m-d'))
+                        ->where('appointment_status', 'الطلب مقبول')
+                        ->orderBy('appointment_start_time', 'asc')
+                        ->get();
 
-                    $has_free_slot = $appointments_end_times->contains(function ($appointment_end_time) use ($worktime_start, $worktime_end) {
-                        return $worktime_start->between($appointment_end_time, $worktime_end);
-                    });
+                    // If no appointments, the entire worktime is available
+                    if ($appointments->isEmpty()) {
+                        $is_day_available = true;
+                        break;
+                    }
 
-                    if (!$has_free_slot) {
+                    // Check for gaps between appointments
+                    $previous_end = $worktime_start;
+                    $is_fully_booked = true; // Assume the day is fully booked initially
+
+                    foreach ($appointments as $appointment) {
+                        $appointment_start = Carbon::parse($appointment->appointment_start_time);
+                        $duration = CarbonInterval::createFromFormat('H:i:s', $appointment->appointment_duration); // تحويل duration إلى CarbonInterval
+                        $appointment_end = $appointment_start->copy()->add($duration); // إضافة duration إلى وقت البدء
+
+                        // If there is a gap between the previous appointment and the current one
+                        if ($appointment_start->gt($previous_end)) {
+                            $is_fully_booked = false; // There is available time
+                            break;
+                        }
+
+                        $previous_end = $appointment_end;
+                    }
+
+                    // Check if there is time after the last appointment
+                    if ($previous_end->lt($worktime_end)) {
+                        $is_fully_booked = false; // There is available time
+                    }
+
+                    // If the day is not fully booked, it is available
+                    if (!$is_fully_booked) {
                         $is_day_available = true;
                         break;
                     }

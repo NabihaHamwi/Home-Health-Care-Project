@@ -29,4 +29,9 @@ class ActivityAppointment extends Pivot
     {
         return $this->hasMany(ActivityDetailsFrequency::class);
     }
+
+    protected $fillable = [
+        'appointment_id',
+        'activity_id'
+    ];
 }

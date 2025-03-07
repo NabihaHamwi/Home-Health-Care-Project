@@ -38,6 +38,9 @@ class ActivitySubServiceController extends Controller
                 ->pluck('sub_service_id')
                 ->toArray();
             $available_subservices = array_intersect($subservice_ids, $provider_subservices);
+            $updatedClaims = $payload->toArray();
+            $updatedClaims['$available_subservices'] = $available_subservices;
+            $newToken = JWTAuth::claims($updatedClaims)->fromUser(auth()->user());
             if (!$available_subservices)
                 throw new Exception('care provider is not have the subservices you selected before');
             foreach ($available_subservices as $subservice) {
@@ -51,6 +54,7 @@ class ActivitySubServiceController extends Controller
                 'msg' => 'activities sended Succesfully',
                 'status' => 200,
                 'data' => $data,
+                'token' => $newToken,
             ];
         } catch (\Exception $e) {
             $response = [
